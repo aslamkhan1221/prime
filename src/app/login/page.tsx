@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Lock, Mail, User, Building, ArrowRight, ShieldCheck, Printer } from 'lucide-react';
+import { Lock, Mail, User, Building, ArrowRight, ShieldCheck, Printer, KeyRound } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
 function LoginForm() {
@@ -16,7 +16,7 @@ function LoginForm() {
 
   const [name, setName] = useState('');
   const [companyName, setCompanyName] = useState('Prime Sublimation');
-  const [email, setEmail] = useState('');
+  const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const { success, error } = useToast();
@@ -28,6 +28,8 @@ function LoginForm() {
         const data = await res.json();
         if (data.needsSetup) {
           setIsSetup(true);
+        } else {
+          setIsSetup(false);
         }
       } catch (err) {
         console.error(err);
@@ -47,7 +49,7 @@ function LoginForm() {
         const res = await fetch('/api/auth/setup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password, companyName }),
+          body: JSON.stringify({ name, email: usernameOrEmail, password, companyName }),
         });
         const data = await res.json();
 
@@ -62,15 +64,15 @@ function LoginForm() {
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email: usernameOrEmail, password }),
         });
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.error || 'Invalid email or password');
+          throw new Error(data.error || 'Invalid username or password');
         }
 
-        success(`Welcome back, ${data.user?.name || 'User'}!`);
+        success(`Welcome back, ${data.user?.name || 'Super Admin'}!`);
         router.push('/dashboard');
         router.refresh();
       }
@@ -79,6 +81,11 @@ function LoginForm() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fillDefaultAdmin = () => {
+    setUsernameOrEmail('primeadmin');
+    setPassword('prime1999');
   };
 
   if (checkingSetup) {
@@ -135,7 +142,7 @@ function LoginForm() {
             <p className="text-xs text-slate-400 mt-1">
               {isSetup
                 ? 'Create your administrator account and set up your studio profile.'
-                : 'Enter your credentials to access your studio dashboard.'}
+                : 'Enter your superadmin credentials to access the studio portal.'}
             </p>
           </div>
 
@@ -170,7 +177,7 @@ function LoginForm() {
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="e.g. Rahul Sharma"
+                      placeholder="e.g. Super Admin"
                       className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-slate-700/80 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition"
                     />
                   </div>
@@ -180,17 +187,17 @@ function LoginForm() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Email Address
+                Username or Email
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
-                  type="email"
+                  type="text"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@primesublimation.in"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-slate-700/80 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition"
+                  value={usernameOrEmail}
+                  onChange={(e) => setUsernameOrEmail(e.target.value)}
+                  placeholder="e.g. primeadmin"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-slate-700/80 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition font-mono"
                 />
               </div>
             </div>
@@ -207,7 +214,7 @@ function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-slate-700/80 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-slate-700/80 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition font-mono"
                 />
               </div>
             </div>
@@ -217,10 +224,27 @@ function LoginForm() {
               disabled={loading}
               className="w-full mt-2 py-3 px-4 bg-gradient-to-r from-brand-600 via-brand-500 to-magenta-600 hover:from-brand-500 hover:to-magenta-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2 transition transform active:scale-98 disabled:opacity-50"
             >
-              <span>{loading ? 'Processing...' : isSetup ? 'Initialize Studio & Access' : 'Sign In'}</span>
+              <span>{loading ? 'Signing in...' : isSetup ? 'Initialize Studio & Access' : 'Sign In'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
+
+          {/* Quick Demo Fill Helper */}
+          <div className="pt-2 border-t border-slate-800/80">
+            <button
+              type="button"
+              onClick={fillDefaultAdmin}
+              className="w-full p-2.5 bg-slate-950/60 hover:bg-slate-800/60 border border-slate-800 rounded-xl flex items-center justify-between text-[11px] text-slate-400 hover:text-white transition group"
+            >
+              <div className="flex items-center gap-2 text-brand-400">
+                <KeyRound className="w-3.5 h-3.5" />
+                <span className="font-semibold">Fill Superadmin Credentials</span>
+              </div>
+              <span className="text-[10px] font-mono text-slate-500 group-hover:text-brand-300">
+                primeadmin / prime1999
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,28 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { comparePassword, signToken, SESSION_COOKIE_NAME } from '@/lib/auth';
+import { comparePassword, hashPassword, signToken, SESSION_COOKIE_NAME } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    const body = await req.json();
+    const identifier = (body.email || body.username || '').trim();
+    const password = (body.password || '').trim();
 
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
+    if (!identifier || !password) {
+      return NextResponse.json({ error: 'Username/Email and password are required' }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
+    const cleanIdentifier = identifier.toLowerCase();
+
+    // Look for user by exact match or normalized lowercase
+    let user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: identifier },
+          { email: cleanIdentifier },
+          { email: `${cleanIdentifier}@primesublimation.in` },
+        ],
+      },
     });
 
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+    // Auto-seed default SuperAdmin if logging in as primeadmin or if table is empty
+    if (!user && (cleanIdentifier === 'primeadmin' || cleanIdentifier === 'admin')) {
+      const passwordHash = await hashPassword('prime1999');
+      user = await prisma.user.upsert({
+        where: { email: 'primeadmin' },
+        update: { passwordHash, role: 'ADMIN' },
+        create: {
+          name: 'Super Admin',
+          email: 'primeadmin',
+          passwordHash,
+          role: 'ADMIN',
+        },
+      });
+      await prisma.companySetting.upsert({
+        where: { id: 'default' },
+        update: {},
+        create: { id: 'default', companyName: 'Prime Sublimation' },
+      });
     }
 
-    const isValid = await comparePassword(password, user.passwordHash);
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid username/email or password' }, { status: 401 });
+    }
+
+    // Verify password
+    let isValid = await comparePassword(password, user.passwordHash);
+
+    // Fallback direct check for default superadmin
+    if (!isValid && user.email === 'primeadmin' && password === 'prime1999') {
+      const newHash = await hashPassword('prime1999');
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { passwordHash: newHash },
+      });
+      isValid = true;
+    }
+
     if (!isValid) {
-      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid username/email or password' }, { status: 401 });
     }
 
     const token = signToken({
