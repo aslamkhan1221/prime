@@ -25,14 +25,19 @@ function LoginForm() {
     async function check() {
       try {
         const res = await fetch('/api/auth/setup');
-        const data = await res.json();
-        if (data.needsSetup) {
-          setIsSetup(true);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.needsSetup) {
+            setIsSetup(true);
+          } else {
+            setIsSetup(false);
+          }
         } else {
           setIsSetup(false);
         }
       } catch (err) {
-        console.error(err);
+        console.error('Setup check error:', err);
+        setIsSetup(false);
       } finally {
         setCheckingSetup(false);
       }
