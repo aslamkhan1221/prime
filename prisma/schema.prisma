@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("ADMIN") // ADMIN, MANAGER, DESIGNER, PARTNER
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model CompanySetting {
+  id                 String   @id @default("default")
+  companyName        String   @default("Prime Sublimation")
+  logoUrl            String?
+  address            String?  @default("402 Creative Heights, Design District, Bangalore - 560001")
+  phone              String?  @default("+91 98765 43210")
+  email              String?  @default("accounts@pixelcraftstudio.in")
+  website            String?  @default("https://pixelcraftstudio.in")
+  gstin              String?  @default("29AAAAA0000A1Z5")
+  pan                String?  @default("AAAAA0000A")
+  invoicePrefix      String   @default("INV-")
+  invoiceNumberStart Int      @default(1001)
+  orderPrefix        String   @default("ORD-")
+  orderNumberStart   Int      @default(1001)
+  defaultTaxRate     Float    @default(18.0)
+  currency           String   @default("INR")
+  currencySymbol     String   @default("₹")
+  invoiceTerms       String?  @default("1. 50% advance for graphic design / print orders.\n2. Invoices are due within 15 days of issue.\n3. Revisions beyond 3 iterations will be billed at hourly rates.")
+  paymentDetails     String?  @default("Payment can be made via UPI or NEFT/IMPS direct bank transfer.")
+  bankAccountName    String?  @default("PixelCraft Design Studio LLP")
+  bankAccountNumber  String?  @default("98765432101234")
+  bankIfsc           String?  @default("HDFC0001234")
+  bankName           String?  @default("HDFC Bank")
+  bankBranch         String?  @default("MG Road, Bangalore")
+  upiId              String?  @default("pixelcraft@hdfcbank")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Customer {
+  id              String    @id @default(cuid())
+  name            String
+  companyName     String?
+  mobile          String?
+  email           String?
+  gstin           String?
+  pan             String?
+  billingAddress  String?
+  shippingAddress String?
+  notes           String?
+  status          String    @default("ACTIVE") // ACTIVE, INACTIVE, LEAD, CLIENT
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  invoices        Invoice[]
+  orders          Order[]
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  name        String
+  sku         String?  @unique
+  description String?
+  category    String   @default("Graphic Design") // Branding, Print Media, Signage, Web Assets, Packaging, UI/UX, Banner
+  itemType    String   @default("SERVICE") // PRODUCT, SERVICE
+  price       Float    @default(0.0)
+  costPrice   Float    @default(0.0)
+  taxRate     Float    @default(18.0)
+  unit        String   @default("PIECE") // PIECE, CM, MM, INCH, FOOT, METER, SQ_CM, SQ_FT, SQ_INCH, SQ_METER, HOUR, DAY, CUSTOM
+  customUnit  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  invoiceItems InvoiceItem[]
+  orderItems   OrderItem[]
+}
+
+model Order {
+  id                   String      @id @default(cuid())
+  orderNumber          String      @unique
+  customerId           String
+  customer             Customer    @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  assignedPartnerId    String?
+  assignedPartner      Partner?    @relation(fields: [assignedPartnerId], references: [id], onDelete: SetNull)
+  orderDate            DateTime    @default(now())
+  expectedDate         DateTime?
+  subtotal             Float       @default(0.0)
+  taxTotal             Float       @default(0.0)
+  discountTotal        Float       @default(0.0)
+  grandTotal           Float       @default(0.0)
+  status               String      @default("PENDING") // PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED
+  notes                String?
+  convertedToInvoiceId String?
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  items                OrderItem[]
+  invoices             Invoice[]
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  itemId      String?
+  item        Item?    @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  name        String
+  description String?
+  unit        String   @default("PIECE")
+  pricingType String   @default("QTY_RATE") // QTY_RATE, DIMENSION_RATE, AREA_RATE
+  width       Float?
+  height      Float?
+  quantity    Float    @default(1.0)
+  area        Float?
+  rate        Float    @default(0.0)
+  discount    Float    @default(0.0)
+  taxRate     Float    @default(18.0)
+  taxAmount   Float    @default(0.0)
+  totalAmount Float    @default(0.0)
+  createdAt   DateTime @default(now())
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  customerId    String
+  customer      Customer      @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  orderId       String?
+  order         Order?        @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  invoiceDate   DateTime      @default(now())
+  dueDate       DateTime
+  subtotal      Float         @default(0.0)
+  taxTotal      Float         @default(0.0)
+  discountTotal Float         @default(0.0)
+  grandTotal    Float         @default(0.0)
+  paidAmount    Float         @default(0.0)
+  balanceAmount Float         @default(0.0)
+  status        String        @default("DRAFT") // DRAFT, SENT, PARTIALLY_PAID, PAID, OVERDUE, CANCELLED
+  notes         String?
+  terms         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items         InvoiceItem[]
+  payments      Payment[]
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  itemId      String?
+  item        Item?    @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  name        String
+  description String?
+  unit        String   @default("PIECE")
+  pricingType String   @default("QTY_RATE") // QTY_RATE, DIMENSION_RATE, AREA_RATE
+  width       Float?
+  height      Float?
+  quantity    Float    @default(1.0)
+  area        Float?
+  rate        Float    @default(0.0)
+  discount    Float    @default(0.0)
+  taxRate     Float    @default(18.0)
+  taxAmount   Float    @default(0.0)
+  totalAmount Float    @default(0.0)
+  createdAt   DateTime @default(now())
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  paymentNumber   String   @unique
+  invoiceId       String
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount          Float
+  paymentDate     DateTime @default(now())
+  paymentMethod   String   @default("UPI") // CASH, UPI, BANK_TRANSFER, CARD, CHEQUE, OTHER
+  referenceNumber String?
+  notes           String?
+  createdAt       DateTime @default(now())
+}
+
+model Expense {
+  id              String   @id @default(cuid())
+  title           String
+  category        String   @default("General") // Raw Materials, Printing Media, Hardware/Machinery, Software Subscriptions, Freelancers/Designers, Office Rent, Utilities, Marketing, Miscellaneous
+  amount          Float
+  date            DateTime @default(now())
+  description     String?
+  paymentMethod   String   @default("BANK_TRANSFER") // CASH, UPI, BANK_TRANSFER, CARD, CHEQUE, OTHER
+  referenceNumber String?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Partner {
+  id               String   @id @default(cuid())
+  name             String
+  email            String?
+  phone            String?
+  profitPercentage Float
+  isActive         Boolean  @default(true)
+  notes            String?
+  passwordHint     String?
+  permissions      String?  @default("[\"dashboard\",\"orders\",\"invoices\",\"reports\"]")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  orders           Order[]
+}
