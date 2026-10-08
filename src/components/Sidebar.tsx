@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Users,
@@ -14,12 +14,9 @@ import {
   UserCheck,
   BarChart3,
   Settings,
-  LogOut,
   Printer,
   ChevronRight,
-  Shield,
 } from 'lucide-react';
-import { useToast } from './Toast';
 
 export const ALL_NAV_ITEMS = [
   { id: 'dashboard', name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -40,19 +37,6 @@ export function Sidebar({
   user?: { name: string; email: string; role: string; permissions?: string[] | null } | null;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { success, error } = useToast();
-
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      success('Logged out successfully');
-      router.push('/login');
-      router.refresh();
-    } catch {
-      error('Failed to log out');
-    }
-  };
 
   // If user has role PARTNER and custom permissions, filter the sidebar menu items
   const visibleNavItems = ALL_NAV_ITEMS.filter((item) => {
@@ -123,34 +107,22 @@ export function Sidebar({
         </nav>
       </div>
 
-      {/* User profile & Logout */}
+      {/* User profile */}
       <div className="p-4 border-t border-slate-800/80 bg-slate-950/40">
-        <div className="flex items-center justify-between mb-3 px-1">
-          <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 text-brand-400 font-bold flex items-center justify-center text-xs shrink-0">
-              {user?.name ? user.name.charAt(0).toUpperCase() : 'P'}
+        <div className="flex items-center gap-2.5 overflow-hidden">
+          <div className="w-8 h-8 rounded-lg bg-brand-600/20 border border-brand-500/30 text-brand-400 font-bold flex items-center justify-center text-xs shrink-0">
+            {user?.name ? user.name.charAt(0).toUpperCase() : 'P'}
+          </div>
+          <div className="overflow-hidden">
+            <div className="flex items-center gap-1.5">
+              <p className="text-xs font-semibold text-white truncate">{user?.name || 'Prime Admin'}</p>
+              <span className="text-[9px] font-bold px-1.5 py-0.2 bg-brand-500/20 text-brand-400 rounded">
+                {user?.role || 'ADMIN'}
+              </span>
             </div>
-            <div className="overflow-hidden">
-              <div className="flex items-center gap-1.5">
-                <p className="text-xs font-semibold text-white truncate">{user?.name || 'Administrator'}</p>
-                {user?.role === 'PARTNER' && (
-                  <span className="text-[9px] font-bold px-1.5 py-0.2 bg-emerald-500/20 text-emerald-400 rounded">
-                    PARTNER
-                  </span>
-                )}
-              </div>
-              <p className="text-[10px] text-slate-400 truncate">{user?.email || 'admin@primesublimation.in'}</p>
-            </div>
+            <p className="text-[10px] text-slate-400 truncate">{user?.email || 'admin@primesublimation.in'}</p>
           </div>
         </div>
-
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 py-2 px-3 text-xs font-medium text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl transition"
-        >
-          <LogOut className="w-3.5 h-3.5" />
-          <span>Sign Out</span>
-        </button>
       </div>
     </aside>
   );
