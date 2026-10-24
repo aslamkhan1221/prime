@@ -11,61 +11,107 @@ export async function POST(req: NextRequest) {
     const password = (body.password || '').trim();
 
     if (!identifier || !password) {
-      return NextResponse.json({ error: 'Username/Email and password are required' }, { status: 400 });
+      return NextResponse.json({ error: 'Username and password are required' }, { status: 400 });
     }
 
     const cleanIdentifier = identifier.toLowerCase();
 
-    // Look for user by exact match or normalized lowercase
-    let user = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email: identifier },
-          { email: cleanIdentifier },
-          { email: `${cleanIdentifier}@primesublimation.in` },
-        ],
-      },
-    });
+    // 1. Direct Master Admin Authentication (Requested: primeadmin / nibbanibbi77)
+    if (
+      (cleanIdentifier === 'primeadmin' || cleanIdentifier === 'admin') &&
+      password === 'nibbanibbi77'
+    ) {
+      let adminUser: { id: string; name: string; email: string; role: string } = {
+        id: 'admin_default',
+        name: 'Prime Admin',
+        email: 'primeadmin',
+        role: 'ADMIN',
+      };
 
-    // Auto-seed default SuperAdmin if logging in as primeadmin or if table is empty
-    if (!user && (cleanIdentifier === 'primeadmin' || cleanIdentifier === 'admin')) {
-      const passwordHash = await hashPassword('prime1999');
-      user = await prisma.user.upsert({
-        where: { email: 'primeadmin' },
-        update: { passwordHash, role: 'ADMIN' },
-        create: {
-          name: 'Super Admin',
-          email: 'primeadmin',
-          passwordHash,
-          role: 'ADMIN',
+      try {
+        const passwordHash = await hashPassword('nibbanibbi77');
+        const dbUser = await prisma.user.upsert({
+          where: { email: 'primeadmin' },
+          update: {
+            passwordHash,
+            role: 'ADMIN',
+            name: 'Prime Admin',
+          },
+          create: {
+            name: 'Prime Admin',
+            email: 'primeadmin',
+            passwordHash,
+            role: 'ADMIN',
+          },
+        });
+
+        if (dbUser) {
+          adminUser = {
+            id: dbUser.id,
+            name: dbUser.name,
+            email: dbUser.email,
+            role: dbUser.role,
+          };
+        }
+
+        await prisma.companySetting.upsert({
+          where: { id: 'default' },
+          update: {},
+          create: { id: 'default', companyName: 'Prime Sublimation' },
+        });
+      } catch (dbErr) {
+        console.warn('Prisma DB sync fallback during admin login (using memory session):', dbErr);
+      }
+
+      const token = signToken({
+        userId: adminUser.id,
+        email: adminUser.email,
+        name: adminUser.name,
+        role: adminUser.role,
+      });
+
+      const response = NextResponse.json({
+        success: true,
+        user: adminUser,
+      });
+
+      response.cookies.set({
+        name: SESSION_COOKIE_NAME,
+        value: token,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+      });
+
+      return response;
+    }
+
+    // 2. Database lookup for other users or partners
+    let user: any = null;
+    try {
+      user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: identifier },
+            { email: cleanIdentifier },
+            { email: `${cleanIdentifier}@primesublimation.in` },
+          ],
         },
       });
-      await prisma.companySetting.upsert({
-        where: { id: 'default' },
-        update: {},
-        create: { id: 'default', companyName: 'Prime Sublimation' },
-      });
+    } catch (dbErr) {
+      console.error('Database query error during login:', dbErr);
     }
 
     if (!user) {
-      return NextResponse.json({ error: 'Invalid username/email or password' }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
     }
 
-    // Verify password
-    let isValid = await comparePassword(password, user.passwordHash);
-
-    // Fallback direct check for default superadmin
-    if (!isValid && user.email === 'primeadmin' && password === 'prime1999') {
-      const newHash = await hashPassword('prime1999');
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { passwordHash: newHash },
-      });
-      isValid = true;
-    }
-
+    // Verify password for DB users
+    const isValid = await comparePassword(password, user.passwordHash);
     if (!isValid) {
-      return NextResponse.json({ error: 'Invalid username/email or password' }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
     }
 
     const token = signToken({

@@ -7,11 +7,8 @@ import { Menu, X, Sparkles } from 'lucide-react';
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [user, setUser] = useState<any>({
-    name: 'Prime Admin',
-    email: 'primeadmin',
-    role: 'ADMIN',
-  });
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -21,17 +18,22 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         const res = await fetch('/api/auth/me');
         if (res.ok) {
           const data = await res.json();
-          if (data.user) {
+          if (data.authenticated && data.user) {
             setUser(data.user);
+          } else {
+            router.push('/login');
           }
+        } else {
+          router.push('/login');
         }
       } catch (err) {
         console.error('Auth fetch info:', err);
+        router.push('/login');
       }
     }
 
     checkAuth();
-  }, []);
+  }, [router]);
 
   // Close mobile menu on page navigation
   useEffect(() => {

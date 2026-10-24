@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
 import { prisma } from './prisma';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'prime_invoice_secret_key_2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'prime_sublimation_secure_jwt_key_2026';
 const COOKIE_NAME = 'prime_session_token';
 
 export interface SessionPayload {
@@ -54,45 +54,70 @@ export const DEFAULT_ADMIN_USER = {
 export async function getCurrentUser() {
   try {
     const session = await getSession();
-    if (session?.userId) {
-      const user = await prisma.user.findUnique({
-        where: { id: session.userId },
-        select: { id: true, email: true, name: true, role: true, createdAt: true },
-      });
-
-      if (user) {
-        let partner: any = null;
-        if (user.role === 'PARTNER' || user.email) {
-          partner = await prisma.partner.findFirst({
-            where: { email: user.email },
+    if (session?.userId || session?.email) {
+      // Default superadmin quick resolution
+      if (session.userId === 'admin_default' || session.email === 'primeadmin') {
+        try {
+          const user = await prisma.user.findFirst({
+            where: { OR: [{ email: 'primeadmin' }, { id: session.userId }] },
+            select: { id: true, email: true, name: true, role: true, createdAt: true },
           });
+          if (user) {
+            return {
+              ...user,
+              partnerId: null,
+              partnerName: null,
+              permissions: null,
+            };
+          }
+        } catch {
+          // In case DB is temporarily unreachable, still return superadmin
         }
+        return DEFAULT_ADMIN_USER;
+      }
 
-        let permissions: string[] | null = null;
-        if (partner?.permissions) {
-          try {
-            permissions = JSON.parse(partner.permissions);
-          } catch {
+      if (session.userId) {
+        const user = await prisma.user.findUnique({
+          where: { id: session.userId },
+          select: { id: true, email: true, name: true, role: true, createdAt: true },
+        });
+
+        if (user) {
+          let partner: any = null;
+          if (user.role === 'PARTNER' || user.email) {
+            try {
+              partner = await prisma.partner.findFirst({
+                where: { email: user.email },
+              });
+            } catch {}
+          }
+
+          let permissions: string[] | null = null;
+          if (partner?.permissions) {
+            try {
+              permissions = JSON.parse(partner.permissions);
+            } catch {
+              permissions = ['dashboard', 'orders', 'invoices', 'reports'];
+            }
+          } else if (user.role === 'PARTNER') {
             permissions = ['dashboard', 'orders', 'invoices', 'reports'];
           }
-        } else if (user.role === 'PARTNER') {
-          permissions = ['dashboard', 'orders', 'invoices', 'reports'];
-        }
 
-        return {
-          ...user,
-          partnerId: partner?.id || null,
-          partnerName: partner?.name || null,
-          permissions,
-        };
+          return {
+            ...user,
+            partnerId: partner?.id || null,
+            partnerName: partner?.name || null,
+            permissions,
+          };
+        }
       }
     }
   } catch (err) {
     console.error('Error in getCurrentUser:', err);
   }
 
-  // Default superadmin access when login is bypassed
-  return DEFAULT_ADMIN_USER;
+  // Not authenticated
+  return null;
 }
 
 export const SESSION_COOKIE_NAME = COOKIE_NAME;

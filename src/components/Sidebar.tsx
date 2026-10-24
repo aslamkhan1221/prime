@@ -16,6 +16,7 @@ import {
   Settings,
   Printer,
   ChevronRight,
+  LogOut,
 } from 'lucide-react';
 
 export const ALL_NAV_ITEMS = [
@@ -50,6 +51,15 @@ export function Sidebar({
     }
     return true;
   });
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+    window.location.href = '/login';
+  };
 
   return (
     <aside className="w-64 shrink-0 bg-slate-900/90 border-r border-slate-800 flex flex-col justify-between h-screen sticky top-0 no-print z-30 select-none">
@@ -107,21 +117,31 @@ export function Sidebar({
         </nav>
       </div>
 
-      {/* User profile */}
-      <div className="p-4 border-t border-slate-800/80 bg-slate-950/40">
-        <div className="flex items-center gap-2.5 overflow-hidden">
-          <div className="w-8 h-8 rounded-lg bg-brand-600/20 border border-brand-500/30 text-brand-400 font-bold flex items-center justify-center text-xs shrink-0">
-            {user?.name ? user.name.charAt(0).toUpperCase() : 'P'}
-          </div>
-          <div className="overflow-hidden">
-            <div className="flex items-center gap-1.5">
-              <p className="text-xs font-semibold text-white truncate">{user?.name || 'Prime Admin'}</p>
-              <span className="text-[9px] font-bold px-1.5 py-0.2 bg-brand-500/20 text-brand-400 rounded">
-                {user?.role || 'ADMIN'}
-              </span>
+      {/* User profile & Logout */}
+      <div className="p-3.5 border-t border-slate-800/80 bg-slate-950/40">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            <div className="w-8 h-8 rounded-lg bg-brand-600/20 border border-brand-500/30 text-brand-400 font-bold flex items-center justify-center text-xs shrink-0">
+              {user?.name ? user.name.charAt(0).toUpperCase() : 'P'}
             </div>
-            <p className="text-[10px] text-slate-400 truncate">{user?.email || 'admin@primesublimation.in'}</p>
+            <div className="overflow-hidden">
+              <div className="flex items-center gap-1.5">
+                <p className="text-xs font-semibold text-white truncate">{user?.name || 'Prime Admin'}</p>
+                <span className="text-[9px] font-bold px-1.5 py-0.2 bg-brand-500/20 text-brand-400 rounded">
+                  {user?.role || 'ADMIN'}
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-400 truncate">{user?.email || 'primeadmin'}</p>
+            </div>
           </div>
+
+          <button
+            onClick={handleLogout}
+            title="Log Out"
+            className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition shrink-0"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </aside>
