@@ -4,13 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma db push --accept-data-loss && next build",
+    "build": "prisma generate && node scripts/sync-turso.mjs && next build",
     "start": "next start",
     "lint": "next lint",
-    "db:push": "prisma db push",
+    "turso:sync": "node scripts/sync-turso.mjs",
+    "db:push": "node scripts/sync-turso.mjs",
     "db:generate": "prisma generate"
   },
   "dependencies": {
+    "@libsql/client": "^0.8.0",
+    "@prisma/adapter-libsql": "^5.22.0",
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
