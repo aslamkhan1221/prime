@@ -169,9 +169,7 @@ function LoginForm() {
                 className="w-full py-2 px-3 bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/50 rounded-xl text-left transition flex items-center justify-between group"
               >
                
-                <span className="text-[10px] font-bold text-brand-400 uppercase tracking-wider group-hover:translate-x-0.5 transition-transform shrink-0">
-                  Fill
-                </span>
+               
               </button>
             </div>
 
