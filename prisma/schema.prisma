@@ -45,6 +45,7 @@ model CompanySetting {
   bankBranch         String?  @default("Aurangabad")
   upiId              String?  @default("graphicon@hdfcbank")
   reviewUrl          String?  @default("https://g.page/r/CfUhh8jFFKjlEAo/review")
+  templateConfig     String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }

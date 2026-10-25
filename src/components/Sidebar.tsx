@@ -17,6 +17,7 @@ import {
   Printer,
   ChevronRight,
   LogOut,
+  LayoutTemplate,
 } from 'lucide-react';
 
 export const ALL_NAV_ITEMS = [
@@ -25,6 +26,7 @@ export const ALL_NAV_ITEMS = [
   { id: 'items', name: 'Items & Catalog', href: '/items', icon: Package },
   { id: 'orders', name: 'Orders', href: '/orders', icon: ShoppingBag },
   { id: 'invoices', name: 'Invoices', href: '/invoices', icon: FileText },
+  { id: 'templates', name: 'Edit Template', href: '/templates', icon: LayoutTemplate },
   { id: 'payments', name: 'Payments', href: '/payments', icon: CreditCard },
   { id: 'expenses', name: 'Expenses', href: '/expenses', icon: Receipt },
   { id: 'partners', name: 'Partners & Profit', href: '/partners', icon: UserCheck },

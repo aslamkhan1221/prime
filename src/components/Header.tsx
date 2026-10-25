@@ -12,6 +12,9 @@ interface HeaderProps {
   actionHref?: string;
   onActionClick?: () => void;
   actionIcon?: React.ReactNode;
+  secondaryActionText?: string;
+  secondaryActionHref?: string;
+  secondaryActionIcon?: React.ReactNode;
 }
 
 export function Header({
@@ -21,6 +24,9 @@ export function Header({
   actionHref,
   onActionClick,
   actionIcon,
+  secondaryActionText,
+  secondaryActionHref,
+  secondaryActionIcon,
 }: HeaderProps) {
   const today = new Date();
 
@@ -36,11 +42,21 @@ export function Header({
         {subtitle && <p className="text-xs font-medium text-slate-500 mt-1">{subtitle}</p>}
       </div>
 
-      <div className="flex items-center gap-3 self-start md:self-auto">
+      <div className="flex items-center gap-3 self-start md:self-auto flex-wrap">
         <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-600 shadow-sm">
           <Calendar className="w-3.5 h-3.5 text-brand-500" />
           <span>{formatDate(today)}</span>
         </div>
+
+        {secondaryActionText && secondaryActionHref && (
+          <Link
+            href={secondaryActionHref}
+            className="flex items-center gap-2 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 text-xs font-bold rounded-xl shadow-sm transition transform active:scale-95"
+          >
+            {secondaryActionIcon}
+            <span>{secondaryActionText}</span>
+          </Link>
+        )}
 
         {actionText && (
           actionHref ? (

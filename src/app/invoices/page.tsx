@@ -22,6 +22,7 @@ import {
   Clock,
   AlertCircle,
   X,
+  LayoutTemplate,
 } from 'lucide-react';
 
 export default function InvoicesPage() {
@@ -176,6 +177,9 @@ export default function InvoicesPage() {
           actionText="Create Invoice"
           actionHref="/invoices/new"
           actionIcon={<Plus className="w-4 h-4" />}
+          secondaryActionText="Edit Template"
+          secondaryActionHref="/templates"
+          secondaryActionIcon={<LayoutTemplate className="w-4 h-4 text-brand-600" />}
         />
 
         {/* Filter & Search */}
