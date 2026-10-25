@@ -42,3 +42,14 @@ function createPrismaClient(): PrismaClient {
 }
 
 export const prisma = globalForPrisma.prisma ?? (globalForPrisma.prisma = createPrismaClient());
+
+export function getLibSql() {
+  return (
+    globalForPrisma.libsql ??
+    (globalForPrisma.libsql = createClient({
+      url: TURSO_URL,
+      authToken: TURSO_AUTH_TOKEN,
+    }))
+  );
+}
+

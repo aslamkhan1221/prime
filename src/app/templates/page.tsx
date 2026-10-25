@@ -24,6 +24,8 @@ import {
   ZoomOut,
   Maximize2,
   Sparkles,
+  FileCheck,
+  Building,
 } from 'lucide-react';
 import {
   InvoiceTemplateConfig,
@@ -33,7 +35,67 @@ import {
 } from '@/lib/templateConfig';
 import { TemplateInvoicePreview } from '@/components/TemplateInvoicePreview';
 
-type NavTab = 'general' | 'headerFooter' | 'transaction' | 'table' | 'total' | 'other';
+export type NavTab =
+  | 'general'
+  | 'headerFooter'
+  | 'transaction'
+  | 'table'
+  | 'total'
+  | 'documentSummary'
+  | 'other';
+
+function ColorPickerField({
+  label,
+  value,
+  onChange,
+  hasCheckbox,
+  checked,
+  onCheckboxChange,
+}: {
+  label?: string;
+  value: string;
+  onChange: (val: string) => void;
+  hasCheckbox?: boolean;
+  checked?: boolean;
+  onCheckboxChange?: (checked: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 text-xs py-1">
+      {hasCheckbox ? (
+        <label className="flex items-center gap-2 font-medium text-slate-700 cursor-pointer min-w-[130px]">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={(e) => onCheckboxChange && onCheckboxChange(e.target.checked)}
+            className="rounded text-brand-600 focus:ring-brand-500 w-3.5 h-3.5"
+          />
+          <span>{label}</span>
+        </label>
+      ) : label ? (
+        <span className="font-medium text-slate-700 min-w-[130px]">{label}</span>
+      ) : null}
+
+      <div className="flex items-center gap-2 ml-auto">
+        <input
+          type="text"
+          value={value || '#000000'}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="#000000"
+          className="w-24 px-2 py-1 text-xs font-mono border border-slate-300 rounded focus:ring-1 focus:ring-brand-500 bg-white text-slate-800"
+        />
+        <div className="relative w-7 h-7 rounded border border-slate-300 overflow-hidden shrink-0 shadow-sm cursor-pointer hover:border-slate-400">
+          <input
+            type="color"
+            value={value?.startsWith('#') && value.length === 7 ? value : '#000000'}
+            onChange={(e) => onChange(e.target.value)}
+            className="absolute -top-2 -left-2 w-12 h-12 cursor-pointer border-none bg-transparent"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 export default function TemplateEditorPage() {
   const router = useRouter();
@@ -89,6 +151,9 @@ export default function TemplateEditorPage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('prime_template_config', JSON.stringify(config));
+      }
       const res = await fetch('/api/templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -158,7 +223,7 @@ export default function TemplateEditorPage() {
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans select-none">
       {/* Top Action Bar matching Zoho Books Header */}
-      <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-6 flex items-center justify-between shrink-0 shadow-sm z-20">
+      <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-6 flex items-center justify-between shrink-0 shadow-sm z-20 no-print">
         <div className="flex items-center gap-3">
           <Link
             href="/invoices"
@@ -192,6 +257,16 @@ export default function TemplateEditorPage() {
               ))}
             </select>
           </div>
+
+          {/* Print Test Invoice Button */}
+          <button
+            onClick={() => window.print()}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition"
+            title="Print Preview / Save as PDF"
+          >
+            <Printer className="w-3.5 h-3.5 text-brand-600" />
+            <span className="hidden sm:inline">Print / PDF</span>
+          </button>
 
           {/* Refresh Preview / Reset */}
           <button
@@ -234,14 +309,15 @@ export default function TemplateEditorPage() {
 
       {/* Main Split Layout */}
       <div className="flex-1 flex overflow-hidden">
-        {/* 1. Left Vertical Icon Ribbon (Zoho Books 6 Tabs) */}
-        <aside className="w-20 md:w-24 shrink-0 bg-slate-50 border-r border-slate-200 flex flex-col items-center py-4 space-y-2 select-none overflow-y-auto">
+        {/* 1. Left Vertical Icon Ribbon (Zoho Books Tabs) */}
+        <aside className="w-20 md:w-24 shrink-0 bg-slate-50 border-r border-slate-200 flex flex-col items-center py-4 space-y-2 select-none overflow-y-auto no-print">
           {[
             { id: 'general', label: 'General', icon: FileText },
             { id: 'headerFooter', label: 'Header & Footer', icon: AlignJustify },
             { id: 'transaction', label: 'Transaction Details', icon: FileSpreadsheet },
             { id: 'table', label: 'Table', icon: TableIcon },
             { id: 'total', label: 'Total', icon: Sigma },
+            { id: 'documentSummary', label: 'Document Summary', icon: FileCheck },
             { id: 'other', label: 'Other Details', icon: MoreHorizontal },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -264,7 +340,7 @@ export default function TemplateEditorPage() {
         </aside>
 
         {/* 2. Middle Configuration Accordion Panel */}
-        <div className="w-full md:w-[420px] lg:w-[460px] shrink-0 bg-white border-r border-slate-200 overflow-y-auto flex flex-col divide-y divide-slate-100">
+        <div className="w-full md:w-[420px] lg:w-[460px] shrink-0 bg-white border-r border-slate-200 overflow-y-auto flex flex-col divide-y divide-slate-100 no-print">
           {/* TAB 1: GENERAL */}
           {activeTab === 'general' && (
             <div className="divide-y divide-slate-100 text-sm">
@@ -1083,66 +1159,130 @@ export default function TemplateEditorPage() {
                   </label>
                 </div>
               ) : (
-                /* Layout sub-tab */
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Header Background Color
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={config.table?.headerBgColor || '#00a3e0'}
-                        onChange={(e) => updateConfig('table.headerBgColor', e.target.value)}
-                        className="w-32 px-3 py-1.5 text-xs font-mono border border-slate-300 rounded-lg"
-                      />
-                      <input
-                        type="color"
-                        value={config.table?.headerBgColor || '#00a3e0'}
-                        onChange={(e) => updateConfig('table.headerBgColor', e.target.value)}
-                        className="w-8 h-8 rounded border border-slate-300 cursor-pointer p-0.5"
-                      />
-                    </div>
+                /* Layout sub-tab matching 1st Image */
+                <div className="space-y-4 pt-1">
+                  {/* Table Border */}
+                  <div className="pb-3 border-b border-slate-100">
+                    <ColorPickerField
+                      label="Table Border"
+                      hasCheckbox={true}
+                      checked={config.table?.showTableBorder !== false}
+                      onCheckboxChange={(checked) => updateConfig('table.showTableBorder', checked)}
+                      value={config.table?.tableBorderColor || '#adadad'}
+                      onChange={(val) => updateConfig('table.tableBorderColor', val)}
+                    />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Header Text Color
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={config.table?.headerTextColor || '#ffffff'}
-                        onChange={(e) => updateConfig('table.headerTextColor', e.target.value)}
-                        className="w-32 px-3 py-1.5 text-xs font-mono border border-slate-300 rounded-lg"
-                      />
-                      <input
-                        type="color"
-                        value={config.table?.headerTextColor || '#ffffff'}
-                        onChange={(e) => updateConfig('table.headerTextColor', e.target.value)}
-                        className="w-8 h-8 rounded border border-slate-300 cursor-pointer p-0.5"
-                      />
+                  {/* Table Header Section */}
+                  <div className="space-y-2 pb-3 border-b border-slate-100">
+                    <div className="font-bold text-xs text-slate-900">Table Header</div>
+
+                    <div className="flex items-center justify-between text-xs py-1">
+                      <span className="font-medium text-slate-700">Font Size</span>
+                      <div className="flex items-center">
+                        <input
+                          type="number"
+                          min="7"
+                          max="16"
+                          value={config.table?.headerFontSize || 9}
+                          onChange={(e) =>
+                            updateConfig('table.headerFontSize', parseInt(e.target.value) || 9)
+                          }
+                          className="w-16 px-2 py-1 text-xs border border-r-0 border-slate-300 rounded-l font-mono"
+                        />
+                        <span className="px-2 py-1 bg-slate-100 border border-slate-300 rounded-r text-[11px] text-slate-600">
+                          pt
+                        </span>
+                      </div>
                     </div>
+
+                    <ColorPickerField
+                      label="Background Color"
+                      hasCheckbox={true}
+                      checked={config.table?.showHeaderBgColor !== false}
+                      onCheckboxChange={(checked) =>
+                        updateConfig('table.showHeaderBgColor', checked)
+                      }
+                      value={config.table?.headerBgColor || '#3c3d3a'}
+                      onChange={(val) => updateConfig('table.headerBgColor', val)}
+                    />
+
+                    <ColorPickerField
+                      label="Font Color"
+                      value={config.table?.headerTextColor || '#ffffff'}
+                      onChange={(val) => updateConfig('table.headerTextColor', val)}
+                    />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Table Row Style
-                    </label>
-                    <div className="flex items-center gap-4 text-xs font-medium text-slate-800">
-                      {(['grid', 'clean', 'striped'] as const).map((style) => (
-                        <label key={style} className="flex items-center gap-2 cursor-pointer capitalize">
-                          <input
-                            type="radio"
-                            name="layoutStyle"
-                            checked={config.table?.layoutStyle === style}
-                            onChange={() => updateConfig('table.layoutStyle', style)}
-                            className="text-brand-600 focus:ring-brand-500 w-4 h-4"
-                          />
-                          <span>{style}</span>
-                        </label>
-                      ))}
+                  {/* Item Row Section */}
+                  <div className="space-y-2 pb-3 border-b border-slate-100">
+                    <div className="font-bold text-xs text-slate-900">Item Row</div>
+
+                    <div className="flex items-center justify-between text-xs py-1">
+                      <span className="font-medium text-slate-700">Font Size</span>
+                      <div className="flex items-center">
+                        <input
+                          type="number"
+                          min="7"
+                          max="16"
+                          value={config.table?.rowFontSize || 9}
+                          onChange={(e) =>
+                            updateConfig('table.rowFontSize', parseInt(e.target.value) || 9)
+                          }
+                          className="w-16 px-2 py-1 text-xs border border-r-0 border-slate-300 rounded-l font-mono"
+                        />
+                        <span className="px-2 py-1 bg-slate-100 border border-slate-300 rounded-r text-[11px] text-slate-600">
+                          pt
+                        </span>
+                      </div>
                     </div>
+
+                    <ColorPickerField
+                      label="Background Color"
+                      hasCheckbox={true}
+                      checked={config.table?.showRowBgColor || false}
+                      onCheckboxChange={(checked) =>
+                        updateConfig('table.showRowBgColor', checked)
+                      }
+                      value={config.table?.rowBgColor || '#ffffff'}
+                      onChange={(val) => updateConfig('table.rowBgColor', val)}
+                    />
+
+                    <ColorPickerField
+                      label="Font Color"
+                      value={config.table?.rowTextColor || '#000000'}
+                      onChange={(val) => updateConfig('table.rowTextColor', val)}
+                    />
+                  </div>
+
+                  {/* Item Description Section */}
+                  <div className="space-y-2 pb-1">
+                    <div className="font-bold text-xs text-slate-900">Item Description</div>
+
+                    <div className="flex items-center justify-between text-xs py-1">
+                      <span className="font-medium text-slate-700">Font Size</span>
+                      <div className="flex items-center">
+                        <input
+                          type="number"
+                          min="6"
+                          max="14"
+                          value={config.table?.descFontSize || 8}
+                          onChange={(e) =>
+                            updateConfig('table.descFontSize', parseInt(e.target.value) || 8)
+                          }
+                          className="w-16 px-2 py-1 text-xs border border-r-0 border-slate-300 rounded-l font-mono"
+                        />
+                        <span className="px-2 py-1 bg-slate-100 border border-slate-300 rounded-r text-[11px] text-slate-600">
+                          pt
+                        </span>
+                      </div>
+                    </div>
+
+                    <ColorPickerField
+                      label="Font Color"
+                      value={config.table?.descTextColor || '#333333'}
+                      onChange={(val) => updateConfig('table.descTextColor', val)}
+                    />
                   </div>
                 </div>
               )}
@@ -1256,7 +1396,242 @@ export default function TemplateEditorPage() {
             </div>
           )}
 
-          {/* TAB 6: OTHER DETAILS */}
+          {/* TAB 6: DOCUMENT SUMMARY (Matching 4th Image) */}
+          {activeTab === 'documentSummary' && (
+            <div className="p-5 space-y-4 text-sm divide-y divide-slate-100">
+              <div className="flex items-center justify-between pb-1">
+                <h2 className="text-base font-bold text-slate-900">Document Summary</h2>
+                <ChevronDown className="w-4 h-4 text-brand-600" />
+              </div>
+
+              {/* Notes */}
+              <div className="pt-3 space-y-3">
+                <div className="font-bold text-xs text-slate-900">Notes</div>
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Label</label>
+                    <input
+                      type="text"
+                      value={config.documentSummary?.notesLabel ?? config.other?.notesLabel ?? 'Notes'}
+                      onChange={(e) => updateConfig('documentSummary.notesLabel', e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500"
+                      placeholder="Notes"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs py-1">
+                    <span className="font-medium text-slate-700">Font Size</span>
+                    <div className="flex items-center">
+                      <input
+                        type="number"
+                        min="6"
+                        max="16"
+                        value={config.documentSummary?.notesFontSize ?? 8}
+                        onChange={(e) => updateConfig('documentSummary.notesFontSize', parseInt(e.target.value) || 8)}
+                        className="w-16 px-2 py-1 text-xs border border-r-0 border-slate-300 rounded-l font-mono"
+                      />
+                      <span className="px-2 py-1 bg-slate-100 border border-slate-300 rounded-r text-[11px] text-slate-600">pt</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Options */}
+              <div className="pt-3 space-y-3">
+                <div className="font-bold text-xs text-slate-900">Payment Options</div>
+                <div className="flex items-center justify-between gap-3 text-xs">
+                  <label className="flex items-center gap-2 font-medium text-slate-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={config.documentSummary?.showOnlinePaymentLink ?? true}
+                      onChange={(e) => updateConfig('documentSummary.showOnlinePaymentLink', e.target.checked)}
+                      className="rounded text-brand-600 focus:ring-brand-500 w-3.5 h-3.5"
+                    />
+                    <span>Online Payment Link</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={config.documentSummary?.onlinePaymentLinkLabel ?? 'Payment Options'}
+                    onChange={(e) => updateConfig('documentSummary.onlinePaymentLinkLabel', e.target.value)}
+                    className="w-40 px-2 py-1 text-xs border border-slate-300 rounded focus:ring-1 focus:ring-brand-500"
+                    placeholder="Payment Options"
+                  />
+                </div>
+
+                <Link
+                  href="/settings"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-lg border border-brand-200 transition"
+                >
+                  <Building className="w-3.5 h-3.5" />
+                  <span>⚙ Add your bank details</span>
+                </Link>
+              </div>
+
+              {/* Terms & Conditions */}
+              <div className="pt-3 space-y-3">
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-900 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={config.documentSummary?.showTerms ?? true}
+                    onChange={(e) => updateConfig('documentSummary.showTerms', e.target.checked)}
+                    className="rounded text-brand-600 focus:ring-brand-500 w-3.5 h-3.5"
+                  />
+                  <span>Terms &amp; Conditions</span>
+                </label>
+
+                {(config.documentSummary?.showTerms ?? true) && (
+                  <div className="space-y-2 pl-4">
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1">Label</label>
+                      <input
+                        type="text"
+                        value={config.documentSummary?.termsLabel ?? config.other?.termsLabel ?? 'Terms & Conditions'}
+                        onChange={(e) => updateConfig('documentSummary.termsLabel', e.target.value)}
+                        className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500"
+                        placeholder="Terms & Conditions"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs py-1">
+                      <span className="font-medium text-slate-700">Font Size</span>
+                      <div className="flex items-center">
+                        <input
+                          type="number"
+                          min="6"
+                          max="16"
+                          value={config.documentSummary?.termsFontSize ?? 8}
+                          onChange={(e) => updateConfig('documentSummary.termsFontSize', parseInt(e.target.value) || 8)}
+                          className="w-16 px-2 py-1 text-xs border border-r-0 border-slate-300 rounded-l font-mono"
+                        />
+                        <span className="px-2 py-1 bg-slate-100 border border-slate-300 rounded-r text-[11px] text-slate-600">pt</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Signature */}
+              <div className="pt-3 space-y-3">
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-900 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={config.documentSummary?.showSignature ?? true}
+                    onChange={(e) => updateConfig('documentSummary.showSignature', e.target.checked)}
+                    className="rounded text-brand-600 focus:ring-brand-500 w-3.5 h-3.5"
+                  />
+                  <span>Signature</span>
+                </label>
+
+                {(config.documentSummary?.showSignature ?? true) && (
+                  <div className="space-y-3 pl-4">
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1">Label</label>
+                      <input
+                        type="text"
+                        value={config.documentSummary?.signatureLabel ?? 'Authorized Signature'}
+                        onChange={(e) => updateConfig('documentSummary.signatureLabel', e.target.value)}
+                        className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500"
+                        placeholder="Authorized Signature"
+                      />
+                    </div>
+
+                    {/* Signature image upload matching Screenshot 4 */}
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1">Signature Image</label>
+                      <div className="border-2 border-dashed border-slate-200 hover:border-brand-400 rounded-2xl p-4 text-center bg-slate-50/50 transition">
+                        {config.documentSummary?.signatureImageUrl ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <img
+                              src={config.documentSummary.signatureImageUrl}
+                              alt="Signature"
+                              className="max-h-16 w-auto object-contain border border-slate-200 rounded p-1 bg-white"
+                            />
+                            <button
+                              onClick={() => updateConfig('documentSummary.signatureImageUrl', '')}
+                              className="text-[11px] text-rose-600 font-semibold hover:underline"
+                            >
+                              Remove signature image
+                            </button>
+                          </div>
+                        ) : (
+                          <label className="cursor-pointer block">
+                            <div className="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center mx-auto mb-2">
+                              <Upload className="w-5 h-5" />
+                            </div>
+                            <div className="text-xs font-bold text-slate-800">
+                              Drag and drop or <span className="text-brand-600 underline">Upload file</span>
+                            </div>
+                            <div className="text-[10px] text-slate-400 mt-1">
+                              Maximum size: 1 MB<br />
+                              Supported Formats: PNG, JPEG, JPG, BMP
+                            </div>
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/jpg,image/bmp"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  if (file.size > 1024 * 1024) {
+                                    alert('File size exceeds 1MB limit');
+                                    return;
+                                  }
+                                  const reader = new FileReader();
+                                  reader.onload = () => {
+                                    updateConfig('documentSummary.signatureImageUrl', reader.result as string);
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1">Signature Name</label>
+                      <input
+                        type="text"
+                        value={config.documentSummary?.signatureName ?? ''}
+                        onChange={(e) => updateConfig('documentSummary.signatureName', e.target.value)}
+                        className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500"
+                        placeholder="e.g. Authorized Signatory for Prime Print"
+                      />
+                    </div>
+
+                    <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer pt-1">
+                      <input
+                        type="checkbox"
+                        checked={config.documentSummary?.additionalSignature ?? false}
+                        onChange={(e) => updateConfig('documentSummary.additionalSignature', e.target.checked)}
+                        className="rounded text-brand-600 focus:ring-brand-500 w-3.5 h-3.5"
+                      />
+                      <span>Additional Signature</span>
+                    </label>
+                  </div>
+                )}
+              </div>
+
+              {/* Annexure Accordion */}
+              <div className="pt-3">
+                <button
+                  onClick={() => updateConfig('documentSummary.showAnnexure', !config.documentSummary?.showAnnexure)}
+                  className="w-full flex items-center justify-between text-xs font-bold text-slate-800 hover:text-slate-900 py-1"
+                >
+                  <span>Annexure</span>
+                  <ChevronRight className={`w-4 h-4 text-slate-400 transition transform ${config.documentSummary?.showAnnexure ? 'rotate-90' : ''}`} />
+                </button>
+                {config.documentSummary?.showAnnexure && (
+                  <div className="mt-2 p-3 bg-slate-50 rounded-xl text-xs text-slate-600">
+                    Annexure pages can be attached to provide extended item specifications, work order scopes, or legal terms.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 7: OTHER DETAILS */}
           {activeTab === 'other' && (
             <div className="p-5 space-y-4 text-sm">
               <h2 className="text-base font-bold text-slate-900">Other Details Properties</h2>
@@ -1350,7 +1725,7 @@ export default function TemplateEditorPage() {
         {/* 3. Right Interactive Real-Time Live Preview Sheet */}
         <main className="flex-1 bg-slate-200/80 overflow-auto flex flex-col items-center p-6 select-auto">
           {/* Preview toolbar */}
-          <div className="w-full max-w-[850px] mb-4 flex items-center justify-between text-xs text-slate-600 bg-white/90 backdrop-blur px-4 py-2 rounded-xl border border-slate-300 shadow-sm">
+          <div className="w-full max-w-[850px] mb-4 flex items-center justify-between text-xs text-slate-600 bg-white/90 backdrop-blur px-4 py-2 rounded-xl border border-slate-300 shadow-sm no-print">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="font-semibold text-slate-800">Live Preview</span>
@@ -1385,11 +1760,12 @@ export default function TemplateEditorPage() {
           </div>
 
           {/* Scaled Printable Preview Paper */}
-          <div className="overflow-visible pb-24">
+          <div className="overflow-visible pb-24 print:p-0 print:m-0">
             <TemplateInvoicePreview
               config={config}
               company={company}
               scale={previewScale}
+              isPrintMode={true}
             />
           </div>
         </main>

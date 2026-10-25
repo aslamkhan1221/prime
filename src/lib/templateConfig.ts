@@ -93,8 +93,18 @@ export interface InvoiceTemplateConfig {
   // Table -> Table Properties
   table: {
     layoutStyle: 'grid' | 'clean' | 'striped';
+    showTableBorder?: boolean;
+    tableBorderColor?: string;
+    headerFontSize?: number;
+    showHeaderBgColor?: boolean;
     headerBgColor: string;
     headerTextColor: string;
+    rowFontSize?: number;
+    showRowBgColor?: boolean;
+    rowBgColor?: string;
+    rowTextColor?: string;
+    descFontSize?: number;
+    descTextColor?: string;
     addTaxToAmount: boolean;
     columns: {
       itemNumber: { show: boolean; width: number; label: string };
@@ -124,6 +134,23 @@ export interface InvoiceTemplateConfig {
     balanceDueColor: string;
     showSignature: boolean;
     signatureLabel: string;
+  };
+
+  // Document Summary (Matching Zoho Books Tab)
+  documentSummary?: {
+    notesLabel?: string;
+    notesFontSize?: number;
+    showOnlinePaymentLink?: boolean;
+    onlinePaymentLinkLabel?: string;
+    showTerms?: boolean;
+    termsLabel?: string;
+    termsFontSize?: number;
+    showSignature?: boolean;
+    signatureLabel?: string;
+    signatureImageUrl?: string;
+    signatureName?: string;
+    additionalSignature?: boolean;
+    showAnnexure?: boolean;
   };
 
   // Other Details
@@ -225,8 +252,18 @@ export const DEFAULT_TEMPLATE_CONFIG: InvoiceTemplateConfig = {
 
   table: {
     layoutStyle: 'grid',
-    headerBgColor: '#00a3e0',
+    showTableBorder: true,
+    tableBorderColor: '#adadad',
+    headerFontSize: 9,
+    showHeaderBgColor: true,
+    headerBgColor: '#3c3d3a',
     headerTextColor: '#ffffff',
+    rowFontSize: 9,
+    showRowBgColor: false,
+    rowBgColor: '#ffffff',
+    rowTextColor: '#000000',
+    descFontSize: 8,
+    descTextColor: '#333333',
     addTaxToAmount: false,
     columns: {
       itemNumber: { show: true, width: 5, label: '#' },
@@ -255,6 +292,22 @@ export const DEFAULT_TEMPLATE_CONFIG: InvoiceTemplateConfig = {
     balanceDueColor: '#00a3e0',
     showSignature: true,
     signatureLabel: 'Authorized Signature for Prime Print & Services',
+  },
+
+  documentSummary: {
+    notesLabel: 'Notes',
+    notesFontSize: 8,
+    showOnlinePaymentLink: true,
+    onlinePaymentLinkLabel: 'Payment Options',
+    showTerms: true,
+    termsLabel: 'Terms & Conditions',
+    termsFontSize: 8,
+    showSignature: true,
+    signatureLabel: 'Authorized Signature',
+    signatureImageUrl: '',
+    signatureName: 'Prime Print & Services',
+    additionalSignature: false,
+    showAnnexure: false,
   },
 
   other: {

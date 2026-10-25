@@ -172,7 +172,7 @@ export function TemplateInvoicePreview({
             @media print {
               @page {
                 size: ${config.paperSize || 'A4'} ${(config.orientation || 'Portrait').toLowerCase()};
-                margin: 0 !important;
+                margin: ${config.margins?.top ?? 0.7}in ${config.margins?.right ?? 0.4}in ${config.margins?.bottom ?? 0.7}in ${config.margins?.left ?? 0.55}in !important;
               }
               html, body {
                 margin: 0 !important;
@@ -189,10 +189,7 @@ export function TemplateInvoicePreview({
                 margin: 0 !important;
                 box-shadow: none !important;
                 border: none !important;
-                padding-top: ${config.margins?.top ?? 0.7}in !important;
-                padding-bottom: ${config.margins?.bottom ?? 0.7}in !important;
-                padding-left: ${config.margins?.left ?? 0.55}in !important;
-                padding-right: ${config.margins?.right ?? 0.4}in !important;
+                padding: 0 !important;
                 font-family: "${fontFamily}", system-ui, sans-serif !important;
                 font-size: ${baseFontSize}pt !important;
                 color: ${fontColor} !important;
@@ -203,6 +200,37 @@ export function TemplateInvoicePreview({
               .template-invoice-root * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+              }
+              .template-invoice-table {
+                border: ${config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || '#adadad'}` : 'none'} !important;
+              }
+              .template-header-th {
+                background-color: ${config.table?.showHeaderBgColor !== false ? (config.table?.headerBgColor || '#3c3d3a') : 'transparent'} !important;
+                color: ${config.table?.headerTextColor || '#ffffff'} !important;
+                font-size: ${config.table?.headerFontSize || 9}pt !important;
+                border-bottom: ${config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || '#adadad'}` : 'none'} !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              .template-header-th th {
+                border-right: ${config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || 'rgba(255,255,255,0.25)'}` : 'none'} !important;
+                background-color: ${config.table?.showHeaderBgColor !== false ? (config.table?.headerBgColor || '#3c3d3a') : 'transparent'} !important;
+                color: ${config.table?.headerTextColor || '#ffffff'} !important;
+              }
+              .template-row-tr {
+                font-size: ${config.table?.rowFontSize || 9}pt !important;
+                color: ${config.table?.rowTextColor || '#000000'} !important;
+                background-color: ${config.table?.showRowBgColor ? (config.table?.rowBgColor || '#ffffff') : 'transparent'} !important;
+                border-bottom: ${config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || '#adadad'}` : 'none'} !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              .template-row-tr td {
+                border-right: ${config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || '#adadad'}` : 'none'} !important;
+              }
+              .template-desc-text {
+                font-size: ${config.table?.descFontSize || 8}pt !important;
+                color: ${config.table?.descTextColor || '#333333'} !important;
               }
             }
           `,
@@ -482,23 +510,29 @@ export function TemplateInvoicePreview({
           </div>
 
           {/* Items Table */}
-          <div className="mt-4 border" style={{ borderColor: '#cbd5e1' }}>
-            <table className="w-full text-left border-collapse" style={{ fontSize: `${baseFontSize * 0.95}pt` }}>
+          <div
+            className="mt-4 template-invoice-table"
+            style={{
+              border: config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || '#adadad'}` : 'none',
+            }}
+          >
+            <table className="w-full text-left border-collapse">
               <thead>
                 <tr
-                  className="font-bold"
+                  className="font-bold template-header-th"
                   style={{
-                    backgroundColor: config.table?.headerBgColor || '#00a3e0',
+                    backgroundColor: config.table?.showHeaderBgColor !== false ? (config.table?.headerBgColor || '#3c3d3a') : 'transparent',
                     color: config.table?.headerTextColor || '#ffffff',
-                    borderBottom: '1px solid #94a3b8',
+                    fontSize: `${config.table?.headerFontSize || 9}pt`,
+                    borderBottom: `1px solid ${config.table?.tableBorderColor || '#adadad'}`,
                   }}
                 >
                   {config.table?.columns?.itemNumber?.show && (
                     <th
-                      className="py-2 px-2 text-center border-r"
+                      className="py-2 px-2 text-center"
                       style={{
                         width: `${config.table.columns.itemNumber.width}%`,
-                        borderColor: 'rgba(255,255,255,0.25)',
+                        borderRight: config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || 'rgba(255,255,255,0.25)'}` : 'none',
                       }}
                     >
                       {config.table.columns.itemNumber.label || '#'}
@@ -506,10 +540,10 @@ export function TemplateInvoicePreview({
                   )}
                   {config.table?.columns?.item?.show && (
                     <th
-                      className="py-2 px-3 border-r"
+                      className="py-2 px-3"
                       style={{
                         width: `${config.table.columns.item.width}%`,
-                        borderColor: 'rgba(255,255,255,0.25)',
+                        borderRight: config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || 'rgba(255,255,255,0.25)'}` : 'none',
                       }}
                     >
                       {config.table.columns.item.label || 'Item & Description'}
@@ -517,10 +551,10 @@ export function TemplateInvoicePreview({
                   )}
                   {config.table?.columns?.customFields?.show && (
                     <th
-                      className="py-2 px-3 border-r"
+                      className="py-2 px-3"
                       style={{
                         width: `${config.table.columns.customFields.width}%`,
-                        borderColor: 'rgba(255,255,255,0.25)',
+                        borderRight: config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || 'rgba(255,255,255,0.25)'}` : 'none',
                       }}
                     >
                       {config.table.columns.customFields.label || 'Specs / Size'}
@@ -528,10 +562,10 @@ export function TemplateInvoicePreview({
                   )}
                   {config.table?.columns?.quantity?.show && (
                     <th
-                      className="py-2 px-3 text-right border-r"
+                      className="py-2 px-3 text-right"
                       style={{
                         width: `${config.table.columns.quantity.width}%`,
-                        borderColor: 'rgba(255,255,255,0.25)',
+                        borderRight: config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || 'rgba(255,255,255,0.25)'}` : 'none',
                       }}
                     >
                       {config.table.columns.quantity.label || 'Qty'}
@@ -539,10 +573,10 @@ export function TemplateInvoicePreview({
                   )}
                   {config.table?.columns?.rate?.show && (
                     <th
-                      className="py-2 px-3 text-right border-r"
+                      className="py-2 px-3 text-right"
                       style={{
                         width: `${config.table.columns.rate.width}%`,
-                        borderColor: 'rgba(255,255,255,0.25)',
+                        borderRight: config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || 'rgba(255,255,255,0.25)'}` : 'none',
                       }}
                     >
                       {config.table.columns.rate.label || 'Rate'}
@@ -550,10 +584,10 @@ export function TemplateInvoicePreview({
                   )}
                   {config.table?.columns?.taxPercent?.show && (
                     <th
-                      className="py-2 px-2 text-right border-r"
+                      className="py-2 px-2 text-right"
                       style={{
                         width: `${config.table.columns.taxPercent.width}%`,
-                        borderColor: 'rgba(255,255,255,0.25)',
+                        borderRight: config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || 'rgba(255,255,255,0.25)'}` : 'none',
                       }}
                     >
                       {config.table.columns.taxPercent.label || 'Tax %'}
@@ -561,10 +595,10 @@ export function TemplateInvoicePreview({
                   )}
                   {config.table?.columns?.taxAmount?.show && (
                     <th
-                      className="py-2 px-2 text-right border-r"
+                      className="py-2 px-2 text-right"
                       style={{
                         width: `${config.table.columns.taxAmount.width}%`,
-                        borderColor: 'rgba(255,255,255,0.25)',
+                        borderRight: config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || 'rgba(255,255,255,0.25)'}` : 'none',
                       }}
                     >
                       {config.table.columns.taxAmount.label || 'Tax'}
@@ -572,10 +606,10 @@ export function TemplateInvoicePreview({
                   )}
                   {config.table?.columns?.discount?.show && (
                     <th
-                      className="py-2 px-2 text-right border-r"
+                      className="py-2 px-2 text-right"
                       style={{
                         width: `${config.table.columns.discount.width}%`,
-                        borderColor: 'rgba(255,255,255,0.25)',
+                        borderRight: config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || 'rgba(255,255,255,0.25)'}` : 'none',
                       }}
                     >
                       {config.table.columns.discount.label || 'Discount'}
@@ -591,69 +625,84 @@ export function TemplateInvoicePreview({
                   )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-300">
+              <tbody>
                 {invoice.items?.map((item: any, idx: number) => {
                   const qty = Number(item.quantity) || 1;
                   const rate = Number(item.rate) || 0;
                   const amt = Number(item.totalAmount) || qty * rate;
                   const isEven = idx % 2 === 1;
 
+                  const rowBg = config.table?.showRowBgColor
+                    ? (config.table?.rowBgColor || '#ffffff')
+                    : config.table?.layoutStyle === 'striped' && isEven
+                    ? '#f8fafc'
+                    : 'transparent';
+
+                  const rowTextColor = config.table?.rowTextColor || '#000000';
+                  const rowFontSize = config.table?.rowFontSize || 9;
+                  const descFontSize = config.table?.descFontSize || 8;
+                  const descTextColor = config.table?.descTextColor || '#333333';
+                  const cellBorder = config.table?.showTableBorder !== false ? `1px solid ${config.table?.tableBorderColor || '#adadad'}` : 'none';
+
                   return (
                     <tr
                       key={item.id || idx}
-                      className="align-top"
+                      className="align-top template-row-tr"
                       style={{
-                        backgroundColor:
-                          config.table?.layoutStyle === 'striped' && isEven
-                            ? '#f8fafc'
-                            : 'transparent',
+                        backgroundColor: rowBg,
+                        color: rowTextColor,
+                        fontSize: `${rowFontSize}pt`,
+                        borderBottom: cellBorder,
                       }}
                     >
                       {config.table?.columns?.itemNumber?.show && (
-                        <td className="py-2.5 px-2 text-center border-r border-slate-300 font-medium">
+                        <td className="py-2.5 px-2 text-center font-medium" style={{ borderRight: cellBorder }}>
                           {idx + 1}
                         </td>
                       )}
                       {config.table?.columns?.item?.show && (
-                        <td className="py-2.5 px-3 border-r border-slate-300">
-                          <div className="font-bold leading-tight" style={{ color: fontColor }}>
+                        <td className="py-2.5 px-3" style={{ borderRight: cellBorder }}>
+                          <div className="font-bold leading-tight" style={{ color: rowTextColor }}>
                             {item.name}
                           </div>
                           {config.table?.columns?.description?.show && item.description && (
-                            <div className="text-[9pt] opacity-80 mt-1 whitespace-pre-line leading-relaxed font-normal">
+                            <div
+                              className="template-desc-text mt-1 whitespace-pre-line leading-relaxed font-normal opacity-90"
+                              style={{ fontSize: `${descFontSize}pt`, color: descTextColor }}
+                            >
                               {item.description}
                             </div>
                           )}
                         </td>
                       )}
                       {config.table?.columns?.customFields?.show && (
-                        <td className="py-2.5 px-3 border-r border-slate-300 text-xs text-slate-700">
+                        <td className="py-2.5 px-3 text-xs" style={{ borderRight: cellBorder }}>
                           {item.customFields || '-'}
                         </td>
                       )}
                       {config.table?.columns?.quantity?.show && (
-                        <td className="py-2.5 px-3 text-right border-r border-slate-300 font-mono">
+                        <td className="py-2.5 px-3 text-right font-mono" style={{ borderRight: cellBorder }}>
                           <div className="font-semibold">{qty.toFixed(2)}</div>
                           <div className="text-[8.5pt] opacity-70">{item.unit || 'pcs'}</div>
                         </td>
                       )}
                       {config.table?.columns?.rate?.show && (
-                        <td className="py-2.5 px-3 text-right border-r border-slate-300 font-mono">
+                        <td className="py-2.5 px-3 text-right font-mono" style={{ borderRight: cellBorder }}>
                           {rate.toFixed(2)}
                         </td>
                       )}
                       {config.table?.columns?.taxPercent?.show && (
-                        <td className="py-2.5 px-2 text-right border-r border-slate-300 font-mono">
+                        <td className="py-2.5 px-2 text-right font-mono" style={{ borderRight: cellBorder }}>
                           {item.taxRate ? `${item.taxRate}%` : '18%'}
                         </td>
                       )}
                       {config.table?.columns?.taxAmount?.show && (
-                        <td className="py-2.5 px-2 text-right border-r border-slate-300 font-mono">
+                        <td className="py-2.5 px-2 text-right font-mono" style={{ borderRight: cellBorder }}>
                           {item.taxAmount ? item.taxAmount.toFixed(2) : '-'}
                         </td>
                       )}
                       {config.table?.columns?.discount?.show && (
-                        <td className="py-2.5 px-2 text-right border-r border-slate-300 font-mono">
+                        <td className="py-2.5 px-2 text-right font-mono" style={{ borderRight: cellBorder }}>
                           {item.discount ? item.discount.toFixed(2) : '0.00'}
                         </td>
                       )}
@@ -691,39 +740,57 @@ export function TemplateInvoicePreview({
                 )}
 
                 {/* Notes */}
-                {config.other?.showNotes && (
+                {(config.documentSummary?.notesLabel || config.other?.showNotes) && (
                   <div className="pt-2 border-t border-slate-200">
-                    <span className="font-bold block mb-0.5" style={{ color: labelColor }}>
-                      {config.other?.notesLabel || 'Notes'}
+                    <span
+                      className="font-bold block mb-0.5"
+                      style={{
+                        color: labelColor,
+                        fontSize: `${config.documentSummary?.notesFontSize || 8}pt`,
+                      }}
+                    >
+                      {config.documentSummary?.notesLabel || config.other?.notesLabel || 'Notes'}
                     </span>
-                    <div className="whitespace-pre-line leading-relaxed opacity-90 text-[9pt]">
+                    <div
+                      className="whitespace-pre-line leading-relaxed opacity-90"
+                      style={{ fontSize: `${config.documentSummary?.notesFontSize || 8}pt` }}
+                    >
                       {invoice.notes || config.other?.defaultNotes}
                     </div>
                   </div>
                 )}
 
                 {/* Terms & Conditions */}
-                {config.other?.showTerms && (
+                {config.documentSummary?.showTerms !== false && config.other?.showTerms && (
                   <div className="pt-2 border-t border-slate-200">
-                    <span className="font-bold block mb-0.5" style={{ color: labelColor }}>
-                      {config.other?.termsLabel || 'Terms & Conditions'}
+                    <span
+                      className="font-bold block mb-0.5"
+                      style={{
+                        color: labelColor,
+                        fontSize: `${config.documentSummary?.termsFontSize || 8}pt`,
+                      }}
+                    >
+                      {config.documentSummary?.termsLabel || config.other?.termsLabel || 'Terms & Conditions'}
                     </span>
-                    <div className="whitespace-pre-line leading-relaxed opacity-85 text-[8.5pt]">
+                    <div
+                      className="whitespace-pre-line leading-relaxed opacity-85"
+                      style={{ fontSize: `${config.documentSummary?.termsFontSize || 8}pt` }}
+                    >
                       {invoice.terms || config.other?.defaultTerms}
                     </div>
                   </div>
                 )}
 
                 {/* Bank Details & UPI QR Code if enabled */}
-                {(config.other?.showBankDetails || config.other?.showUpiQr) && (
+                {(config.other?.showBankDetails || config.other?.showUpiQr || config.documentSummary?.showOnlinePaymentLink) && (
                   <div className="pt-2 border-t border-slate-200 flex items-center justify-between bg-slate-50 p-2.5 rounded border border-slate-200">
                     {config.other?.showBankDetails && (
                       <div className="text-[8.5pt] space-y-0.5">
                         <div className="font-bold" style={{ color: labelColor }}>
-                          Bank Account Details:
+                          {config.documentSummary?.onlinePaymentLinkLabel || 'Bank Account Details:'}
                         </div>
                         <div>
-                          <span className="font-medium">Account:</span> {comp.bankAccountName || comp.name}
+                          <span className="font-medium">Account:</span> {comp.bankAccountName || comp.companyName || comp.name}
                         </div>
                         <div>
                           <span className="font-medium">A/C No:</span> {comp.bankAccountNumber || '98765432101234'}
@@ -831,12 +898,42 @@ export function TemplateInvoicePreview({
                   )}
                 </div>
 
-                {/* Signature Box */}
-                {config.total?.showSignature && (
-                  <div className="p-4 pt-12 text-center border-t border-slate-300">
-                    <div className="border-t border-slate-400 w-44 mx-auto mb-1" />
-                    <div className="text-[8.5pt] font-semibold" style={{ color: labelColor }}>
-                      {config.total.signatureLabel || 'Authorized Signature'}
+                {/* Signature Box (Supports Document Summary Signature Image & Additional Signature) */}
+                {(config.documentSummary ? config.documentSummary.showSignature !== false : config.total?.showSignature !== false) && (
+                  <div className="p-3 pt-6 text-center border-t border-slate-300">
+                    <div className="flex items-end justify-around gap-4">
+                      {/* Primary Signature */}
+                      <div className="flex-1 text-center">
+                        {config.documentSummary?.signatureImageUrl && (
+                          <div className="mb-1 flex justify-center">
+                            <img
+                              src={config.documentSummary.signatureImageUrl}
+                              alt="Signature"
+                              className="max-h-12 w-auto object-contain"
+                            />
+                          </div>
+                        )}
+                        <div className="border-t border-slate-400 w-36 mx-auto mb-1" />
+                        <div className="text-[8pt] font-semibold" style={{ color: labelColor }}>
+                          {config.documentSummary?.signatureLabel || config.total?.signatureLabel || 'Authorized Signature'}
+                        </div>
+                        {config.documentSummary?.signatureName && (
+                          <div className="text-[7.5pt] text-slate-500 font-medium">
+                            {config.documentSummary.signatureName}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Additional Signature if enabled */}
+                      {config.documentSummary?.additionalSignature && (
+                        <div className="flex-1 text-center">
+                          <div className="h-10" />
+                          <div className="border-t border-slate-400 w-36 mx-auto mb-1" />
+                          <div className="text-[8pt] font-semibold" style={{ color: labelColor }}>
+                            Customer Signature
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

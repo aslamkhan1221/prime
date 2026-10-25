@@ -38,6 +38,7 @@ export async function GET() {
             columns: { ...DEFAULT_TEMPLATE_CONFIG.table.columns, ...(parsed.table?.columns || {}) },
           },
           total: { ...DEFAULT_TEMPLATE_CONFIG.total, ...(parsed.total || {}) },
+          documentSummary: { ...DEFAULT_TEMPLATE_CONFIG.documentSummary, ...(parsed.documentSummary || {}) },
           other: { ...DEFAULT_TEMPLATE_CONFIG.other, ...(parsed.other || {}) },
         };
       } catch (err) {

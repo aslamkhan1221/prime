@@ -97,6 +97,7 @@ body {
     width: 100% !important;
     min-width: 100% !important;
     overflow: visible !important;
+    height: auto !important;
   }
 
   * {
@@ -104,16 +105,23 @@ body {
     print-color-adjust: exact !important;
   }
 
-  .no-print, [data-no-print="true"] {
+  .no-print, [data-no-print="true"], aside, nav, header {
     display: none !important;
   }
 
+  /* Reset all layout wrappers to block flow so multi-page printing is never clipped */
+  .min-h-screen,
+  .flex-1,
   main {
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
     width: 100% !important;
     overflow: visible !important;
+    min-height: auto !important;
+    height: auto !important;
+    display: block !important;
+    background: transparent !important;
   }
 
   .template-invoice-root {
@@ -123,3 +131,4 @@ body {
     overflow: visible !important;
   }
 }
+

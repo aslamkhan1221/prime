@@ -37,6 +37,7 @@ function parseTemplateConfig(raw: any): InvoiceTemplateConfig {
         columns: { ...DEFAULT_TEMPLATE_CONFIG.table.columns, ...(parsed.table?.columns || {}) },
       },
       total: { ...DEFAULT_TEMPLATE_CONFIG.total, ...(parsed.total || {}) },
+      documentSummary: { ...DEFAULT_TEMPLATE_CONFIG.documentSummary, ...(parsed.documentSummary || {}) },
       other: { ...DEFAULT_TEMPLATE_CONFIG.other, ...(parsed.other || {}) },
     };
   } catch {
@@ -45,9 +46,17 @@ function parseTemplateConfig(raw: any): InvoiceTemplateConfig {
 }
 
 export function InvoicePrintView({ invoice, settings, onBack }: InvoicePrintViewProps) {
-  const [templateConfig, setTemplateConfig] = useState<InvoiceTemplateConfig>(() =>
-    parseTemplateConfig(settings?.templateConfig)
-  );
+  const [templateConfig, setTemplateConfig] = useState<InvoiceTemplateConfig>(() => {
+    // 1. Try instant cache from localStorage if updated in template editor
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('prime_template_config');
+        if (cached) return parseTemplateConfig(JSON.parse(cached));
+      } catch {}
+    }
+    // 2. Fall back to settings passed from server
+    return parseTemplateConfig(settings?.templateConfig);
+  });
 
   // Background fetch to guarantee latest saved template properties are applied
   useEffect(() => {
@@ -56,6 +65,9 @@ export function InvoicePrintView({ invoice, settings, onBack }: InvoicePrintView
       .then((data) => {
         if (data?.config) {
           setTemplateConfig(parseTemplateConfig(data.config));
+          try {
+            localStorage.setItem('prime_template_config', JSON.stringify(data.config));
+          } catch {}
         }
       })
       .catch((err) => console.error('Failed to sync latest template config:', err));

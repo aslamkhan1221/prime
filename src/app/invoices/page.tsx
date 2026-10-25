@@ -24,6 +24,7 @@ import {
   LayoutTemplate,
   Shield,
   Layers,
+  X,
 } from 'lucide-react';
 
 export default function InvoicesPage() {

@@ -232,3 +232,95 @@ model Partner {
   permissions      String?  @default("[\"dashboard\",\"orders\",\"invoices\",\"reports\"]")
   orders           Order[]
 }
+
+model Vendor {
+  id               String          @id @default(cuid())
+  salutation       String?
+  firstName        String?
+  lastName         String?
+  companyName      String?
+  displayName      String
+  email            String?
+  workPhone        String?
+  mobilePhone      String?
+  language         String?         @default("English")
+  pan              String?
+  isMsmeRegistered Boolean         @default(false)
+  currency         String?         @default("INR")
+  openingBalance   Float?          @default(0.0)
+  paymentTerms     String?         @default("Due on Receipt")
+  tds              String?
+  enablePortal     Boolean         @default(false)
+  address          String?
+  city             String?
+  state            String?
+  pincode          String?
+  country          String?         @default("India")
+  bankAccountName  String?
+  bankAccountNumber String?
+  bankIfsc         String?
+  bankName         String?
+  remarks          String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  purchaseOrders   PurchaseOrder[]
+}
+
+model PurchaseOrder {
+  id                  String              @id @default(cuid())
+  poNumber            String              @unique
+  vendorId            String
+  referenceNumber     String?
+  orderDate           DateTime            @default(now())
+  deliveryDate        DateTime?
+  deliveryAddressType String              @default("ORGANIZATION")
+  deliveryAddress     String?
+  paymentTerms        String?             @default("Due on Receipt")
+  shipmentPreference  String?
+  subtotal            Float               @default(0.0)
+  discount            Float               @default(0.0)
+  taxTotal            Float               @default(0.0)
+  adjustment          Float               @default(0.0)
+  total               Float               @default(0.0)
+  status              String              @default("DRAFT")
+  notes               String?
+  terms               String?
+  attachmentUrl       String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  vendor              Vendor              @relation(fields: [vendorId], references: [id])
+  items               PurchaseOrderItem[]
+}
+
+model PurchaseOrderItem {
+  id              String        @id @default(cuid())
+  purchaseOrderId String
+  itemId          String?
+  name            String
+  description     String?
+  account         String?
+  quantity        Float         @default(1.0)
+  rate            Float         @default(0.0)
+  discount        Float         @default(0.0)
+  taxRate         Float         @default(18.0)
+  taxAmount       Float         @default(0.0)
+  totalAmount     Float         @default(0.0)
+  createdAt       DateTime      @default(now())
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+}
+
+model CompanyDocument {
+  id             String   @id @default(cuid())
+  title          String
+  category       String
+  documentNumber String?
+  fileUrl        String
+  fileName       String
+  fileType       String?
+  fileSize       Int?     @default(0)
+  notes          String?
+  expiryDate     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+

@@ -18,6 +18,11 @@ import {
   ChevronRight,
   LogOut,
   LayoutTemplate,
+  Briefcase,
+  ChevronDown,
+  ShieldCheck,
+  Building2,
+  FileCheck2,
 } from 'lucide-react';
 
 export const ALL_NAV_ITEMS = [
@@ -27,8 +32,22 @@ export const ALL_NAV_ITEMS = [
   { id: 'orders', name: 'Orders', href: '/orders', icon: ShoppingBag },
   { id: 'invoices', name: 'Invoices', href: '/invoices', icon: FileText },
   { id: 'templates', name: 'Edit Template', href: '/templates', icon: LayoutTemplate },
-  { id: 'payments', name: 'Payments', href: '/payments', icon: CreditCard },
-  { id: 'expenses', name: 'Expenses', href: '/expenses', icon: Receipt },
+  {
+    id: 'purchases',
+    name: 'Purchases',
+    icon: Briefcase,
+    isParent: true,
+    subItems: [
+      { id: 'vendors', name: 'Vendors', href: '/purchases/vendors', icon: Building2 },
+      { id: 'expenses', name: 'Expenses', href: '/expenses', icon: Receipt },
+      { id: 'purchaseOrders', name: 'Purchase Orders', href: '/purchases/orders', icon: FileCheck2 },
+      { id: 'bills', name: 'Bills', href: '/purchases/bills', icon: FileText },
+      { id: 'paymentsMade', name: 'Payments Made', href: '/purchases/payments', icon: CreditCard },
+      { id: 'vendorCredits', name: 'Vendor Credits', href: '/purchases/credits', icon: Receipt },
+    ],
+  },
+  { id: 'payments', name: 'Payments Received', href: '/payments', icon: CreditCard },
+  { id: 'documents', name: 'Document Locker', href: '/documents', icon: ShieldCheck },
   { id: 'partners', name: 'Partners & Profit', href: '/partners', icon: UserCheck },
   { id: 'reports', name: 'Reports & Analytics', href: '/reports', icon: BarChart3 },
   { id: 'settings', name: 'Company Settings', href: '/settings', icon: Settings },
@@ -40,6 +59,15 @@ export function Sidebar({
   user?: { name: string; email: string; role: string; permissions?: string[] | null } | null;
 }) {
   const pathname = usePathname();
+  const [purchasesOpen, setPurchasesOpen] = React.useState(
+    pathname?.startsWith('/purchases') || pathname?.startsWith('/expenses')
+  );
+
+  React.useEffect(() => {
+    if (pathname?.startsWith('/purchases') || pathname?.startsWith('/expenses')) {
+      setPurchasesOpen(true);
+    }
+  }, [pathname]);
 
   // If user has role PARTNER and custom permissions, filter the sidebar menu items
   const visibleNavItems = ALL_NAV_ITEMS.filter((item) => {
@@ -48,7 +76,6 @@ export function Sidebar({
       if (Array.isArray(user.permissions) && user.permissions.length > 0) {
         return user.permissions.includes(item.id);
       }
-      // Default partner allowed items if no specific permissions
       return ['dashboard', 'orders', 'invoices', 'reports'].includes(item.id);
     }
     return true;
@@ -85,12 +112,70 @@ export function Sidebar({
         <nav className="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-190px)]">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
+
+            // Handle expandable parent item like Purchases
+            if (item.isParent && item.subItems) {
+              const isAnySubActive = item.subItems.some(
+                (sub) => pathname === sub.href || pathname?.startsWith(sub.href)
+              );
+              return (
+                <div key={item.id} className="space-y-0.5">
+                  <button
+                    onClick={() => setPurchasesOpen(!purchasesOpen)}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all group ${
+                      isAnySubActive
+                        ? 'text-brand-700 bg-brand-50/70 font-bold'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon
+                        className={`w-4 h-4 transition-transform group-hover:scale-110 ${
+                          isAnySubActive ? 'text-brand-600' : 'text-slate-400 group-hover:text-brand-500'
+                        }`}
+                      />
+                      <span>{item.name}</span>
+                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                        purchasesOpen ? 'rotate-180 text-brand-600' : ''
+                      }`}
+                    />
+                  </button>
+
+                  {/* Submenu Items */}
+                  {purchasesOpen && (
+                    <div className="pl-6 pr-1 py-1 space-y-0.5 border-l-2 border-slate-100 ml-5 my-0.5 animate-in slide-in-from-top-1">
+                      {item.subItems.map((sub) => {
+                        const isSubActive = pathname === sub.href || pathname?.startsWith(sub.href);
+                        return (
+                          <Link
+                            key={sub.href}
+                            href={sub.href}
+                            className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-xs transition-all ${
+                              isSubActive
+                                ? 'bg-brand-600 text-white font-bold shadow-sm shadow-brand-500/20'
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium'
+                            }`}
+                          >
+                            <span>{sub.name}</span>
+                            {isSubActive && <ChevronRight className="w-3 h-3 text-white/80" />}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            const href = item.href || '#';
             const isActive =
-              pathname === item.href || (item.href !== '/dashboard' && pathname?.startsWith(item.href));
+              pathname === href || (href !== '/dashboard' && href !== '#' && !!pathname?.startsWith(href));
             return (
               <Link
-                key={item.href}
-                href={item.href}
+                key={item.id}
+                href={href}
                 className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all group ${
                   isActive
                     ? 'bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-md shadow-brand-500/20 font-bold border-l-4 border-magenta-500'
