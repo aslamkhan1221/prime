@@ -151,6 +151,7 @@ export interface InvoiceTemplateConfig {
     signatureName?: string;
     additionalSignature?: boolean;
     showAnnexure?: boolean;
+    upiQrImageUrl?: string;
   };
 
   // Other Details
@@ -163,6 +164,8 @@ export interface InvoiceTemplateConfig {
     defaultTerms: string;
     showBankDetails: boolean;
     showUpiQr: boolean;
+    upiQrImageUrl?: string;
+    upiId?: string;
     showGoogleReview: boolean;
   };
 }
@@ -308,6 +311,7 @@ export const DEFAULT_TEMPLATE_CONFIG: InvoiceTemplateConfig = {
     signatureName: 'Prime Print & Services',
     additionalSignature: false,
     showAnnexure: false,
+    upiQrImageUrl: '',
   },
 
   other: {
@@ -319,6 +323,8 @@ export const DEFAULT_TEMPLATE_CONFIG: InvoiceTemplateConfig = {
     defaultTerms: '1) Bill must be paid within 10 days form the date of receipt.\n2) Any Queries/Corrections will be entertained only within 10 days form the date of Submission of the bill.\nNo Corrections will be entertained thereafter.',
     showBankDetails: true,
     showUpiQr: true,
+    upiQrImageUrl: '',
+    upiId: '',
     showGoogleReview: true,
   },
 };

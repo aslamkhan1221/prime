@@ -28,6 +28,8 @@ import {
   Building,
   Sliders,
   Eye,
+  QrCode,
+  Trash2,
 } from 'lucide-react';
 import {
   InvoiceTemplateConfig,
@@ -1475,7 +1477,7 @@ export default function TemplateEditorPage() {
                 </div>
               </div>
 
-              {/* Payment Options */}
+              {/* Payment Options & UPI QR Code */}
               <div className="pt-3 space-y-3">
                 <div className="font-bold text-xs text-slate-900">Payment Options</div>
                 <div className="flex items-center justify-between gap-3 text-xs">
@@ -1497,13 +1499,127 @@ export default function TemplateEditorPage() {
                   />
                 </div>
 
-                <Link
-                  href="/settings"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-lg border border-brand-200 transition"
-                >
-                  <Building className="w-3.5 h-3.5" />
-                  <span>⚙ Add your bank details</span>
-                </Link>
+                {/* UPI Payment QR Code Card in Document Summary */}
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={config.other?.showUpiQr}
+                        onChange={(e) => updateConfig('other.showUpiQr', e.target.checked)}
+                        className="rounded text-brand-600 focus:ring-brand-500 w-3.5 h-3.5"
+                      />
+                      <span className="flex items-center gap-1.5">
+                        <QrCode className="w-4 h-4 text-brand-600" />
+                        Show UPI Payment QR Code
+                      </span>
+                    </label>
+                    {(config.other?.upiQrImageUrl || config.documentSummary?.upiQrImageUrl) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateConfig('other.upiQrImageUrl', '');
+                          updateConfig('documentSummary.upiQrImageUrl', '');
+                        }}
+                        className="text-[11px] text-rose-600 hover:text-rose-700 font-semibold flex items-center gap-1 hover:underline"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  {config.other?.showUpiQr && (
+                    <>
+                      {(config.other?.upiQrImageUrl || config.documentSummary?.upiQrImageUrl) ? (
+                        <div className="flex items-center gap-3 bg-white p-2.5 rounded-lg border border-slate-200 shadow-xs">
+                          <div className="w-16 h-16 bg-slate-50 border border-slate-200 rounded-lg p-1 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                            <img
+                              src={config.other?.upiQrImageUrl || config.documentSummary?.upiQrImageUrl}
+                              alt="Uploaded UPI QR Code"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <div className="text-xs font-bold text-slate-800 truncate">
+                              UPI QR Code Uploaded
+                            </div>
+                            <div className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                              <Check className="w-3 h-3" />
+                              Reflecting live on invoice
+                            </div>
+                            <label className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700 cursor-pointer">
+                              <Upload className="w-3 h-3" />
+                              <span>Change QR Image</span>
+                              <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    if (file.size > 2 * 1024 * 1024) {
+                                      alert('File size exceeds 2MB limit');
+                                      return;
+                                    }
+                                    const reader = new FileReader();
+                                    reader.onload = () => {
+                                      const url = reader.result as string;
+                                      updateConfig('other.upiQrImageUrl', url);
+                                      updateConfig('documentSummary.upiQrImageUrl', url);
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      ) : (
+                        <label className="border-2 border-dashed border-slate-300 hover:border-brand-500 hover:bg-brand-50/20 bg-white rounded-xl p-3 flex flex-col items-center justify-center text-center cursor-pointer transition group">
+                          <div className="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center mb-1.5 group-hover:scale-110 transition">
+                            <Upload className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="text-xs font-bold text-slate-800">
+                            Upload UPI QR Code Image
+                          </div>
+                          <div className="text-[10px] text-slate-400">
+                            PNG, JPG, WebP, SVG up to 2MB
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                if (file.size > 2 * 1024 * 1024) {
+                                  alert('File size exceeds 2MB limit');
+                                  return;
+                                }
+                                const reader = new FileReader();
+                                reader.onload = () => {
+                                  const url = reader.result as string;
+                                  updateConfig('other.upiQrImageUrl', url);
+                                  updateConfig('documentSummary.upiQrImageUrl', url);
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
+                    </>
+                  )}
+
+                  <Link
+                    href="/settings"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-lg border border-brand-200 transition"
+                  >
+                    <Building className="w-3.5 h-3.5" />
+                    <span>⚙ Add / Edit Bank Account Details</span>
+                  </Link>
+                </div>
               </div>
 
               {/* Terms & Conditions */}
@@ -1747,15 +1863,144 @@ export default function TemplateEditorPage() {
                   <span>Show Bank Account Details in Invoice</span>
                 </label>
 
-                <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={config.other?.showUpiQr}
-                    onChange={(e) => updateConfig('other.showUpiQr', e.target.checked)}
-                    className="rounded text-brand-600 focus:ring-brand-500 w-4 h-4"
-                  />
-                  <span>Show UPI Payment QR Code</span>
-                </label>
+                {/* UPI QR Code Section with Upload Option */}
+                <div className="space-y-3 pt-3 border-t border-slate-100">
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={config.other?.showUpiQr}
+                      onChange={(e) => {
+                        updateConfig('other.showUpiQr', e.target.checked);
+                      }}
+                      className="rounded text-brand-600 focus:ring-brand-500 w-4 h-4"
+                    />
+                    <span className="flex items-center gap-1.5">
+                      <QrCode className="w-4 h-4 text-brand-600" />
+                      Show UPI Payment QR Code
+                    </span>
+                  </label>
+
+                  {config.other?.showUpiQr && (
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-800">
+                          UPI QR Code Image
+                        </span>
+                        {(config.other?.upiQrImageUrl || config.documentSummary?.upiQrImageUrl) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              updateConfig('other.upiQrImageUrl', '');
+                              updateConfig('documentSummary.upiQrImageUrl', '');
+                            }}
+                            className="text-[11px] text-rose-600 hover:text-rose-700 font-semibold flex items-center gap-1 hover:underline"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Remove
+                          </button>
+                        )}
+                      </div>
+
+                      {(config.other?.upiQrImageUrl || config.documentSummary?.upiQrImageUrl) ? (
+                        <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-200 shadow-xs">
+                          <div className="w-20 h-20 bg-slate-50 border border-slate-200 rounded-lg p-1 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                            <img
+                              src={config.other?.upiQrImageUrl || config.documentSummary?.upiQrImageUrl}
+                              alt="Uploaded UPI QR Code"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <div className="text-xs font-bold text-slate-800 truncate">
+                              QR Code Uploaded
+                            </div>
+                            <div className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                              <Check className="w-3 h-3" />
+                              Reflecting live on invoice
+                            </div>
+                            <label className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700 cursor-pointer pt-1">
+                              <Upload className="w-3.5 h-3.5" />
+                              <span>Change QR Image</span>
+                              <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    if (file.size > 2 * 1024 * 1024) {
+                                      alert('File size exceeds 2MB limit');
+                                      return;
+                                    }
+                                    const reader = new FileReader();
+                                    reader.onload = () => {
+                                      const url = reader.result as string;
+                                      updateConfig('other.upiQrImageUrl', url);
+                                      updateConfig('documentSummary.upiQrImageUrl', url);
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      ) : (
+                        <label className="border-2 border-dashed border-slate-300 hover:border-brand-500 hover:bg-brand-50/20 bg-white rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition group">
+                          <div className="w-9 h-9 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center mb-2 group-hover:scale-110 transition">
+                            <Upload className="w-4 h-4" />
+                          </div>
+                          <div className="text-xs font-bold text-slate-800">
+                            Upload UPI QR Code Image
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">
+                            PNG, JPG, WebP, SVG up to 2MB
+                          </div>
+                          <div className="text-[10px] text-brand-600 font-medium mt-1">
+                            GPay, PhonePe, Paytm, BHIM or Bank QR
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                if (file.size > 2 * 1024 * 1024) {
+                                  alert('File size exceeds 2MB limit');
+                                  return;
+                                }
+                                const reader = new FileReader();
+                                reader.onload = () => {
+                                  const url = reader.result as string;
+                                  updateConfig('other.upiQrImageUrl', url);
+                                  updateConfig('documentSummary.upiQrImageUrl', url);
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
+
+                      {/* Optional UPI ID text */}
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          UPI ID / VPA (Optional display text)
+                        </label>
+                        <input
+                          type="text"
+                          value={config.other?.upiId || ''}
+                          onChange={(e) => {
+                            updateConfig('other.upiId', e.target.value);
+                          }}
+                          placeholder="e.g. yourbusiness@okhdfcbank"
+                          className="w-full px-3 py-1.5 text-xs font-mono border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 bg-white text-slate-800"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}

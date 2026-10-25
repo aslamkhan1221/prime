@@ -802,13 +802,26 @@ export function TemplateInvoicePreview({
                     )}
 
                     {config.other?.showUpiQr && (
-                      <div className="flex flex-col items-center pl-2">
-                        <div className="w-16 h-16 bg-white p-1 border border-slate-300 rounded flex items-center justify-center">
-                          <QrCode className="w-14 h-14 text-slate-800" />
+                      <div className="flex flex-col items-center pl-2 shrink-0">
+                        <div className="w-16 h-16 bg-white p-1 border border-slate-300 rounded flex items-center justify-center overflow-hidden shadow-xs">
+                          {config.other?.upiQrImageUrl || config.documentSummary?.upiQrImageUrl ? (
+                            <img
+                              src={config.other?.upiQrImageUrl || config.documentSummary?.upiQrImageUrl}
+                              alt="UPI QR Code"
+                              className="w-full h-full object-contain"
+                            />
+                          ) : (
+                            <QrCode className="w-14 h-14 text-slate-800" />
+                          )}
                         </div>
-                        <span className="text-[7.5pt] font-semibold text-slate-600 mt-0.5">
+                        <span className="text-[7.5pt] font-semibold text-slate-600 mt-0.5 text-center leading-tight">
                           Scan to Pay UPI
                         </span>
+                        {(config.other?.upiId || comp.upiId) && (
+                          <span className="text-[6.5pt] text-slate-500 font-mono mt-0.5 text-center max-w-[90px] truncate">
+                            {config.other?.upiId || comp.upiId}
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
