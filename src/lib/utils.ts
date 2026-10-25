@@ -96,3 +96,69 @@ export const ITEM_CATEGORIES = [
   "Photography & Vector Art",
   "Custom Printing & Fabrication"
 ];
+
+export function numberToWords(amount: number): string {
+  if (isNaN(amount) || amount === 0) return 'Indian Rupee Zero Only';
+
+  const ones = [
+    '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+    'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
+  ];
+  const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+  function convertTwoDigits(num: number): string {
+    if (num === 0) return '';
+    if (num < 20) return ones[num];
+    const ten = Math.floor(num / 10);
+    const unit = num % 10;
+    return `${tens[ten]}${unit > 0 ? ' ' + ones[unit] : ''}`;
+  }
+
+  function convertThreeDigits(num: number): string {
+    const hundred = Math.floor(num / 100);
+    const rest = num % 100;
+    let res = '';
+    if (hundred > 0) {
+      res += `${ones[hundred]} Hundred`;
+      if (rest > 0) res += ' ';
+    }
+    if (rest > 0) {
+      res += convertTwoDigits(rest);
+    }
+    return res;
+  }
+
+  const integerPart = Math.floor(Math.abs(amount));
+  const decimalPart = Math.round((Math.abs(amount) - integerPart) * 100);
+
+  let crore = Math.floor(integerPart / 10000000);
+  let lakh = Math.floor((integerPart % 10000000) / 100000);
+  let thousand = Math.floor((integerPart % 100000) / 1000);
+  let hundred = integerPart % 1000;
+
+  let words = '';
+
+  if (crore > 0) {
+    words += `${convertTwoDigits(crore)} Crore `;
+  }
+  if (lakh > 0) {
+    words += `${convertTwoDigits(lakh)} Lakh `;
+  }
+  if (thousand > 0) {
+    words += `${convertTwoDigits(thousand)} Thousand `;
+  }
+  if (hundred > 0) {
+    words += `${convertThreeDigits(hundred)} `;
+  }
+
+  words = words.trim();
+  if (!words) words = 'Zero';
+
+  let result = `Indian Rupee ${words}`;
+  if (decimalPart > 0) {
+    result += ` and ${convertTwoDigits(decimalPart)} Paise`;
+  }
+  result += ' Only';
+
+  return result;
+}

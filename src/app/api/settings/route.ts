@@ -59,11 +59,15 @@ export async function PUT(req: NextRequest) {
         bankIfsc: body.bankIfsc,
         bankName: body.bankName,
         bankBranch: body.bankBranch,
+        companyId: body.companyId || 'GDS',
+        reviewUrl: body.reviewUrl || 'https://g.page/r/CfUhh8jFFKjlEAo/review',
         upiId: body.upiId,
       },
       create: {
         id: 'default',
-        companyName: body.companyName || 'PixelCraft Design Studio',
+        companyName: body.companyName || 'Graphicon Design Studio (New)',
+        companyId: body.companyId || 'GDS',
+        reviewUrl: body.reviewUrl || 'https://g.page/r/CfUhh8jFFKjlEAo/review',
         ...body,
       },
     });

@@ -206,6 +206,14 @@ const statements = [
   `CREATE UNIQUE INDEX IF NOT EXISTS "Order_orderNumber_key" ON "Order"("orderNumber");`,
   `CREATE UNIQUE INDEX IF NOT EXISTS "Invoice_invoiceNumber_key" ON "Invoice"("invoiceNumber");`,
   `CREATE UNIQUE INDEX IF NOT EXISTS "Payment_paymentNumber_key" ON "Payment"("paymentNumber");`,
+
+  // Alter statements for newly added columns (safely ignored if already existing)
+  `ALTER TABLE "Item" ADD COLUMN "salesAccount" TEXT DEFAULT 'Sales';`,
+  `ALTER TABLE "Item" ADD COLUMN "purchaseAccount" TEXT DEFAULT 'Cost of Goods Sold';`,
+  `ALTER TABLE "Item" ADD COLUMN "purchaseDescription" TEXT;`,
+  `ALTER TABLE "Item" ADD COLUMN "preferredVendor" TEXT;`,
+  `ALTER TABLE "CompanySetting" ADD COLUMN "companyId" TEXT DEFAULT 'GDS';`,
+  `ALTER TABLE "CompanySetting" ADD COLUMN "reviewUrl" TEXT DEFAULT 'https://g.page/r/CfUhh8jFFKjlEAo/review';`,
 ];
 
 async function syncTurso() {
@@ -217,7 +225,9 @@ async function syncTurso() {
     try {
       await client.execute(statement);
     } catch (e) {
-      console.error('Error applying statement:', statement, e);
+      if (!e?.message?.includes('duplicate column name') && !e?.cause?.message?.includes('duplicate column name')) {
+        console.warn('Notice applying statement:', e.message);
+      }
     }
   }
 
@@ -250,10 +260,125 @@ async function syncTurso() {
 
   if (existingCompany.rows.length === 0) {
     await client.execute({
-      sql: 'INSERT INTO "CompanySetting" (id, companyName, createdAt, updatedAt) VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
-      args: ['default', 'Prime Sublimation'],
+      sql: `INSERT INTO "CompanySetting" (
+        id, companyName, companyId, address, phone, email, website, gstin, pan, invoiceTerms,
+        reviewUrl, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+      args: [
+        'default',
+        'Graphicon Design Studio (New)',
+        'GDS',
+        '23/41/1068, Vaishali Nagar, Jaswantsingpura,\nCIDCO N-8, Azad Chowk to TV Center Road\nAurangabad Maharashtra 431001\nIndia',
+        '+91 98765 43210',
+        'mail@graphicon.in',
+        'https://graphicon.in/',
+        '27AAAAA0000A1Z5',
+        'AAAAA0000A',
+        '1) Bill must be paid within 10 days form the date of receipt.\n2) Any Queries/Corrections will be entertained only within 10 days form the date of Submission of the bill\nNo Corrections will be entertained thereafter.',
+        'https://g.page/r/CfUhh8jFFKjlEAo/review',
+      ],
     });
-    console.log('Created default CompanySetting on Turso');
+    console.log('Created default Graphicon Design Studio CompanySetting on Turso');
+  } else {
+    await client.execute({
+      sql: `UPDATE "CompanySetting" SET 
+        companyName = ?, companyId = ?, address = ?, email = ?, website = ?, invoiceTerms = ?, reviewUrl = ?
+        WHERE id = ?`,
+      args: [
+        'Graphicon Design Studio (New)',
+        'GDS',
+        '23/41/1068, Vaishali Nagar, Jaswantsingpura,\nCIDCO N-8, Azad Chowk to TV Center Road\nAurangabad Maharashtra 431001\nIndia',
+        'mail@graphicon.in',
+        'https://graphicon.in/',
+        '1) Bill must be paid within 10 days form the date of receipt.\n2) Any Queries/Corrections will be entertained only within 10 days form the date of Submission of the bill\nNo Corrections will be entertained thereafter.',
+        'https://g.page/r/CfUhh8jFFKjlEAo/review',
+        'default',
+      ],
+    });
+    console.log('Updated CompanySetting to Graphicon Design Studio (New) on Turso');
+  }
+
+  // Seed initial sample items from invoice PDF if Item table has fewer than 2 items
+  const itemCount = await client.execute('SELECT COUNT(*) as count FROM "Item"');
+  const count = Number(itemCount.rows[0]?.count) || 0;
+  if (count === 0) {
+    const sampleItems = [
+      {
+        id: 'item_flex_star',
+        name: 'Flex Star with Frame',
+        description: 'Size : 3 x 5ft\nFlex Type : Star\nPrinting Type : Solvent, Fine Quality.\nFrame Type : 0.75 in MS Frame\nWith Mounting',
+        itemType: 'GOODS',
+        unit: 'Sq ft',
+        price: 60.0,
+        costPrice: 40.0,
+        salesAccount: 'Sales',
+        purchaseAccount: 'Cost of Goods Sold',
+      },
+      {
+        id: 'item_graphic_design',
+        name: 'Graphic Designing Charges',
+        description: 'Product Lebal Design',
+        itemType: 'SERVICE',
+        unit: 'pcs',
+        price: 250.0,
+        costPrice: 100.0,
+        salesAccount: 'Design Revenue',
+        purchaseAccount: 'Cost of Goods Sold',
+      },
+      {
+        id: 'item_flex_printing',
+        name: 'Flex star Printing',
+        description: 'Size : 10 X 3ft\nFlex Type : Star\nPrinting Type : Solvent, Fine Quality.',
+        itemType: 'GOODS',
+        unit: 'Sq ft',
+        price: 30.0,
+        costPrice: 18.0,
+        salesAccount: 'Printing Revenue',
+        purchaseAccount: 'Cost of Goods Sold',
+      },
+      {
+        id: 'item_vinyl_foam',
+        name: 'Vinyl With 5mm Foam Sheet',
+        description: 'Size : 2 x 3ft\nMedia Type : Self Adhisive Vinyl\nPrinting Type : Eco-Solvent\nLamination Type : Matt / Gloss\nFoam Thikness : 5 mm',
+        itemType: 'GOODS',
+        unit: 'Sq ft',
+        price: 140.0,
+        costPrice: 95.0,
+        salesAccount: 'Sales',
+        purchaseAccount: 'Raw Materials',
+      },
+      {
+        id: 'item_social_media',
+        name: 'Social Media Post Design',
+        description: 'Invitation Post Design',
+        itemType: 'SERVICE',
+        unit: 'pcs',
+        price: 300.0,
+        costPrice: 120.0,
+        salesAccount: 'Design Revenue',
+        purchaseAccount: 'Cost of Goods Sold',
+      },
+    ];
+
+    for (const it of sampleItems) {
+      await client.execute({
+        sql: `INSERT OR REPLACE INTO "Item" (
+          id, name, description, itemType, unit, price, costPrice, salesAccount, purchaseAccount, isActive, createdAt, updatedAt
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+        args: [
+          it.id,
+          it.name,
+          it.description,
+          it.itemType,
+          it.unit,
+          it.price,
+          it.costPrice,
+          it.salesAccount,
+          it.purchaseAccount,
+        ],
+      });
+    }
+    console.log('Seeded sample items from invoice PDF into Turso database');
   }
 
   console.log('Turso synchronization complete!');

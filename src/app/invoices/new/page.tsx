@@ -390,7 +390,14 @@ function NewInvoiceContent() {
                         placeholder="Item / Service Name *"
                         value={row.name}
                         onChange={(e) => updateItemField(idx, 'name', e.target.value)}
-                        className="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white font-medium focus:border-brand-500"
+                        className="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white font-medium focus:border-brand-500 mb-1.5"
+                      />
+                      <textarea
+                        rows={2}
+                        placeholder="Item specifications (e.g. Size : 3 x 5ft, Flex Type : Star, Printing Type : Solvent)..."
+                        value={row.description || ''}
+                        onChange={(e) => updateItemField(idx, 'description', e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-300 placeholder-slate-500 focus:border-brand-500"
                       />
                     </div>
 

@@ -5,7 +5,7 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { Header } from '@/components/Header';
 import { useToast } from '@/components/Toast';
 import { ConfirmModal } from '@/components/ConfirmModal';
-import { formatCurrency, UNIT_OPTIONS, ITEM_CATEGORIES } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 import {
   Package,
   Search,
@@ -13,45 +13,83 @@ import {
   Edit2,
   Trash2,
   X,
-  PlusCircle,
-  List,
+  Info,
+  HelpCircle,
+  Check,
+  ShoppingBag,
+  Layers,
 } from 'lucide-react';
+
+const STANDARD_UNITS = [
+  { value: 'pcs', label: 'pcs (Pieces)' },
+  { value: 'Sq ft', label: 'Sq ft (Square Feet)' },
+  { value: 'sq m', label: 'sq m (Square Meter)' },
+  { value: 'box', label: 'box (Box)' },
+  { value: 'roll', label: 'roll (Roll)' },
+  { value: 'cm', label: 'cm (Centimeter)' },
+  { value: 'mm', label: 'mm (Millimeter)' },
+  { value: 'inch', label: 'inch (Inch)' },
+  { value: 'ft', label: 'ft (Foot)' },
+  { value: 'm', label: 'm (Meter)' },
+  { value: 'kg', label: 'kg (Kilogram)' },
+  { value: 'hour', label: 'hour (Hour)' },
+  { value: 'day', label: 'day (Day)' },
+];
+
+const SALES_ACCOUNTS = [
+  'Sales',
+  'General Income',
+  'Design Revenue',
+  'Printing Revenue',
+  'Advertising Sales',
+  'Other Charges',
+];
+
+const PURCHASE_ACCOUNTS = [
+  'Cost of Goods Sold',
+  'Raw Materials',
+  'Printing Media & Vinyls',
+  'Ink & Consumables',
+  'Hardware & Equipment',
+  'Job Work Charges',
+  'Operating Expenses',
+];
 
 export default function ItemsPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [typeFilter, setTypeFilter] = useState('ALL');
-
-  // Dynamic Categories and Types
-  const [categories, setCategories] = useState<string[]>(ITEM_CATEGORIES);
-  const [itemTypes, setItemTypes] = useState<string[]>(['SERVICE', 'PRODUCT']);
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [saving, setSaving] = useState(false);
 
-  // Custom Category & Type Modes in Form
-  const [customCategoryMode, setCustomCategoryMode] = useState(false);
-  const [customCategoryInput, setCustomCategoryInput] = useState('');
+  // Custom Unit Entry Mode
+  const [customUnitMode, setCustomUnitMode] = useState(false);
+  const [customUnitInput, setCustomUnitInput] = useState('');
 
-  const [customTypeMode, setCustomTypeMode] = useState(false);
-  const [customTypeInput, setCustomTypeInput] = useState('');
-
-  // Form State
+  // Form State matching screenshot
   const [formData, setFormData] = useState({
     name: '',
-    sku: '',
-    description: '',
-    category: 'Branding & Logo Design',
-    itemType: 'SERVICE',
-    price: 0,
-    costPrice: 0,
-    taxRate: 18,
-    unit: 'PIECE',
+    itemType: 'GOODS', // 'GOODS' | 'SERVICE'
+    unit: 'pcs',
     customUnit: '',
+    // Sales Information
+    enableSales: true,
+    price: 0,
+    salesAccount: 'Sales',
+    description: '',
+    // Purchase Information
+    enablePurchase: true,
+    costPrice: 0,
+    purchaseAccount: 'Cost of Goods Sold',
+    purchaseDescription: '',
+    preferredVendor: '',
+    // Auxiliary
+    category: 'General',
+    taxRate: 18,
     isActive: true,
   });
 
@@ -65,24 +103,14 @@ export default function ItemsPage() {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const url = `/api/items?search=${encodeURIComponent(search)}&category=${categoryFilter}&itemType=${typeFilter}`;
+      const url = `/api/items?search=${encodeURIComponent(search)}${
+        typeFilter !== 'ALL' ? `&itemType=${typeFilter}` : ''
+      }`;
       const res = await fetch(url);
       const data = await res.json();
-      const fetchedItems = data.items || [];
-      setItems(fetchedItems);
-
-      // Dynamically extract categories & item types from existing items
-      const dbCategories = Array.from(
-        new Set(fetchedItems.map((it: any) => it.category).filter(Boolean))
-      ) as string[];
-      setCategories((prev) => Array.from(new Set([...prev, ...dbCategories])));
-
-      const dbTypes = Array.from(
-        new Set(fetchedItems.map((it: any) => it.itemType).filter(Boolean))
-      ) as string[];
-      setItemTypes((prev) => Array.from(new Set([...prev, ...dbTypes])));
+      setItems(data.items || []);
     } catch {
-      error('Failed to load catalog items');
+      error('Failed to load items catalog');
     } finally {
       setLoading(false);
     }
@@ -90,7 +118,7 @@ export default function ItemsPage() {
 
   useEffect(() => {
     fetchItems();
-  }, [categoryFilter, typeFilter]);
+  }, [typeFilter]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,21 +127,24 @@ export default function ItemsPage() {
 
   const openAddModal = () => {
     setEditingItem(null);
-    setCustomCategoryMode(false);
-    setCustomCategoryInput('');
-    setCustomTypeMode(false);
-    setCustomTypeInput('');
+    setCustomUnitMode(false);
+    setCustomUnitInput('');
     setFormData({
       name: '',
-      sku: '',
-      description: '',
-      category: categories[0] || 'Branding & Logo Design',
-      itemType: itemTypes[0] || 'SERVICE',
-      price: 0,
-      costPrice: 0,
-      taxRate: 18,
-      unit: 'PIECE',
+      itemType: 'GOODS',
+      unit: 'pcs',
       customUnit: '',
+      enableSales: true,
+      price: 0,
+      salesAccount: 'Sales',
+      description: '',
+      enablePurchase: true,
+      costPrice: 0,
+      purchaseAccount: 'Cost of Goods Sold',
+      purchaseDescription: '',
+      preferredVendor: '',
+      category: 'General',
+      taxRate: 18,
       isActive: true,
     });
     setModalOpen(true);
@@ -121,56 +152,29 @@ export default function ItemsPage() {
 
   const openEditModal = (item: any) => {
     setEditingItem(item);
-    setCustomCategoryMode(false);
-    setCustomCategoryInput('');
-    setCustomTypeMode(false);
-    setCustomTypeInput('');
-
-    if (item.category && !categories.includes(item.category)) {
-      setCategories((prev) => [...prev, item.category]);
-    }
-    if (item.itemType && !itemTypes.includes(item.itemType)) {
-      setItemTypes((prev) => [...prev, item.itemType]);
-    }
+    const isCustom = !STANDARD_UNITS.some((u) => u.value.toLowerCase() === (item.unit || '').toLowerCase());
+    setCustomUnitMode(isCustom && Boolean(item.unit && item.unit !== 'pcs'));
+    setCustomUnitInput(isCustom ? item.unit || '' : '');
 
     setFormData({
       name: item.name || '',
-      sku: item.sku || '',
-      description: item.description || '',
-      category: item.category || categories[0] || 'Branding & Logo Design',
-      itemType: item.itemType || itemTypes[0] || 'SERVICE',
+      itemType: (item.itemType || 'GOODS').toUpperCase() === 'SERVICE' ? 'SERVICE' : 'GOODS',
+      unit: isCustom ? '__CUSTOM__' : item.unit || 'pcs',
+      customUnit: item.customUnit || (isCustom ? item.unit : ''),
+      enableSales: item.price !== undefined && item.price !== null,
       price: item.price || 0,
+      salesAccount: item.salesAccount || 'Sales',
+      description: item.description || '',
+      enablePurchase: Boolean(item.costPrice !== undefined && item.costPrice !== null),
       costPrice: item.costPrice || 0,
+      purchaseAccount: item.purchaseAccount || 'Cost of Goods Sold',
+      purchaseDescription: item.purchaseDescription || item.description || '',
+      preferredVendor: item.preferredVendor || '',
+      category: item.category || 'General',
       taxRate: item.taxRate ?? 18,
-      unit: item.unit || 'PIECE',
-      customUnit: item.customUnit || '',
       isActive: item.isActive !== undefined ? item.isActive : true,
     });
     setModalOpen(true);
-  };
-
-  const handleAddCustomCategory = () => {
-    const trimmed = customCategoryInput.trim();
-    if (!trimmed) return;
-    if (!categories.includes(trimmed)) {
-      setCategories((prev) => [...prev, trimmed]);
-    }
-    setFormData((prev) => ({ ...prev, category: trimmed }));
-    setCustomCategoryMode(false);
-    setCustomCategoryInput('');
-    success(`Category "${trimmed}" added to dropdown list`);
-  };
-
-  const handleAddCustomType = () => {
-    const trimmed = customTypeInput.trim().toUpperCase();
-    if (!trimmed) return;
-    if (!itemTypes.includes(trimmed)) {
-      setItemTypes((prev) => [...prev, trimmed]);
-    }
-    setFormData((prev) => ({ ...prev, itemType: trimmed }));
-    setCustomTypeMode(false);
-    setCustomTypeInput('');
-    success(`Item Type "${trimmed}" added to dropdown list`);
   };
 
   const handleSaveItem = async (e: React.FormEvent) => {
@@ -180,28 +184,26 @@ export default function ItemsPage() {
       return;
     }
 
-    // Auto-apply custom category/type if user typed in input but didn't click add button
-    let finalCategory = formData.category;
-    if (customCategoryMode && customCategoryInput.trim()) {
-      finalCategory = customCategoryInput.trim();
-      if (!categories.includes(finalCategory)) {
-        setCategories((prev) => [...prev, finalCategory]);
-      }
-    }
-
-    let finalItemType = formData.itemType;
-    if (customTypeMode && customTypeInput.trim()) {
-      finalItemType = customTypeInput.trim().toUpperCase();
-      if (!itemTypes.includes(finalItemType)) {
-        setItemTypes((prev) => [...prev, finalItemType]);
-      }
+    let finalUnit = formData.unit;
+    if (formData.unit === '__CUSTOM__' || customUnitMode) {
+      finalUnit = customUnitInput.trim() || formData.customUnit?.trim() || 'pcs';
     }
 
     const payload = {
-      ...formData,
-      category: finalCategory,
-      itemType: finalItemType,
-      costPrice: formData.price, // ensure valid numeric value
+      name: formData.name.trim(),
+      itemType: formData.itemType,
+      unit: finalUnit,
+      customUnit: finalUnit,
+      price: formData.enableSales ? Number(formData.price) || 0 : 0,
+      salesAccount: formData.salesAccount || 'Sales',
+      description: formData.description?.trim() || '',
+      costPrice: formData.enablePurchase ? Number(formData.costPrice) || 0 : 0,
+      purchaseAccount: formData.purchaseAccount || 'Cost of Goods Sold',
+      purchaseDescription: formData.purchaseDescription?.trim() || '',
+      preferredVendor: formData.preferredVendor?.trim() || '',
+      taxRate: Number(formData.taxRate) ?? 18,
+      category: formData.itemType === 'SERVICE' ? 'Graphic Design' : 'Print Media',
+      isActive: formData.isActive,
     };
 
     setSaving(true);
@@ -255,464 +257,464 @@ export default function ItemsPage() {
     <DashboardLayout>
       <div className="space-y-6">
         <Header
-          title="Items, Products & Graphic Services"
-          subtitle="Manage design services, banner printing, vinyl signage, and measurement units"
-          actionText="Add New Item / Service"
+          title="Items & Services"
+          subtitle="Manage goods, print media, substrates, and design services"
+          actionText="New Item"
           onActionClick={openAddModal}
           actionIcon={<Plus className="w-4 h-4" />}
         />
 
-        {/* Filter & Search Bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-          <form onSubmit={handleSearchSubmit} className="relative w-full md:w-80">
+        {/* Search & Filter Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+          <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-80">
             <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search items, SKU, category..."
+              placeholder="Search items by name, vendor, description..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+              className="w-full pl-10 pr-4 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition"
             />
           </form>
 
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
-            >
-              <option value="ALL">All Categories</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
             >
               <option value="ALL">All Types</option>
-              {itemTypes.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
+              <option value="GOODS">Goods (Products)</option>
+              <option value="SERVICE">Services</option>
             </select>
           </div>
         </div>
 
-        {/* Items Grid / Table */}
-        <div className="bg-slate-900/80 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+        {/* Items Table */}
+        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-slate-950/60 border-b border-slate-800 text-slate-400 font-bold uppercase text-[10px]">
-                  <th className="py-3.5 px-4">Item Name / Code</th>
-                  <th className="py-3.5 px-4">Category & Type</th>
-                  <th className="py-3.5 px-4">Billing Unit</th>
-                  <th className="py-3.5 px-4 text-right">Rate</th>
-                  <th className="py-3.5 px-4 text-center">GST %</th>
-                  <th className="py-3.5 px-4 text-center">Status</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
+                <tr className="bg-slate-950/60 border-b border-slate-800 text-slate-400 font-bold uppercase text-[10px] tracking-wider">
+                  <th className="py-3 px-4">Name</th>
+                  <th className="py-3 px-4">Type</th>
+                  <th className="py-3 px-4">Unit</th>
+                  <th className="py-3 px-4 text-right">Selling Price</th>
+                  <th className="py-3 px-4 text-right">Cost Price</th>
+                  <th className="py-3 px-4">Account</th>
+                  <th className="py-3 px-4 text-center">Status</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-slate-800/60 text-slate-200">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-500">
-                      Loading catalog items...
+                    <td colSpan={8} className="py-12 text-center text-slate-500">
+                      <div className="inline-block w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-2" />
+                      <div>Loading catalog items...</div>
                     </td>
                   </tr>
-                ) : items.length > 0 ? (
-                  items.map((it) => (
-                    <tr key={it.id} className="hover:bg-slate-800/30 transition group">
-                      <td className="py-3.5 px-4">
-                        <div className="font-bold text-white text-sm">{it.name}</div>
-                        <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
-                          {it.sku && <span className="font-mono text-brand-400 font-semibold">{it.sku}</span>}
-                          {it.description && <span className="truncate max-w-xs">{it.description}</span>}
-                        </div>
+                ) : items.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-12 text-center text-slate-500">
+                      <Package className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                      <p className="font-semibold text-slate-400">No items found</p>
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        Click &quot;New Item&quot; to add your first product or service.
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  items.map((item) => (
+                    <tr key={item.id} className="hover:bg-slate-800/40 transition">
+                      <td className="py-3 px-4">
+                        <div className="font-bold text-white text-sm">{item.name}</div>
+                        {item.description && (
+                          <div className="text-[11px] text-slate-400 line-clamp-1 max-w-xs mt-0.5 whitespace-pre-line">
+                            {item.description}
+                          </div>
+                        )}
                       </td>
-                      <td className="py-3.5 px-4">
-                        <div className="text-slate-300 font-medium">{it.category}</div>
+                      <td className="py-3 px-4">
                         <span
-                          className={`inline-block text-[9px] font-bold px-1.5 py-0.5 rounded mt-0.5 ${
-                            it.itemType === 'SERVICE'
-                              ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                              : it.itemType === 'PRODUCT'
-                              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                              : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                            (item.itemType || 'GOODS').toUpperCase() === 'SERVICE'
+                              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                              : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                           }`}
                         >
-                          {it.itemType}
+                          {(item.itemType || 'GOODS').toUpperCase() === 'SERVICE' ? 'Service' : 'Goods'}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 font-medium text-slate-300">
-                        {it.unit === 'CUSTOM' ? it.customUnit || 'Custom' : it.unit?.replace('_', ' ')}
+                      <td className="py-3 px-4 font-mono text-slate-300">{item.unit || 'pcs'}</td>
+                      <td className="py-3 px-4 text-right font-mono font-bold text-emerald-400">
+                        {formatCurrency(item.price || 0, '₹')}
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono font-bold text-white text-sm">
-                        {formatCurrency(it.price)}
+                      <td className="py-3 px-4 text-right font-mono text-slate-400">
+                        {formatCurrency(item.costPrice || 0, '₹')}
                       </td>
-                      <td className="py-3.5 px-4 text-center font-semibold text-slate-300">
-                        {it.taxRate}%
+                      <td className="py-3 px-4 text-slate-400 text-[11px]">
+                        <div>{item.salesAccount || 'Sales'}</div>
+                        {item.preferredVendor && (
+                          <div className="text-[10px] text-slate-500">Vendor: {item.preferredVendor}</div>
+                        )}
                       </td>
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3 px-4 text-center">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            it.isActive
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                              : 'bg-slate-800 text-slate-400'
+                          className={`inline-block w-2 h-2 rounded-full ${
+                            item.isActive !== false ? 'bg-emerald-400' : 'bg-slate-500'
                           }`}
-                        >
-                          {it.isActive ? 'Active' : 'Inactive'}
-                        </span>
+                        />
                       </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => openEditModal(it)}
-                            title="Edit Item"
-                            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setItemToDelete(it);
-                              setDeleteConfirmOpen(true);
-                            }}
-                            title="Delete Item"
-                            className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                      <td className="py-3 px-4 text-right space-x-2">
+                        <button
+                          onClick={() => openEditModal(item)}
+                          className="p-1.5 text-slate-400 hover:text-brand-400 hover:bg-slate-800 rounded-lg transition"
+                          title="Edit Item"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setItemToDelete(item);
+                            setDeleteConfirmOpen(true);
+                          }}
+                          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition"
+                          title="Delete Item"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </td>
                     </tr>
                   ))
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-500">
-                      No items found. Click &quot;Add New Item / Service&quot; to populate your catalog.
-                    </td>
-                  </tr>
                 )}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Add / Edit Item Modal */}
+        {/* New / Edit Item Modal matching user reference screenshot */}
         {modalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-            <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
-              <div className="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-950/40">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-brand-500/10 text-brand-400 border border-brand-500/20">
-                    <Package className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white">
-                      {editingItem ? 'Edit Item / Service' : 'Add New Item / Service'}
-                    </h3>
-                    <p className="text-xs text-slate-400">Configure rate, measurement units, categories, and item types</p>
-                  </div>
-                </div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto bg-black/75 backdrop-blur-sm animate-fadeIn">
+            <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden my-8">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/90 sticky top-0 z-10">
+                <h3 className="text-lg font-bold text-white">
+                  {editingItem ? 'Edit Item' : 'New Item'}
+                </h3>
                 <button
+                  type="button"
                   onClick={() => setModalOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-white bg-slate-800 rounded-xl"
+                  className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSaveItem} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Item Name */}
+              <form onSubmit={handleSaveItem} className="p-6 space-y-6 max-h-[calc(88vh-80px)] overflow-y-auto">
+                {/* Info Callout Banner matching user screenshot */}
+                <div className="flex items-start gap-3 p-4 bg-sky-950/40 border border-sky-800/60 rounded-xl text-sky-200 text-xs leading-relaxed">
+                  <div className="w-5 h-5 rounded-full bg-sky-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                    <Info className="w-3.5 h-3.5" />
+                  </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Item / Service Name *
+                    <strong className="block text-sky-100 font-semibold mb-0.5">
+                      Do you want to keep track of this item?
+                    </strong>
+                    <span className="text-sky-300/90 text-[11px]">
+                      Enable Inventory to view its stock based on the sales and purchase transactions you record for it. Go to{' '}
+                      <span className="italic font-medium text-white">Settings &gt; Preferences &gt; Items</span> and enable inventory.
+                    </span>
+                  </div>
+                </div>
+
+                {/* Primary Item Attributes: Name, Type, Unit */}
+                <div className="space-y-4">
+                  {/* Name* */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                    <label className="sm:w-28 text-xs font-semibold text-rose-400">
+                      Name*
                     </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. Flex Banner Print, Logo Design"
-                      className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
-                    />
-                  </div>
-
-                  {/* SKU / Item Code */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      SKU / Item Code
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.sku}
-                      onChange={(e) => setFormData({ ...formData, sku: e.target.value.toUpperCase() })}
-                      placeholder="e.g. BAN-FLEX-01"
-                      className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white uppercase placeholder-slate-500 focus:outline-none focus:border-brand-500"
-                    />
-                  </div>
-
-                  {/* Category Selection with Custom Add / Manual Entry */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-semibold text-slate-300">
-                        Category
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCustomCategoryMode(!customCategoryMode);
-                          if (!customCategoryMode) setCustomCategoryInput('');
-                        }}
-                        className="text-[11px] font-semibold text-brand-400 hover:text-brand-300 flex items-center gap-1"
-                      >
-                        {customCategoryMode ? (
-                          <>
-                            <List className="w-3 h-3" /> Select from List
-                          </>
-                        ) : (
-                          <>
-                            <PlusCircle className="w-3 h-3" /> + Custom / Manual
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    {customCategoryMode ? (
-                      <div className="flex gap-1.5">
-                        <input
-                          type="text"
-                          value={customCategoryInput}
-                          onChange={(e) => setCustomCategoryInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleAddCustomCategory();
-                            }
-                          }}
-                          placeholder="Enter custom category name..."
-                          className="flex-1 px-3 py-2 bg-slate-800 border border-brand-500/50 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAddCustomCategory}
-                          className="px-3 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shrink-0"
-                        >
-                          Add
-                        </button>
-                      </div>
-                    ) : (
-                      <select
-                        value={formData.category}
-                        onChange={(e) => {
-                          if (e.target.value === '__ADD_CUSTOM__') {
-                            setCustomCategoryMode(true);
-                            setCustomCategoryInput('');
-                          } else {
-                            setFormData({ ...formData, category: e.target.value });
-                          }
-                        }}
-                        className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
-                      >
-                        {categories.map((cat) => (
-                          <option key={cat} value={cat}>
-                            {cat}
-                          </option>
-                        ))}
-                        <option value="__ADD_CUSTOM__" className="text-brand-400 font-bold">
-                          + Add Custom Category / Enter Manually...
-                        </option>
-                      </select>
-                    )}
-                  </div>
-
-                  {/* Item Type Selection with Custom Add / Manual Entry */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-semibold text-slate-300">
-                        Item Type
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCustomTypeMode(!customTypeMode);
-                          if (!customTypeMode) setCustomTypeInput('');
-                        }}
-                        className="text-[11px] font-semibold text-brand-400 hover:text-brand-300 flex items-center gap-1"
-                      >
-                        {customTypeMode ? (
-                          <>
-                            <List className="w-3 h-3" /> Select from List
-                          </>
-                        ) : (
-                          <>
-                            <PlusCircle className="w-3 h-3" /> + Custom / Manual
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    {customTypeMode ? (
-                      <div className="flex gap-1.5">
-                        <input
-                          type="text"
-                          value={customTypeInput}
-                          onChange={(e) => setCustomTypeInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleAddCustomType();
-                            }
-                          }}
-                          placeholder="Enter custom item type (e.g. RETAINER, MEDIA)..."
-                          className="flex-1 px-3 py-2 bg-slate-800 border border-brand-500/50 rounded-xl text-xs text-white placeholder-slate-500 uppercase focus:outline-none focus:border-brand-500"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAddCustomType}
-                          className="px-3 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shrink-0"
-                        >
-                          Add
-                        </button>
-                      </div>
-                    ) : (
-                      <select
-                        value={formData.itemType}
-                        onChange={(e) => {
-                          if (e.target.value === '__ADD_CUSTOM__') {
-                            setCustomTypeMode(true);
-                            setCustomTypeInput('');
-                          } else {
-                            setFormData({ ...formData, itemType: e.target.value });
-                          }
-                        }}
-                        className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
-                      >
-                        {itemTypes.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
-                          </option>
-                        ))}
-                        <option value="__ADD_CUSTOM__" className="text-brand-400 font-bold">
-                          + Add Custom Type / Enter Manually...
-                        </option>
-                      </select>
-                    )}
-                  </div>
-
-                  {/* Single Rate Field */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Rate (₹) *
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      required
-                      value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                      placeholder="0.00"
-                      className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500 font-mono"
-                    />
-                  </div>
-
-                  {/* Default Measurement Unit */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Default Measurement Unit
-                    </label>
-                    <select
-                      value={formData.unit}
-                      onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
-                    >
-                      {UNIT_OPTIONS.map((u) => (
-                        <option key={u.value} value={u.value}>
-                          {u.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {formData.unit === 'CUSTOM' ? (
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">
-                        Custom Unit Name
-                      </label>
+                    <div className="flex-1 max-w-md">
                       <input
                         type="text"
-                        value={formData.customUnit}
-                        onChange={(e) => setFormData({ ...formData, customUnit: e.target.value })}
-                        placeholder="e.g. Bundle, Roll, Box"
-                        className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="e.g. Flex Star with Frame, Vinyl Print, Logo Design"
+                        className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition"
                       />
                     </div>
-                  ) : (
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">
-                        Default GST / Tax Rate (%)
+                  </div>
+
+                  {/* Type Radio: Goods vs Service */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                    <div className="sm:w-28 flex items-center gap-1 text-xs font-semibold text-slate-300">
+                      <span>Type</span>
+                      <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <label className="flex items-center gap-2 text-xs font-medium text-slate-200 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="itemType"
+                          value="GOODS"
+                          checked={formData.itemType === 'GOODS'}
+                          onChange={() => setFormData({ ...formData, itemType: 'GOODS' })}
+                          className="w-4 h-4 text-brand-500 bg-slate-950 border-slate-700 focus:ring-brand-500"
+                        />
+                        <span>Goods</span>
                       </label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={formData.taxRate}
-                        onChange={(e) => setFormData({ ...formData, taxRate: Number(e.target.value) })}
-                        placeholder="18"
-                        className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
-                      />
+                      <label className="flex items-center gap-2 text-xs font-medium text-slate-200 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="itemType"
+                          value="SERVICE"
+                          checked={formData.itemType === 'SERVICE'}
+                          onChange={() => setFormData({ ...formData, itemType: 'SERVICE' })}
+                          className="w-4 h-4 text-brand-500 bg-slate-950 border-slate-700 focus:ring-brand-500"
+                        />
+                        <span>Service</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Unit Dropdown / Type to add */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                    <div className="sm:w-28 flex items-center gap-1 text-xs font-semibold text-slate-300">
+                      <span>Unit</span>
+                      <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
+                    </div>
+                    <div className="flex-1 max-w-md">
+                      {customUnitMode ? (
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={customUnitInput}
+                            onChange={(e) => setCustomUnitInput(e.target.value)}
+                            placeholder="Type custom unit (e.g. Bundle, Set, Sheet)..."
+                            className="flex-1 px-3.5 py-2 bg-slate-950/70 border border-brand-500 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none"
+                            autoFocus
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (customUnitInput.trim()) {
+                                setFormData({ ...formData, unit: customUnitInput.trim() });
+                              }
+                              setCustomUnitMode(false);
+                            }}
+                            className="px-3 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold"
+                          >
+                            Done
+                          </button>
+                        </div>
+                      ) : (
+                        <select
+                          value={formData.unit}
+                          onChange={(e) => {
+                            if (e.target.value === '__CUSTOM__') {
+                              setCustomUnitMode(true);
+                              setCustomUnitInput('');
+                            } else {
+                              setFormData({ ...formData, unit: e.target.value });
+                            }
+                          }}
+                          className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
+                        >
+                          <option value="" disabled>
+                            Select or type to add
+                          </option>
+                          {STANDARD_UNITS.map((u) => (
+                            <option key={u.value} value={u.value}>
+                              {u.label}
+                            </option>
+                          ))}
+                          <option value="__CUSTOM__" className="text-brand-400 font-bold">
+                            + Type custom unit...
+                          </option>
+                        </select>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sales Information Section */}
+                <div className="pt-4 border-t border-slate-800 space-y-4">
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-100 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.enableSales}
+                      onChange={(e) => setFormData({ ...formData, enableSales: e.target.checked })}
+                      className="w-4 h-4 text-brand-500 bg-slate-950 border-slate-700 rounded focus:ring-brand-500"
+                    />
+                    <span>Sales Information</span>
+                  </label>
+
+                  {formData.enableSales && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pl-6">
+                      {/* Left: Selling Price & Description */}
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-rose-400 mb-1">
+                            Selling Price*
+                          </label>
+                          <div className="relative flex rounded-xl border border-slate-700 bg-slate-950/70 overflow-hidden focus-within:border-brand-500">
+                            <span className="inline-flex items-center px-3 text-xs font-bold text-slate-400 bg-slate-800/80 border-r border-slate-700 select-none">
+                              INR
+                            </span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              required={formData.enableSales}
+                              value={formData.price === 0 ? '' : formData.price}
+                              onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) || 0 })}
+                              placeholder="0.00"
+                              className="w-full px-3 py-2 bg-transparent text-xs text-white focus:outline-none font-mono"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-300 mb-1">
+                            Description
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            placeholder="Specification details, printing type, media type..."
+                            className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Right: Account* */}
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-rose-400 mb-1">
+                            Account*
+                          </label>
+                          <select
+                            value={formData.salesAccount}
+                            onChange={(e) => setFormData({ ...formData, salesAccount: e.target.value })}
+                            className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
+                          >
+                            {SALES_ACCOUNTS.map((acc) => (
+                              <option key={acc} value={acc}>
+                                {acc}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Description & Specifications
+                {/* Purchase Information Section */}
+                <div className="pt-4 border-t border-slate-800 space-y-4">
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-100 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.enablePurchase}
+                      onChange={(e) => setFormData({ ...formData, enablePurchase: e.target.checked })}
+                      className="w-4 h-4 text-brand-500 bg-slate-950 border-slate-700 rounded focus:ring-brand-500"
+                    />
+                    <span>Purchase Information</span>
                   </label>
-                  <textarea
-                    rows={2}
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Specification details e.g., 340 GSM Star Flex with eyelets..."
-                    className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
-                  />
+
+                  {formData.enablePurchase && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pl-6">
+                      {/* Left: Cost Price & Description */}
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-rose-400 mb-1">
+                            Cost Price*
+                          </label>
+                          <div className="relative flex rounded-xl border border-slate-700 bg-slate-950/70 overflow-hidden focus-within:border-brand-500">
+                            <span className="inline-flex items-center px-3 text-xs font-bold text-slate-400 bg-slate-800/80 border-r border-slate-700 select-none">
+                              INR
+                            </span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              required={formData.enablePurchase}
+                              value={formData.costPrice === 0 ? '' : formData.costPrice}
+                              onChange={(e) => setFormData({ ...formData, costPrice: Number(e.target.value) || 0 })}
+                              placeholder="0.00"
+                              className="w-full px-3 py-2 bg-transparent text-xs text-white focus:outline-none font-mono"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-300 mb-1">
+                            Description
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={formData.purchaseDescription}
+                            onChange={(e) => setFormData({ ...formData, purchaseDescription: e.target.value })}
+                            placeholder="Vendor purchase specifications, raw material details..."
+                            className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Right: Account* & Preferred Vendor */}
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-rose-400 mb-1">
+                            Account*
+                          </label>
+                          <select
+                            value={formData.purchaseAccount}
+                            onChange={(e) => setFormData({ ...formData, purchaseAccount: e.target.value })}
+                            className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
+                          >
+                            {PURCHASE_ACCOUNTS.map((acc) => (
+                              <option key={acc} value={acc}>
+                                {acc}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-300 mb-1">
+                            Preferred Vendor
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.preferredVendor}
+                            onChange={(e) => setFormData({ ...formData, preferredVendor: e.target.value })}
+                            placeholder="Select or type vendor"
+                            className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="isActive"
-                    checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                    className="rounded border-slate-700 bg-slate-800 text-brand-600 focus:ring-brand-500"
-                  />
-                  <label htmlFor="isActive" className="text-xs font-semibold text-slate-300 cursor-pointer">
-                    Active in catalog (available for new orders & invoices)
-                  </label>
-                </div>
-
+                {/* Footer Buttons */}
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
                   <button
                     type="button"
                     onClick={() => setModalOpen(false)}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-600/30 transition"
+                    className="px-6 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-600/30 transition disabled:opacity-50"
                   >
-                    {saving ? 'Saving...' : editingItem ? 'Update Item' : 'Save to Catalog'}
+                    {saving ? 'Saving...' : 'Save'}
                   </button>
                 </div>
               </form>
@@ -727,7 +729,7 @@ export default function ItemsPage() {
           onConfirm={handleDeleteItem}
           isLoading={deleting}
           title="Delete Catalog Item"
-          message={`Are you sure you want to delete item "${itemToDelete?.name}"? If this item is used in existing invoices, you should mark it Inactive instead.`}
+          message={`Are you sure you want to delete "${itemToDelete?.name}"? If this item is used in existing invoices, you can mark it Inactive instead.`}
           confirmText="Delete Item"
         />
       </div>

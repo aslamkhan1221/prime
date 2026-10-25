@@ -20,12 +20,13 @@ model User {
 
 model CompanySetting {
   id                 String   @id @default("default")
-  companyName        String   @default("Prime Sublimation")
+  companyName        String   @default("Graphicon Design Studio (New)")
+  companyId          String?  @default("GDS")
   logoUrl            String?
-  address            String?  @default("402 Creative Heights, Design District, Bangalore - 560001")
+  address            String?  @default("23/41/1068, Vaishali Nagar, Jaswantsingpura,\nCIDCO N-8, Azad Chowk to TV Center Road\nAurangabad Maharashtra 431001\nIndia")
   phone              String?  @default("+91 98765 43210")
-  email              String?  @default("accounts@pixelcraftstudio.in")
-  website            String?  @default("https://pixelcraftstudio.in")
+  email              String?  @default("mail@graphicon.in")
+  website            String?  @default("https://graphicon.in/")
   gstin              String?  @default("29AAAAA0000A1Z5")
   pan                String?  @default("AAAAA0000A")
   invoicePrefix      String   @default("INV-")
@@ -35,14 +36,15 @@ model CompanySetting {
   defaultTaxRate     Float    @default(18.0)
   currency           String   @default("INR")
   currencySymbol     String   @default("₹")
-  invoiceTerms       String?  @default("1. 50% advance for graphic design / print orders.\n2. Invoices are due within 15 days of issue.\n3. Revisions beyond 3 iterations will be billed at hourly rates.")
+  invoiceTerms       String?  @default("1) Bill must be paid within 10 days form the date of receipt.\n2) Any Queries/Corrections will be entertained only within 10 days form the date of Submission of the bill\nNo Corrections will be entertained thereafter.")
   paymentDetails     String?  @default("Payment can be made via UPI or NEFT/IMPS direct bank transfer.")
-  bankAccountName    String?  @default("PixelCraft Design Studio LLP")
+  bankAccountName    String?  @default("Graphicon Design Studio LLP")
   bankAccountNumber  String?  @default("98765432101234")
   bankIfsc           String?  @default("HDFC0001234")
   bankName           String?  @default("HDFC Bank")
-  bankBranch         String?  @default("MG Road, Bangalore")
-  upiId              String?  @default("pixelcraft@hdfcbank")
+  bankBranch         String?  @default("Aurangabad")
+  upiId              String?  @default("graphicon@hdfcbank")
+  reviewUrl          String?  @default("https://g.page/r/CfUhh8jFFKjlEAo/review")
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
@@ -66,22 +68,26 @@ model Customer {
 }
 
 model Item {
-  id           String        @id @default(cuid())
-  name         String
-  sku          String?       @unique
-  description  String?
-  category     String        @default("Graphic Design")
-  itemType     String        @default("SERVICE")
-  price        Float         @default(0.0)
-  costPrice    Float         @default(0.0)
-  taxRate      Float         @default(18.0)
-  unit         String        @default("PIECE")
-  customUnit   String?
-  isActive     Boolean       @default(true)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  invoiceItems InvoiceItem[]
-  orderItems   OrderItem[]
+  id                  String        @id @default(cuid())
+  name                String
+  sku                 String?       @unique
+  description         String?
+  category            String        @default("Graphic Design")
+  itemType            String        @default("GOODS")
+  price               Float         @default(0.0)
+  costPrice           Float         @default(0.0)
+  taxRate             Float         @default(18.0)
+  unit                String        @default("PIECE")
+  customUnit          String?
+  salesAccount        String?       @default("Sales")
+  purchaseAccount     String?       @default("Cost of Goods Sold")
+  purchaseDescription String?
+  preferredVendor     String?
+  isActive            Boolean       @default(true)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  invoiceItems        InvoiceItem[]
+  orderItems          OrderItem[]
 }
 
 model Order {

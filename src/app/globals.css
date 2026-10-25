@@ -63,6 +63,10 @@ body {
 
 /* Clean invoice print styling */
 @media print {
+  @page {
+    size: A4;
+    margin: 8mm;
+  }
   body {
     background: #ffffff !important;
     color: #000000 !important;
@@ -75,15 +79,11 @@ body {
   }
   .invoice-printable {
     background: #ffffff !important;
-    color: #111827 !important;
+    color: #000000 !important;
     border: none !important;
     box-shadow: none !important;
     width: 100% !important;
     margin: 0 !important;
-    padding: 20px !important;
-  }
-  .invoice-printable * {
-    color: #111827 !important;
-    border-color: #e5e7eb !important;
+    padding: 0 !important;
   }
 }
