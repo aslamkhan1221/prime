@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Printer, ArrowLeft, LayoutTemplate } from 'lucide-react';
 import { InvoiceTemplateConfig, DEFAULT_TEMPLATE_CONFIG } from '@/lib/templateConfig';
@@ -12,46 +12,65 @@ interface InvoicePrintViewProps {
   onBack?: () => void;
 }
 
+function parseTemplateConfig(raw: any): InvoiceTemplateConfig {
+  if (!raw) return DEFAULT_TEMPLATE_CONFIG;
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return {
+      ...DEFAULT_TEMPLATE_CONFIG,
+      ...parsed,
+      margins: { ...DEFAULT_TEMPLATE_CONFIG.margins, ...(parsed.margins || {}) },
+      font: { ...DEFAULT_TEMPLATE_CONFIG.font, ...(parsed.font || {}) },
+      background: { ...DEFAULT_TEMPLATE_CONFIG.background, ...(parsed.background || {}) },
+      header: { ...DEFAULT_TEMPLATE_CONFIG.header, ...(parsed.header || {}) },
+      footer: { ...DEFAULT_TEMPLATE_CONFIG.footer, ...(parsed.footer || {}) },
+      organization: { ...DEFAULT_TEMPLATE_CONFIG.organization, ...(parsed.organization || {}) },
+      customer: { ...DEFAULT_TEMPLATE_CONFIG.customer, ...(parsed.customer || {}) },
+      document: {
+        ...DEFAULT_TEMPLATE_CONFIG.document,
+        ...(parsed.document || {}),
+        fields: { ...DEFAULT_TEMPLATE_CONFIG.document.fields, ...(parsed.document?.fields || {}) },
+      },
+      table: {
+        ...DEFAULT_TEMPLATE_CONFIG.table,
+        ...(parsed.table || {}),
+        columns: { ...DEFAULT_TEMPLATE_CONFIG.table.columns, ...(parsed.table?.columns || {}) },
+      },
+      total: { ...DEFAULT_TEMPLATE_CONFIG.total, ...(parsed.total || {}) },
+      other: { ...DEFAULT_TEMPLATE_CONFIG.other, ...(parsed.other || {}) },
+    };
+  } catch {
+    return DEFAULT_TEMPLATE_CONFIG;
+  }
+}
+
 export function InvoicePrintView({ invoice, settings, onBack }: InvoicePrintViewProps) {
+  const [templateConfig, setTemplateConfig] = useState<InvoiceTemplateConfig>(() =>
+    parseTemplateConfig(settings?.templateConfig)
+  );
+
+  // Background fetch to guarantee latest saved template properties are applied
+  useEffect(() => {
+    fetch('/api/templates')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.config) {
+          setTemplateConfig(parseTemplateConfig(data.config));
+        }
+      })
+      .catch((err) => console.error('Failed to sync latest template config:', err));
+  }, []);
+
+  // Update if settings prop changes
+  useEffect(() => {
+    if (settings?.templateConfig) {
+      setTemplateConfig(parseTemplateConfig(settings.templateConfig));
+    }
+  }, [settings?.templateConfig]);
+
   const handlePrint = () => {
     window.print();
   };
-
-  // Parse templateConfig from settings if present
-  let templateConfig: InvoiceTemplateConfig = DEFAULT_TEMPLATE_CONFIG;
-  if (settings?.templateConfig) {
-    try {
-      const parsed = typeof settings.templateConfig === 'string'
-        ? JSON.parse(settings.templateConfig)
-        : settings.templateConfig;
-
-      templateConfig = {
-        ...DEFAULT_TEMPLATE_CONFIG,
-        ...parsed,
-        margins: { ...DEFAULT_TEMPLATE_CONFIG.margins, ...(parsed.margins || {}) },
-        font: { ...DEFAULT_TEMPLATE_CONFIG.font, ...(parsed.font || {}) },
-        background: { ...DEFAULT_TEMPLATE_CONFIG.background, ...(parsed.background || {}) },
-        header: { ...DEFAULT_TEMPLATE_CONFIG.header, ...(parsed.header || {}) },
-        footer: { ...DEFAULT_TEMPLATE_CONFIG.footer, ...(parsed.footer || {}) },
-        organization: { ...DEFAULT_TEMPLATE_CONFIG.organization, ...(parsed.organization || {}) },
-        customer: { ...DEFAULT_TEMPLATE_CONFIG.customer, ...(parsed.customer || {}) },
-        document: {
-          ...DEFAULT_TEMPLATE_CONFIG.document,
-          ...(parsed.document || {}),
-          fields: { ...DEFAULT_TEMPLATE_CONFIG.document.fields, ...(parsed.document?.fields || {}) },
-        },
-        table: {
-          ...DEFAULT_TEMPLATE_CONFIG.table,
-          ...(parsed.table || {}),
-          columns: { ...DEFAULT_TEMPLATE_CONFIG.table.columns, ...(parsed.table?.columns || {}) },
-        },
-        total: { ...DEFAULT_TEMPLATE_CONFIG.total, ...(parsed.total || {}) },
-        other: { ...DEFAULT_TEMPLATE_CONFIG.other, ...(parsed.other || {}) },
-      };
-    } catch (e) {
-      console.error('Failed to parse settings.templateConfig:', e);
-    }
-  }
 
   return (
     <div className="space-y-6">

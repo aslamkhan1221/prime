@@ -777,9 +777,9 @@ export default function OrdersPage() {
                                   </label>
                                   <input
                                     type="number"
-                                    min="1"
-                                    step="0.1"
-                                    value={row.quantity || 1}
+                                    min=""
+                                    step="1"
+                                    value={row.quantity}
                                     onChange={(e) => updateItemField(idx, 'quantity', e.target.value)}
                                     className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 font-mono text-center font-medium"
                                   />

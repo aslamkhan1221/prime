@@ -21,8 +21,9 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  X,
   LayoutTemplate,
+  Shield,
+  Layers,
 } from 'lucide-react';
 
 export default function InvoicesPage() {
@@ -31,6 +32,8 @@ export default function InvoicesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [duplicateFilter, setDuplicateFilter] = useState<'all' | 'original' | 'duplicate'>('all');
+  const [isPortalMode, setIsPortalMode] = useState(false);
 
   // Quick Payment Modal State
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
@@ -49,10 +52,30 @@ export default function InvoicesPage() {
 
   const { success, error } = useToast();
 
+  // Check portal mode
+  useEffect(() => {
+    fetch('/api/portal/mode')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.isPortalMode || d.role === 'PARTNER') {
+          setIsPortalMode(true);
+          setDuplicateFilter('duplicate');
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const fetchInvoices = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
     try {
-      const url = `/api/invoices?search=${encodeURIComponent(search)}&status=${statusFilter}`;
+      let dupParam = '';
+      if (isPortalMode || duplicateFilter === 'duplicate') {
+        dupParam = '&isDuplicate=true';
+      } else if (duplicateFilter === 'original') {
+        dupParam = '&isDuplicate=false';
+      }
+
+      const url = `/api/invoices?search=${encodeURIComponent(search)}&status=${statusFilter}${dupParam}`;
       const res = await fetch(url);
       const data = await res.json();
       setInvoices(data.invoices || []);
@@ -65,7 +88,32 @@ export default function InvoicesPage() {
 
   useEffect(() => {
     fetchInvoices();
-  }, [statusFilter]);
+  }, [statusFilter, duplicateFilter, isPortalMode]);
+
+  const handleToggleDuplicate = async (invoiceId: string, currentStatus: boolean) => {
+    const newStatus = !currentStatus;
+    // INSTANT DISPLAY:
+    setInvoices((prev) =>
+      prev.map((inv) => (inv.id === invoiceId ? { ...inv, isDuplicate: newStatus } : inv))
+    );
+    success(
+      newStatus
+        ? 'Invoice marked as Duplicate (Visible in Portal)'
+        : 'Invoice marked as Original (Hidden from Portal)'
+    );
+
+    try {
+      const res = await fetch(`/api/invoices/${invoiceId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isDuplicate: newStatus }),
+      });
+      if (!res.ok) throw new Error('Failed to update duplicate status');
+    } catch (err: any) {
+      error(err.message || 'Error updating duplicate status');
+      fetchInvoices(true);
+    }
+  };
 
   const handleDuplicate = async (invoiceId: string) => {
     try {
@@ -77,7 +125,7 @@ export default function InvoicesPage() {
       if (data.invoice) {
         setInvoices((prev) => [data.invoice, ...prev]);
       }
-      success(`Invoice duplicated as #${data.invoice?.invoiceNumber}`);
+      success(`Duplicated as Portal Invoice #${data.invoice?.invoiceNumber}`);
       fetchInvoices(true); // Silent sync
     } catch (err: any) {
       error(err.message || 'Error duplicating invoice');
@@ -172,8 +220,12 @@ export default function InvoicesPage() {
     <DashboardLayout>
       <div className="space-y-6">
         <Header
-          title="Invoices & Billing"
-          subtitle="Generate GST invoices, track payments, download PDF and manage receivables"
+          title={isPortalMode ? "Portal Invoices & Billing" : "Invoices & Billing"}
+          subtitle={
+            isPortalMode
+              ? "Displaying duplicate invoice records for partner portal management"
+              : "Generate GST invoices, track payments, download PDF and manage receivables"
+          }
           actionText="Create Invoice"
           actionHref="/invoices/new"
           actionIcon={<Plus className="w-4 h-4" />}
@@ -182,9 +234,22 @@ export default function InvoicesPage() {
           secondaryActionIcon={<LayoutTemplate className="w-4 h-4 text-brand-600" />}
         />
 
+        {/* Portal Mode Notice */}
+        {isPortalMode && (
+          <div className="bg-purple-50 border border-purple-200 text-purple-900 px-4 py-3 rounded-2xl flex items-center justify-between text-xs font-semibold shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse" />
+              <span>Portal View Active: Only duplicate invoice records are displayed here and on the dashboard.</span>
+            </div>
+            <span className="text-[11px] bg-purple-200/60 text-purple-800 px-2.5 py-0.5 rounded-full font-bold">
+              Duplicate Invoices Only
+            </span>
+          </div>
+        )}
+
         {/* Filter & Search */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-          <div className="relative w-full md:w-80">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex-wrap">
+          <div className="relative w-full md:w-72">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
@@ -196,20 +261,60 @@ export default function InvoicesPage() {
             />
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
-            {['ALL', 'DRAFT', 'SENT', 'PARTIALLY_PAID', 'PAID', 'OVERDUE', 'CANCELLED'].map((st) => (
-              <button
-                key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition shrink-0 ${
-                  statusFilter === st
-                    ? 'bg-gradient-to-r from-[#00a3e0] to-[#0284c7] text-white shadow-md shadow-sky-500/20'
-                    : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200'
-                }`}
-              >
-                {st.replace('_', ' ')}
-              </button>
-            ))}
+          <div className="flex items-center gap-3 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 flex-wrap">
+            {/* Admin Filter between All / Original / Duplicate Invoices */}
+            {!isPortalMode && (
+              <div className="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold shrink-0">
+                <button
+                  onClick={() => setDuplicateFilter('all')}
+                  className={`px-3 py-1 rounded-lg transition ${
+                    duplicateFilter === 'all'
+                      ? 'bg-white text-slate-900 shadow-sm font-bold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setDuplicateFilter('original')}
+                  className={`px-3 py-1 rounded-lg transition ${
+                    duplicateFilter === 'original'
+                      ? 'bg-white text-slate-900 shadow-sm font-bold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Original Only
+                </button>
+                <button
+                  onClick={() => setDuplicateFilter('duplicate')}
+                  className={`px-3 py-1 rounded-lg transition flex items-center gap-1 ${
+                    duplicateFilter === 'duplicate'
+                      ? 'bg-purple-600 text-white shadow-sm font-bold'
+                      : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50'
+                  }`}
+                >
+                  <Copy className="w-3 h-3" />
+                  <span>Duplicate (Portal)</span>
+                </button>
+              </div>
+            )}
+
+            {/* Status Pills */}
+            <div className="flex items-center gap-1 overflow-x-auto">
+              {['ALL', 'DRAFT', 'SENT', 'PARTIALLY_PAID', 'PAID', 'OVERDUE', 'CANCELLED'].map((st) => (
+                <button
+                  key={st}
+                  onClick={() => setStatusFilter(st)}
+                  className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition shrink-0 ${
+                    statusFilter === st
+                      ? 'bg-gradient-to-r from-[#00a3e0] to-[#0284c7] text-white shadow-md shadow-sky-500/20'
+                      : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                  }`}
+                >
+                  {st.replace('_', ' ')}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -226,6 +331,7 @@ export default function InvoicesPage() {
                   <th className="py-3.5 px-4 text-right">Grand Total</th>
                   <th className="py-3.5 px-4 text-right">Paid</th>
                   <th className="py-3.5 px-4 text-right">Balance Due</th>
+                  <th className="py-3.5 px-3 text-center">Type</th>
                   <th className="py-3.5 px-4 text-center">Status</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
@@ -233,7 +339,7 @@ export default function InvoicesPage() {
               <tbody className="divide-y divide-slate-100 text-slate-800">
                 {loading ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-slate-500">
+                    <td colSpan={10} className="py-12 text-center text-slate-500">
                       <div className="inline-block w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-2" />
                       <div>Loading invoices...</div>
                     </td>
@@ -266,6 +372,30 @@ export default function InvoicesPage() {
                         <span className={inv.balanceAmount > 0 ? 'text-[#f59e0b]' : 'text-slate-400'}>
                           {formatCurrency(inv.balanceAmount)}
                         </span>
+                      </td>
+                      <td className="py-3.5 px-3 text-center">
+                        {inv.isDuplicate ? (
+                          <button
+                            onClick={() => !isPortalMode && handleToggleDuplicate(inv.id, true)}
+                            title={!isPortalMode ? "Click to set as Original Invoice" : "Duplicate Portal Copy"}
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 inline-flex items-center gap-1 ${
+                              !isPortalMode ? 'hover:bg-purple-100 cursor-pointer shadow-sm' : 'cursor-default'
+                            }`}
+                          >
+                            <Copy className="w-2.5 h-2.5" />
+                            <span>Duplicate</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => !isPortalMode && handleToggleDuplicate(inv.id, false)}
+                            title="Click to mark as Duplicate (Portal Visible)"
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200 ${
+                              !isPortalMode ? 'hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 cursor-pointer' : 'cursor-default'
+                            }`}
+                          >
+                            <span>Original</span>
+                          </button>
+                        )}
                       </td>
                       <td className="py-3.5 px-4 text-center">
                         <span

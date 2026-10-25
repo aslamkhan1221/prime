@@ -40,6 +40,7 @@ function NewInvoiceContent() {
     return d.toISOString().split('T')[0];
   });
   const [status, setStatus] = useState('DRAFT');
+  const [isDuplicate, setIsDuplicate] = useState(false);
   const [notes, setNotes] = useState('');
   const [terms, setTerms] = useState('');
 
@@ -188,6 +189,7 @@ function NewInvoiceContent() {
           invoiceDate,
           dueDate,
           status,
+          isDuplicate,
           notes,
           terms,
           items,
@@ -304,6 +306,16 @@ function NewInvoiceContent() {
                 <option value="PAID">Paid</option>
                 <option value="CANCELLED">Cancelled</option>
               </select>
+
+              <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer mt-3 p-2.5 bg-purple-50/70 rounded-xl border border-purple-200">
+                <input
+                  type="checkbox"
+                  checked={isDuplicate}
+                  onChange={(e) => setIsDuplicate(e.target.checked)}
+                  className="rounded text-purple-600 focus:ring-purple-500 w-4 h-4"
+                />
+                <span className="text-purple-900">Mark as Duplicate Invoice (Portal Visible)</span>
+              </label>
             </div>
 
             {/* Dates */}
@@ -471,7 +483,7 @@ function NewInvoiceContent() {
                             <input
                               type="number"
                               min="1"
-                              value={row.quantity || 1}
+                              value={row.quantity}
                               onChange={(e) => updateItemField(idx, 'quantity', e.target.value)}
                               className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 font-mono text-center font-medium"
                             />
@@ -512,9 +524,9 @@ function NewInvoiceContent() {
                           </label>
                           <input
                             type="number"
-                            min="1"
-                            step="0.1"
-                            value={row.quantity || 1}
+                            min=""
+                            step="1"
+                            value={row.quantity}
                             onChange={(e) => updateItemField(idx, 'quantity', e.target.value)}
                             className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 font-mono text-center font-medium"
                           />

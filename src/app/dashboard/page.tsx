@@ -21,6 +21,9 @@ import {
   RefreshCw,
   Eye,
   Calendar,
+  Copy,
+  Shield,
+  Layers,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -42,6 +45,8 @@ export default function DashboardPage() {
   const [filter, setFilter] = useState('this_month');
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
+  const [isPortalMode, setIsPortalMode] = useState(false);
+  const [togglingPortal, setTogglingPortal] = useState(false);
 
   const fetchDashboardData = async (isSilent = false) => {
     if (!isSilent && !data) setLoading(true);
@@ -53,6 +58,9 @@ export default function DashboardPage() {
       const res = await fetch(url);
       const resData = await res.json();
       setData(resData);
+      if (resData?.isPortalMode !== undefined) {
+        setIsPortalMode(Boolean(resData.isPortalMode));
+      }
     } catch (err) {
       console.error('Error fetching dashboard:', err);
     } finally {
@@ -63,6 +71,27 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchDashboardData(Boolean(data));
   }, [filter]);
+
+  const handleTogglePortalMode = async () => {
+    setTogglingPortal(true);
+    try {
+      const newMode = !isPortalMode;
+      const res = await fetch('/api/portal/mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: newMode }),
+      });
+      const resData = await res.json();
+      if (resData.success) {
+        setIsPortalMode(newMode);
+        fetchDashboardData(false);
+      }
+    } catch (e) {
+      console.error('Error toggling portal mode:', e);
+    } finally {
+      setTogglingPortal(false);
+    }
+  };
 
   const handleCustomApply = (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,6 +154,21 @@ export default function DashboardPage() {
               </button>
             ))}
 
+            {/* Portal / Admin View Switcher */}
+            <button
+              onClick={handleTogglePortalMode}
+              disabled={togglingPortal}
+              title={isPortalMode ? "Switch to Full Admin View (All Invoices)" : "Switch to Portal View (Duplicate Invoices Only)"}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border shadow-sm ${
+                isPortalMode
+                  ? 'bg-purple-600 text-white border-purple-600 shadow-purple-600/20'
+                  : 'bg-white text-purple-700 hover:bg-purple-50 border-purple-200'
+              }`}
+            >
+              <Copy className="w-3.5 h-3.5" />
+              <span>{isPortalMode ? 'Portal View (Duplicate Only)' : 'Portal View'}</span>
+            </button>
+
             <button
               onClick={() => fetchDashboardData()}
               title="Refresh Data"
@@ -134,6 +178,27 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
+
+        {/* Portal Mode Notice Banner */}
+        {isPortalMode && (
+          <div className="bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border border-purple-200 text-purple-900 px-4 py-3.5 rounded-2xl flex items-center justify-between text-xs font-semibold shadow-sm flex-wrap gap-2">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse shrink-0" />
+              <div>
+                <span className="font-bold">Portal Dashboard Active:</span>{' '}
+                <span className="text-purple-800">
+                  All revenue figures, receivables, invoices count, and recent transactions are displayed strictly as per duplicate invoice records.
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={handleTogglePortalMode}
+              className="text-[11px] font-bold text-purple-700 bg-white hover:bg-purple-100 border border-purple-300 px-3 py-1 rounded-xl transition"
+            >
+              Switch to Admin View
+            </button>
+          </div>
+        )}
 
         {/* Custom Date Range Picker bar */}
         {filter === 'custom' && (

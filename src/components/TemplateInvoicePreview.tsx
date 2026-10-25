@@ -94,17 +94,17 @@ export function TemplateInvoicePreview({
     companyId: 'PRIME',
     logoUrl: '/logo.png',
     address: '23/41/1068, Vaishali Nagar, Jaswantsingpura,\nCIDCO N-8, Azad Chowk to TV Center Road\nAurangabad Maharashtra 431001\nIndia',
-    phone: '+91 98765 43210',
-    email: 'accounts@primeprint.in',
-    website: 'https://primeprint.in/',
-    gstin: '29AAAAA0000A1Z5',
-    pan: 'AAAAA0000A',
-    bankAccountName: 'Prime Print & Services LLP',
-    bankAccountNumber: '98765432101234',
-    bankIfsc: 'HDFC0001234',
-    bankName: 'HDFC Bank',
+    phone: '',
+    email: '',
+    website: 'https://prime-nu-nine.vercel.app/',
+    gstin: '',
+    pan: '',
+    bankAccountName: 'Prime Sublimation & Print',
+    bankAccountNumber: '',
+    bankIfsc: '',
+    bankName: '',
     bankBranch: 'Aurangabad Main',
-    upiId: 'primeprint@hdfcbank',
+    upiId: '',
   };
 
   const currencySymbol = comp.currencySymbol || '₹';
@@ -145,7 +145,7 @@ export function TemplateInvoicePreview({
   return (
     <div
       className={`template-invoice-root transition-all duration-200 ${
-        isPrintMode ? 'print:p-0 print:m-0 print:shadow-none' : 'shadow-2xl rounded-sm'
+        isPrintMode ? 'print:shadow-none print:border-none' : 'shadow-2xl rounded-sm'
       }`}
       style={{
         width: `${paperWidth}px`,
@@ -165,6 +165,49 @@ export function TemplateInvoicePreview({
         transformOrigin: 'top center',
       }}
     >
+      {/* Dynamic Print Stylesheet strictly enforcing template properties during window.print() */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            @media print {
+              @page {
+                size: ${config.paperSize || 'A4'} ${(config.orientation || 'Portrait').toLowerCase()};
+                margin: 0 !important;
+              }
+              html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                background-color: ${bgColor} !important;
+                width: 100% !important;
+                min-width: 100% !important;
+                overflow: visible !important;
+              }
+              .template-invoice-root {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-height: auto !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding-top: ${config.margins?.top ?? 0.7}in !important;
+                padding-bottom: ${config.margins?.bottom ?? 0.7}in !important;
+                padding-left: ${config.margins?.left ?? 0.55}in !important;
+                padding-right: ${config.margins?.right ?? 0.4}in !important;
+                font-family: "${fontFamily}", system-ui, sans-serif !important;
+                font-size: ${baseFontSize}pt !important;
+                color: ${fontColor} !important;
+                background-color: ${bgColor} !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              .template-invoice-root * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+            }
+          `,
+        }}
+      />
       {/* Watermark if enabled */}
       {config.background?.showWatermark && config.background?.watermarkText && (
         <div

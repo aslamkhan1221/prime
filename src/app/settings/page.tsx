@@ -26,8 +26,8 @@ export default function SettingsPage() {
     phone: '+91 98765 43210',
     email: 'accounts@primeprint.in',
     website: 'https://primeprint.in',
-    gstin: '29AAAAA0000A1Z5',
-    pan: 'AAAAA0000A',
+    gstin: '',
+    pan: '',
     invoicePrefix: 'INV-',
     invoiceNumberStart: 1001,
     orderPrefix: 'ORD-',
@@ -176,7 +176,7 @@ export default function SettingsPage() {
                 type="text"
                 value={settings.gstin || ''}
                 onChange={(e) => setSettings({ ...settings, gstin: e.target.value.toUpperCase() })}
-                placeholder="29AAAAA0000A1Z5"
+                placeholder=""
                 className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 font-mono uppercase focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
@@ -187,7 +187,7 @@ export default function SettingsPage() {
                 type="text"
                 value={settings.pan || ''}
                 onChange={(e) => setSettings({ ...settings, pan: e.target.value.toUpperCase() })}
-                placeholder="AAAAA0000A"
+                placeholder=""
                 className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 font-mono uppercase focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
