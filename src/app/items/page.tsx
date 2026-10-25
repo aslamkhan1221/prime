@@ -100,8 +100,8 @@ export default function ItemsPage() {
 
   const { success, error } = useToast();
 
-  const fetchItems = async () => {
-    setLoading(true);
+  const fetchItems = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const url = `/api/items?search=${encodeURIComponent(search)}${
         typeFilter !== 'ALL' ? `&itemType=${typeFilter}` : ''
@@ -110,9 +110,9 @@ export default function ItemsPage() {
       const data = await res.json();
       setItems(data.items || []);
     } catch {
-      error('Failed to load items catalog');
+      if (!isSilent) error('Failed to load items catalog');
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
@@ -216,7 +216,13 @@ export default function ItemsPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to update item');
+        
+        // INSTANT DISPLAY: Immediately update in table state
+        const updatedItem = data.item || { ...editingItem, ...payload };
+        setItems((prev) => prev.map((it) => (it.id === editingItem.id ? updatedItem : it)));
+        setModalOpen(false);
         success('Item updated successfully');
+        fetchItems(true); // Silent sync in background
       } else {
         const res = await fetch('/api/items', {
           method: 'POST',
@@ -225,10 +231,15 @@ export default function ItemsPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to create item');
+
+        // INSTANT DISPLAY: Immediately add to table state
+        if (data.item) {
+          setItems((prev) => [data.item, ...prev]);
+        }
+        setModalOpen(false);
         success('Item created successfully');
+        fetchItems(true); // Silent sync in background
       }
-      setModalOpen(false);
-      fetchItems();
     } catch (err: any) {
       error(err.message || 'Error saving item');
     } finally {
@@ -238,16 +249,20 @@ export default function ItemsPage() {
 
   const handleDeleteItem = async () => {
     if (!itemToDelete) return;
-    setDeleting(true);
+    const targetId = itemToDelete.id;
+    // INSTANT DISPLAY: Immediately remove from table state
+    setItems((prev) => prev.filter((it) => it.id !== targetId));
+    setDeleteConfirmOpen(false);
+    success('Item deleted successfully');
+
     try {
-      const res = await fetch(`/api/items/${itemToDelete.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/items/${targetId}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete item');
-      success('Item deleted successfully');
-      setDeleteConfirmOpen(false);
-      fetchItems();
+      fetchItems(true); // Silent background sync
     } catch (err: any) {
       error(err.message || 'Error deleting item');
+      fetchItems(false); // Reload on error
     } finally {
       setDeleting(false);
     }

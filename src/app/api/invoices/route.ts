@@ -71,9 +71,11 @@ export async function POST(req: NextRequest) {
     // Generate Invoice Number if not provided
     let invoiceNumber = body.invoiceNumber;
     if (!invoiceNumber) {
-      const settings = await prisma.companySetting.findUnique({ where: { id: 'default' } });
+      const [settings, invCount] = await Promise.all([
+        prisma.companySetting.findUnique({ where: { id: 'default' } }),
+        prisma.invoice.count(),
+      ]);
       const prefix = settings?.invoicePrefix || 'INV-';
-      const invCount = await prisma.invoice.count();
       const startNum = settings?.invoiceNumberStart || 1001;
       invoiceNumber = `${prefix}${startNum + invCount}`;
     }

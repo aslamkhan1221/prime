@@ -14,40 +14,6 @@ export async function GET(req: NextRequest) {
     const fromDate = searchParams.get('fromDate');
     const toDate = searchParams.get('toDate');
 
-    const partners = await prisma.partner.findMany({
-      orderBy: { createdAt: 'asc' },
-      include: {
-        _count: {
-          select: { orders: true },
-        },
-      },
-    });
-
-    // Check which partners have active user login accounts
-    const partnerEmails = partners.map((p) => p.email).filter(Boolean) as string[];
-    const userAccounts = await prisma.user.findMany({
-      where: { email: { in: partnerEmails } },
-      select: { email: true, role: true, createdAt: true },
-    });
-    const userEmailMap = new Set(userAccounts.map((u) => u.email));
-
-    const enrichedPartners = partners.map((p) => {
-      let parsedPermissions = ['dashboard', 'orders', 'invoices', 'reports'];
-      if (p.permissions) {
-        try {
-          parsedPermissions = JSON.parse(p.permissions);
-        } catch {
-          // fallback
-        }
-      }
-      return {
-        ...p,
-        hasLoginAccount: p.email ? userEmailMap.has(p.email) : false,
-        parsedPermissions,
-        assignedOrdersCount: p._count?.orders || 0,
-      };
-    });
-
     // Date filters for financial figures
     const paymentWhere: any = {};
     const expenseWhere: any = {};
@@ -67,27 +33,64 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Dynamic calculations from actual DB
-    const payments = await prisma.payment.findMany({ where: paymentWhere });
-    const totalRevenue = payments.reduce((acc, p) => acc + p.amount, 0);
-
-    const expenses = await prisma.expense.findMany({ where: expenseWhere });
-    const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
-
-    const invoiceItems = await prisma.invoiceItem.findMany({
-      where:
-        fromDate || toDate
-          ? {
-              invoice: {
-                invoiceDate: {
-                  gte: fromDate ? new Date(fromDate) : undefined,
-                  lte: toDate ? new Date(new Date(toDate).setHours(23, 59, 59, 999)) : undefined,
+    // Run queries concurrently
+    const [partners, payments, expenses, invoiceItems] = await Promise.all([
+      prisma.partner.findMany({
+        orderBy: { createdAt: 'asc' },
+        include: {
+          _count: {
+            select: { orders: true },
+          },
+        },
+      }),
+      prisma.payment.findMany({ where: paymentWhere }),
+      prisma.expense.findMany({ where: expenseWhere }),
+      prisma.invoiceItem.findMany({
+        where:
+          fromDate || toDate
+            ? {
+                invoice: {
+                  invoiceDate: {
+                    gte: fromDate ? new Date(fromDate) : undefined,
+                    lte: toDate ? new Date(new Date(toDate).setHours(23, 59, 59, 999)) : undefined,
+                  },
                 },
-              },
-            }
-          : undefined,
-      include: { item: true },
+              }
+            : undefined,
+        include: { item: true },
+      }),
+    ]);
+
+    // Check which partners have active user login accounts
+    const partnerEmails = partners.map((p) => p.email).filter(Boolean) as string[];
+    const userAccounts =
+      partnerEmails.length > 0
+        ? await prisma.user.findMany({
+            where: { email: { in: partnerEmails } },
+            select: { email: true, role: true, createdAt: true },
+          })
+        : [];
+    const userEmailMap = new Set(userAccounts.map((u) => u.email));
+
+    const enrichedPartners = partners.map((p) => {
+      let parsedPermissions = ['dashboard', 'orders', 'invoices', 'reports'];
+      if (p.permissions) {
+        try {
+          parsedPermissions = JSON.parse(p.permissions);
+        } catch {
+          // fallback
+        }
+      }
+      return {
+        ...p,
+        hasLoginAccount: p.email ? userEmailMap.has(p.email) : false,
+        parsedPermissions,
+        assignedOrdersCount: p._count?.orders || 0,
+      };
     });
+
+    const totalRevenue = payments.reduce((acc, p) => acc + p.amount, 0);
+    const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
 
     const totalJobCost = invoiceItems.reduce((acc, ii) => {
       const itemCost = ii.item?.costPrice || 0;

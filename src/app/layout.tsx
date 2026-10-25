@@ -1,6 +1,14 @@
 import type { Metadata } from 'next';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { ToastProvider } from '@/components/Toast';
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+  preload: true,
+});
 
 export const metadata: Metadata = {
   title: 'Prime Studio | Invoice & CRM Suite',
@@ -13,16 +21,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-      </head>
-      <body className="font-sans antialiased bg-[#0b0f19] text-slate-100 selection:bg-brand-500 selection:text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
+    <html lang="en" className={`dark ${plusJakartaSans.className}`}>
+      <body className="font-sans antialiased bg-[#0b0f19] text-slate-100 selection:bg-brand-500 selection:text-white">
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );

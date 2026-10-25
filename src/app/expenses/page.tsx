@@ -51,8 +51,8 @@ export default function ExpensesPage() {
 
   const { success, error } = useToast();
 
-  const fetchExpenses = async () => {
-    setLoading(true);
+  const fetchExpenses = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const url = `/api/expenses?search=${encodeURIComponent(search)}&category=${categoryFilter}&paymentMethod=${methodFilter}`;
       const res = await fetch(url);
@@ -60,9 +60,9 @@ export default function ExpensesPage() {
       setExpenses(data.expenses || []);
       setTotalAmount(data.totalAmount || 0);
     } catch {
-      error('Failed to load expenses');
+      if (!isSilent) error('Failed to load expenses');
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
@@ -121,7 +121,15 @@ export default function ExpensesPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to update expense');
+
+        // INSTANT DISPLAY: Immediately update in table
+        const updated = data.expense || { ...editingExpense, ...formData };
+        setExpenses((prev) =>
+          prev.map((exp) => (exp.id === editingExpense.id ? updated : exp))
+        );
+        setModalOpen(false);
         success('Expense updated successfully');
+        fetchExpenses(true); // Silent background sync
       } else {
         const res = await fetch('/api/expenses', {
           method: 'POST',
@@ -130,10 +138,16 @@ export default function ExpensesPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to record expense');
+
+        // INSTANT DISPLAY: Immediately prepend new expense
+        if (data.expense) {
+          setExpenses((prev) => [data.expense, ...prev]);
+          setTotalAmount((prev) => prev + Number(data.expense.amount || 0));
+        }
+        setModalOpen(false);
         success('Expense recorded successfully');
+        fetchExpenses(true); // Silent background sync
       }
-      setModalOpen(false);
-      fetchExpenses();
     } catch (err: any) {
       error(err.message || 'Error saving expense');
     } finally {
@@ -143,16 +157,22 @@ export default function ExpensesPage() {
 
   const handleDeleteExpense = async () => {
     if (!expenseToDelete) return;
-    setDeleting(true);
+    const targetId = expenseToDelete.id;
+    const targetAmount = expenseToDelete.amount || 0;
+    // INSTANT DISPLAY: Remove immediately
+    setExpenses((prev) => prev.filter((exp) => exp.id !== targetId));
+    setTotalAmount((prev) => Math.max(0, prev - targetAmount));
+    setDeleteConfirmOpen(false);
+    success('Expense deleted successfully');
+
     try {
-      const res = await fetch(`/api/expenses/${expenseToDelete.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/expenses/${targetId}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete expense');
-      success('Expense deleted successfully');
-      setDeleteConfirmOpen(false);
-      fetchExpenses();
+      fetchExpenses(true); // Silent background sync
     } catch (err: any) {
       error(err.message || 'Error deleting expense');
+      fetchExpenses(false);
     } finally {
       setDeleting(false);
     }

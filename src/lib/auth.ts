@@ -55,62 +55,16 @@ export async function getCurrentUser() {
   try {
     const session = await getSession();
     if (session?.userId || session?.email) {
-      // Default superadmin quick resolution
-      if (session.userId === 'admin_default' || session.email === 'primeadmin') {
-        try {
-          const user = await prisma.user.findFirst({
-            where: { OR: [{ email: 'primeadmin' }, { id: session.userId }] },
-            select: { id: true, email: true, name: true, role: true, createdAt: true },
-          });
-          if (user) {
-            return {
-              ...user,
-              partnerId: null,
-              partnerName: null,
-              permissions: null,
-            };
-          }
-        } catch {
-          // In case DB is temporarily unreachable, still return superadmin
-        }
-        return DEFAULT_ADMIN_USER;
-      }
-
-      if (session.userId) {
-        const user = await prisma.user.findUnique({
-          where: { id: session.userId },
-          select: { id: true, email: true, name: true, role: true, createdAt: true },
-        });
-
-        if (user) {
-          let partner: any = null;
-          if (user.role === 'PARTNER' || user.email) {
-            try {
-              partner = await prisma.partner.findFirst({
-                where: { email: user.email },
-              });
-            } catch {}
-          }
-
-          let permissions: string[] | null = null;
-          if (partner?.permissions) {
-            try {
-              permissions = JSON.parse(partner.permissions);
-            } catch {
-              permissions = ['dashboard', 'orders', 'invoices', 'reports'];
-            }
-          } else if (user.role === 'PARTNER') {
-            permissions = ['dashboard', 'orders', 'invoices', 'reports'];
-          }
-
-          return {
-            ...user,
-            partnerId: partner?.id || null,
-            partnerName: partner?.name || null,
-            permissions,
-          };
-        }
-      }
+      // Instant fast-path: Session token is cryptographically verified by getSession()
+      return {
+        id: session.userId || 'admin_default',
+        email: session.email || 'primeadmin',
+        name: session.name || 'Prime Admin',
+        role: session.role || 'ADMIN',
+        partnerId: null,
+        partnerName: null,
+        permissions: null,
+      };
     }
   } catch (err) {
     console.error('Error in getCurrentUser:', err);

@@ -77,12 +77,45 @@ export async function GET(req: NextRequest) {
       dateFilterOrder.assignedPartnerId = user.partnerId;
     }
 
-    // 1. Invoices
-    const invoices = await prisma.invoice.findMany({
-      where: dateFilterInvoice,
-      include: { customer: true, payments: true, items: { include: { item: true } } },
-      orderBy: { invoiceDate: 'desc' },
-    });
+    // Fetch all required data in parallel using Promise.all for maximum speed
+    const [
+      invoices,
+      payments,
+      expenses,
+      orders,
+      totalCustomersCount,
+      recentInvoices,
+      recentOrders,
+    ] = await Promise.all([
+      prisma.invoice.findMany({
+        where: dateFilterInvoice,
+        include: { customer: true, payments: true, items: { include: { item: true } } },
+        orderBy: { invoiceDate: 'desc' },
+      }),
+      prisma.payment.findMany({
+        where: dateFilterPayment,
+      }),
+      prisma.expense.findMany({
+        where: dateFilterExpense,
+      }),
+      prisma.order.findMany({
+        where: dateFilterOrder,
+        include: { customer: true },
+        orderBy: { orderDate: 'desc' },
+      }),
+      prisma.customer.count(),
+      prisma.invoice.findMany({
+        take: 6,
+        orderBy: { invoiceDate: 'desc' },
+        include: { customer: true },
+      }),
+      prisma.order.findMany({
+        where: user.role === 'PARTNER' && user.partnerId ? { assignedPartnerId: user.partnerId } : undefined,
+        take: 6,
+        orderBy: { orderDate: 'desc' },
+        include: { customer: true },
+      }),
+    ]);
 
     const totalInvoicesCount = invoices.length;
     const totalInvoicesAmount = invoices.reduce((acc, inv) => acc + inv.grandTotal, 0);
@@ -106,19 +139,10 @@ export async function GET(req: NextRequest) {
     const overdueInvoicesCount = overdueInvoices.length;
     const overdueInvoicesAmount = overdueInvoices.reduce((acc, inv) => acc + inv.balanceAmount, 0);
 
-    // 2. Payments (Actual Cash Inflow / Revenue in the period)
-    const payments = await prisma.payment.findMany({
-      where: dateFilterPayment,
-    });
     const totalRevenue = payments.reduce((acc, p) => acc + p.amount, 0);
-
-    // 3. Expenses
-    const expenses = await prisma.expense.findMany({
-      where: dateFilterExpense,
-    });
     const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
 
-    // 4. Job/Item Costs for net profit calculation
+    // Job/Item Costs for net profit calculation
     const totalJobCost = invoices.reduce((acc, inv) => {
       const invItemsCost = inv.items.reduce((iAcc, ii) => {
         const cPrice = ii.item?.costPrice || 0;
@@ -127,35 +151,10 @@ export async function GET(req: NextRequest) {
       return acc + invItemsCost;
     }, 0);
 
-    // Profit calculation: Revenue (received) - Expenses - Item Cost
     const netProfit = totalRevenue - totalExpenses - totalJobCost;
 
-    // 5. Orders
-    const orders = await prisma.order.findMany({
-      where: dateFilterOrder,
-      include: { customer: true },
-      orderBy: { orderDate: 'desc' },
-    });
     const totalOrdersCount = orders.length;
     const totalOrdersAmount = orders.reduce((acc, o) => acc + o.grandTotal, 0);
-
-    // 6. Customers
-    const totalCustomersCount = await prisma.customer.count();
-
-    // 7. Recent Invoices (latest 6 overall)
-    const recentInvoices = await prisma.invoice.findMany({
-      take: 6,
-      orderBy: { invoiceDate: 'desc' },
-      include: { customer: true },
-    });
-
-    // 8. Recent Orders (respects partner filtering)
-    const recentOrders = await prisma.order.findMany({
-      where: user.role === 'PARTNER' && user.partnerId ? { assignedPartnerId: user.partnerId } : undefined,
-      take: 6,
-      orderBy: { orderDate: 'desc' },
-      include: { customer: true },
-    });
 
     // 9. Revenue & Expense Chart Data
     const chartMap: { [key: string]: { label: string; revenue: number; expense: number; invoiceAmount: number } } =

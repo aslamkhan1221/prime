@@ -70,17 +70,17 @@ export default function OrdersPage() {
 
   const { success, error } = useToast();
 
-  const fetchOrders = async () => {
-    setLoading(true);
+  const fetchOrders = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const url = `/api/orders?search=${encodeURIComponent(search)}&status=${statusFilter}&partnerId=${partnerFilter}`;
       const res = await fetch(url);
       const data = await res.json();
       setOrders(data.orders || []);
     } catch {
-      error('Failed to load orders');
+      if (!isSilent) error('Failed to load orders');
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
@@ -263,7 +263,13 @@ export default function OrdersPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to update order');
+
+        // INSTANT DISPLAY: Update order in list immediately
+        const updated = data.order || { ...editingOrder, ...payload };
+        setOrders((prev) => prev.map((ord) => (ord.id === editingOrder.id ? { ...ord, ...updated } : ord)));
+        setModalOpen(false);
         success('Order updated successfully');
+        fetchOrders(true); // Silent background sync
       } else {
         const res = await fetch('/api/orders', {
           method: 'POST',
@@ -272,10 +278,15 @@ export default function OrdersPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to create order');
+
+        // INSTANT DISPLAY: Prepend new order immediately
+        if (data.order) {
+          setOrders((prev) => [data.order, ...prev]);
+        }
+        setModalOpen(false);
         success('Order created successfully');
+        fetchOrders(true); // Silent background sync
       }
-      setModalOpen(false);
-      fetchOrders();
     } catch (err: any) {
       error(err.message || 'Error saving order');
     } finally {
@@ -297,16 +308,20 @@ export default function OrdersPage() {
 
   const handleDeleteOrder = async () => {
     if (!orderToDelete) return;
-    setDeleting(true);
+    const targetId = orderToDelete.id;
+    // INSTANT DISPLAY: Remove immediately
+    setOrders((prev) => prev.filter((ord) => ord.id !== targetId));
+    setDeleteConfirmOpen(false);
+    success('Order deleted successfully');
+
     try {
-      const res = await fetch(`/api/orders/${orderToDelete.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/orders/${targetId}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete order');
-      success('Order deleted successfully');
-      setDeleteConfirmOpen(false);
-      fetchOrders();
+      fetchOrders(true); // Silent background sync
     } catch (err: any) {
       error(err.message || 'Error deleting order');
+      fetchOrders(false);
     } finally {
       setDeleting(false);
     }

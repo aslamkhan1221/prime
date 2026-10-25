@@ -43,8 +43,8 @@ export default function ReportsPage() {
 
   const { error, success } = useToast();
 
-  const fetchReportData = async () => {
-    setLoading(true);
+  const fetchReportData = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       let url = `/api/reports?type=${activeTab}`;
       if (fromDate) url += `&fromDate=${fromDate}`;
@@ -54,9 +54,9 @@ export default function ReportsPage() {
       const reportData = await res.json();
       setData(reportData);
     } catch {
-      error('Failed to load report');
+      if (!isSilent) error('Failed to load report');
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 

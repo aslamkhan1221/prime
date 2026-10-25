@@ -107,8 +107,8 @@ export default function PartnersPage() {
     return `Prime@${code}`;
   };
 
-  const fetchPartners = async () => {
-    setLoading(true);
+  const fetchPartners = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       let url = `/api/partners?`;
       const now = new Date();
@@ -129,9 +129,9 @@ export default function PartnersPage() {
       setFinancials(data.financials || {});
       setValidation(data.validation || { isValid: false, totalPercentage: 0 });
     } catch {
-      error('Failed to load partners data');
+      if (!isSilent) error('Failed to load partners data');
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
@@ -214,12 +214,24 @@ export default function PartnersPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to update partner');
+
+        // INSTANT DISPLAY: Update immediately in local state
+        const updatedPartner = data.partner || { ...editingPartner, ...formData };
+        setPartners((prev) =>
+          prev.map((p) => (p.id === editingPartner.id ? { ...p, ...updatedPartner } : p))
+        );
+        setRawPartners((prev) =>
+          prev.map((p) => (p.id === editingPartner.id ? { ...p, ...updatedPartner } : p))
+        );
+
+        setModalOpen(false);
         success('Partner updated successfully');
 
         if (data.credentials) {
           setGeneratedCredentials(data.credentials);
           setCredentialsModalOpen(true);
         }
+        fetchPartners(true); // Silent background sync
       } else {
         const res = await fetch('/api/partners', {
           method: 'POST',
@@ -228,15 +240,29 @@ export default function PartnersPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to add partner');
+
+        // INSTANT DISPLAY: Prepend new partner immediately
+        if (data.partner) {
+          const newP = {
+            ...data.partner,
+            assignedOrdersCount: 0,
+            hasLoginAccount: true,
+            parsedPermissions: formData.permissions,
+            shareAmount: 0,
+          };
+          setPartners((prev) => [newP, ...prev]);
+          setRawPartners((prev) => [newP, ...prev]);
+        }
+
+        setModalOpen(false);
         success('Partner added and login credentials generated!');
 
         if (data.credentials) {
           setGeneratedCredentials(data.credentials);
           setCredentialsModalOpen(true);
         }
+        fetchPartners(true); // Silent background sync
       }
-      setModalOpen(false);
-      fetchPartners();
     } catch (err: any) {
       error(err.message || 'Error saving partner');
     } finally {
@@ -255,9 +281,14 @@ export default function PartnersPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to revoke login');
+      
+      // INSTANT DISPLAY
+      setPartners((prev) =>
+        prev.map((p) => (p.id === partnerToRevoke.id ? { ...p, hasLoginAccount: false } : p))
+      );
       success(`Login credentials revoked for ${partnerToRevoke.name}`);
       setRevokeConfirmOpen(false);
-      fetchPartners();
+      fetchPartners(true);
     } catch (err: any) {
       error(err.message || 'Error revoking login');
     } finally {
@@ -267,16 +298,21 @@ export default function PartnersPage() {
 
   const handleDeletePartner = async () => {
     if (!partnerToDelete) return;
-    setDeleting(true);
+    const targetId = partnerToDelete.id;
+    // INSTANT DISPLAY: Remove immediately from state
+    setPartners((prev) => prev.filter((p) => p.id !== targetId));
+    setRawPartners((prev) => prev.filter((p) => p.id !== targetId));
+    setDeleteConfirmOpen(false);
+    success('Partner deleted successfully');
+
     try {
-      const res = await fetch(`/api/partners/${partnerToDelete.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/partners/${targetId}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete partner');
-      success('Partner deleted successfully');
-      setDeleteConfirmOpen(false);
-      fetchPartners();
+      fetchPartners(true); // Silent background sync
     } catch (err: any) {
       error(err.message || 'Error deleting partner');
+      fetchPartners(false);
     } finally {
       setDeleting(false);
     }

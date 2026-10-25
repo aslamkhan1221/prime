@@ -48,17 +48,17 @@ export default function InvoicesPage() {
 
   const { success, error } = useToast();
 
-  const fetchInvoices = async () => {
-    setLoading(true);
+  const fetchInvoices = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const url = `/api/invoices?search=${encodeURIComponent(search)}&status=${statusFilter}`;
       const res = await fetch(url);
       const data = await res.json();
       setInvoices(data.invoices || []);
     } catch {
-      error('Failed to load invoices');
+      if (!isSilent) error('Failed to load invoices');
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
@@ -71,8 +71,13 @@ export default function InvoicesPage() {
       const res = await fetch(`/api/invoices/${invoiceId}/duplicate`, { method: 'POST' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to duplicate');
+      
+      // INSTANT DISPLAY: Add duplicated invoice to top
+      if (data.invoice) {
+        setInvoices((prev) => [data.invoice, ...prev]);
+      }
       success(`Invoice duplicated as #${data.invoice?.invoiceNumber}`);
-      fetchInvoices();
+      fetchInvoices(true); // Silent sync
     } catch (err: any) {
       error(err.message || 'Error duplicating invoice');
     }
@@ -112,9 +117,28 @@ export default function InvoicesPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to record payment');
-      success('Payment recorded and invoice status updated!');
+
+      // INSTANT DISPLAY: Immediately update invoice payment & balance in list
+      setInvoices((prev) =>
+        prev.map((inv) => {
+          if (inv.id === selectedInvoice.id) {
+            const newPaid = (inv.paidAmount || 0) + Number(paymentAmount);
+            const newBal = Math.max(0, (inv.grandTotal || 0) - newPaid);
+            const newStatus = newBal === 0 ? 'PAID' : newPaid > 0 ? 'PARTIALLY_PAID' : inv.status;
+            return {
+              ...inv,
+              paidAmount: newPaid,
+              balanceAmount: newBal,
+              status: newStatus,
+            };
+          }
+          return inv;
+        })
+      );
+
       setPaymentModalOpen(false);
-      fetchInvoices();
+      success('Payment recorded and invoice status updated!');
+      fetchInvoices(true); // Silent background sync
     } catch (err: any) {
       error(err.message || 'Error recording payment');
     } finally {
@@ -124,16 +148,20 @@ export default function InvoicesPage() {
 
   const handleDeleteInvoice = async () => {
     if (!invoiceToDelete) return;
-    setDeleting(true);
+    const targetId = invoiceToDelete.id;
+    // INSTANT DISPLAY: Remove immediately from list
+    setInvoices((prev) => prev.filter((inv) => inv.id !== targetId));
+    setDeleteConfirmOpen(false);
+    success('Invoice deleted successfully');
+
     try {
-      const res = await fetch(`/api/invoices/${invoiceToDelete.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/invoices/${targetId}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete invoice');
-      success('Invoice deleted successfully');
-      setDeleteConfirmOpen(false);
-      fetchInvoices();
+      fetchInvoices(true); // Silent background sync
     } catch (err: any) {
       error(err.message || 'Error deleting invoice');
+      fetchInvoices(false);
     } finally {
       setDeleting(false);
     }

@@ -209,16 +209,17 @@ export async function GET(req: NextRequest) {
       }
 
       case 'profit': {
-        const payments = await prisma.payment.findMany({ where: dateFilterPayment });
+        const [payments, expenses, invoiceItems] = await Promise.all([
+          prisma.payment.findMany({ where: dateFilterPayment }),
+          prisma.expense.findMany({ where: dateFilterExpense }),
+          prisma.invoiceItem.findMany({
+            where: dateFilterInvoice.invoiceDate ? { invoice: dateFilterInvoice } : undefined,
+            include: { item: true },
+          }),
+        ]);
+
         const revenue = payments.reduce((acc, p) => acc + p.amount, 0);
-
-        const expenses = await prisma.expense.findMany({ where: dateFilterExpense });
         const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
-
-        const invoiceItems = await prisma.invoiceItem.findMany({
-          where: dateFilterInvoice.invoiceDate ? { invoice: dateFilterInvoice } : undefined,
-          include: { item: true },
-        });
 
         const jobCosts = invoiceItems.reduce((acc, ii) => {
           const cPrice = ii.item?.costPrice || 0;
@@ -238,16 +239,18 @@ export async function GET(req: NextRequest) {
       }
 
       case 'partner_profit': {
-        const payments = await prisma.payment.findMany({ where: dateFilterPayment });
+        const [payments, expenses, invoiceItems, partners] = await Promise.all([
+          prisma.payment.findMany({ where: dateFilterPayment }),
+          prisma.expense.findMany({ where: dateFilterExpense }),
+          prisma.invoiceItem.findMany({
+            where: dateFilterInvoice.invoiceDate ? { invoice: dateFilterInvoice } : undefined,
+            include: { item: true },
+          }),
+          prisma.partner.findMany({ where: { isActive: true } }),
+        ]);
+
         const revenue = payments.reduce((acc, p) => acc + p.amount, 0);
-
-        const expenses = await prisma.expense.findMany({ where: dateFilterExpense });
         const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
-
-        const invoiceItems = await prisma.invoiceItem.findMany({
-          where: dateFilterInvoice.invoiceDate ? { invoice: dateFilterInvoice } : undefined,
-          include: { item: true },
-        });
 
         const jobCosts = invoiceItems.reduce((acc, ii) => {
           const cPrice = ii.item?.costPrice || 0;
@@ -255,7 +258,6 @@ export async function GET(req: NextRequest) {
         }, 0);
 
         const netProfit = Math.max(0, revenue - totalExpenses - jobCosts);
-        const partners = await prisma.partner.findMany({ where: { isActive: true } });
         const partnerProfits = calculatePartnerProfits(netProfit, partners);
 
         return NextResponse.json({

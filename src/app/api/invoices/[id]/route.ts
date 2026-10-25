@@ -8,27 +8,28 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const invoice = await prisma.invoice.findUnique({
-      where: { id: params.id },
-      include: {
-        customer: true,
-        order: true,
-        items: {
-          include: {
-            item: true,
+    const [invoice, settings] = await Promise.all([
+      prisma.invoice.findUnique({
+        where: { id: params.id },
+        include: {
+          customer: true,
+          order: true,
+          items: {
+            include: {
+              item: true,
+            },
+          },
+          payments: {
+            orderBy: { paymentDate: 'desc' },
           },
         },
-        payments: {
-          orderBy: { paymentDate: 'desc' },
-        },
-      },
-    });
+      }),
+      prisma.companySetting.findUnique({ where: { id: 'default' } }),
+    ]);
 
     if (!invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
-
-    const settings = await prisma.companySetting.findUnique({ where: { id: 'default' } });
 
     return NextResponse.json({ invoice, settings });
   } catch (err: any) {

@@ -87,9 +87,11 @@ export async function POST(req: NextRequest) {
     // Generate Order Number
     let orderNumber = body.orderNumber;
     if (!orderNumber) {
-      const settings = await prisma.companySetting.findUnique({ where: { id: 'default' } });
+      const [settings, orderCount] = await Promise.all([
+        prisma.companySetting.findUnique({ where: { id: 'default' } }),
+        prisma.order.count(),
+      ]);
       const prefix = settings?.orderPrefix || 'ORD-';
-      const orderCount = await prisma.order.count();
       const startNum = settings?.orderNumberStart || 1001;
       orderNumber = `${prefix}${startNum + orderCount}`;
     }

@@ -39,8 +39,8 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
 
   const { success, error } = useToast();
 
-  const fetchInvoice = async () => {
-    setLoading(true);
+  const fetchInvoice = async (isSilent = false) => {
+    if (!isSilent && !invoice) setLoading(true);
     try {
       const res = await fetch(`/api/invoices/${params.id}`);
       const data = await res.json();
@@ -49,7 +49,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
       setSettings(data.settings);
       setPaymentAmount(data.invoice?.balanceAmount || 0);
     } catch (err: any) {
-      error(err.message || 'Error loading invoice');
+      if (!isSilent) error(err.message || 'Error loading invoice');
     } finally {
       setLoading(false);
     }
@@ -94,9 +94,32 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to record payment');
-      success('Payment recorded successfully');
+
+      // INSTANT DISPLAY: Update payment & balance immediately
+      const newPaid = (invoice.paidAmount || 0) + Number(paymentAmount);
+      const newBal = Math.max(0, (invoice.grandTotal || 0) - newPaid);
+      const newStatus = newBal === 0 ? 'PAID' : newPaid > 0 ? 'PARTIALLY_PAID' : invoice.status;
+      setInvoice((prev: any) => ({
+        ...prev,
+        paidAmount: newPaid,
+        balanceAmount: newBal,
+        status: newStatus,
+        payments: [
+          {
+            id: data.payment?.id || 'temp',
+            amount: Number(paymentAmount),
+            paymentDate: new Date(paymentDate),
+            paymentMethod,
+            referenceNumber,
+            notes: paymentNotes,
+          },
+          ...(prev?.payments || []),
+        ],
+      }));
+      setPaymentAmount(newBal);
       setPaymentModalOpen(false);
-      fetchInvoice();
+      success('Payment recorded successfully');
+      fetchInvoice(true); // Silent background sync
     } catch (err: any) {
       error(err.message || 'Error recording payment');
     } finally {

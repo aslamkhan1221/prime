@@ -55,17 +55,17 @@ export default function CustomersPage() {
 
   const { success, error } = useToast();
 
-  const fetchCustomers = async () => {
-    setLoading(true);
+  const fetchCustomers = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const url = `/api/customers?search=${encodeURIComponent(search)}&status=${statusFilter}`;
       const res = await fetch(url);
       const data = await res.json();
       setCustomers(data.customers || []);
     } catch (err: any) {
-      error('Failed to load customers');
+      if (!isSilent) error('Failed to load customers');
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
@@ -129,7 +129,15 @@ export default function CustomersPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to update customer');
+
+        // INSTANT DISPLAY: Immediately update customer in table state
+        const updated = data.customer || { ...editingCustomer, ...formData };
+        setCustomers((prev) =>
+          prev.map((c) => (c.id === editingCustomer.id ? { ...c, ...updated } : c))
+        );
+        setModalOpen(false);
         success('Customer updated successfully');
+        fetchCustomers(true); // Silent background sync
       } else {
         const res = await fetch('/api/customers', {
           method: 'POST',
@@ -138,10 +146,23 @@ export default function CustomersPage() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to create customer');
+
+        // INSTANT DISPLAY: Immediately prepend new customer
+        if (data.customer) {
+          const newCust = {
+            ...data.customer,
+            totalOrders: 0,
+            totalInvoices: 0,
+            totalBilled: 0,
+            totalPaid: 0,
+            pendingAmount: 0,
+          };
+          setCustomers((prev) => [newCust, ...prev]);
+        }
+        setModalOpen(false);
         success('Customer created successfully');
+        fetchCustomers(true); // Silent background sync
       }
-      setModalOpen(false);
-      fetchCustomers();
     } catch (err: any) {
       error(err.message || 'Error saving customer');
     } finally {
@@ -151,16 +172,20 @@ export default function CustomersPage() {
 
   const handleDeleteCustomer = async () => {
     if (!customerToDelete) return;
-    setDeleting(true);
+    const targetId = customerToDelete.id;
+    // INSTANT DISPLAY: Remove immediately from state
+    setCustomers((prev) => prev.filter((c) => c.id !== targetId));
+    setDeleteConfirmOpen(false);
+    success('Customer deleted successfully');
+
     try {
-      const res = await fetch(`/api/customers/${customerToDelete.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/customers/${targetId}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete customer');
-      success('Customer deleted successfully');
-      setDeleteConfirmOpen(false);
-      fetchCustomers();
+      fetchCustomers(true); // Silent background sync
     } catch (err: any) {
       error(err.message || 'Error deleting customer');
+      fetchCustomers(false); // Reload on error
     } finally {
       setDeleting(false);
     }

@@ -4,6 +4,7 @@ import { createClient } from '@libsql/client';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
+  libsql: any;
 };
 
 const TURSO_URL =
@@ -18,14 +19,17 @@ const TURSO_AUTH_TOKEN =
 function createPrismaClient(): PrismaClient {
   try {
     if (TURSO_URL && (TURSO_URL.startsWith('libsql://') || TURSO_URL.startsWith('https://'))) {
-      const libsql = createClient({
-        url: TURSO_URL,
-        authToken: TURSO_AUTH_TOKEN,
-      });
+      const libsql =
+        globalForPrisma.libsql ??
+        (globalForPrisma.libsql = createClient({
+          url: TURSO_URL,
+          authToken: TURSO_AUTH_TOKEN,
+        }));
+
       const adapter = new PrismaLibSQL(libsql);
       return new PrismaClient({
         adapter,
-        log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+        log: ['error'],
       });
     }
   } catch (err) {
@@ -33,10 +37,8 @@ function createPrismaClient(): PrismaClient {
   }
 
   return new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+    log: ['error'],
   });
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+export const prisma = globalForPrisma.prisma ?? (globalForPrisma.prisma = createPrismaClient());

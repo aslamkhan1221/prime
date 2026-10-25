@@ -43,8 +43,8 @@ export default function DashboardPage() {
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
 
-  const fetchDashboardData = async () => {
-    setLoading(true);
+  const fetchDashboardData = async (isSilent = false) => {
+    if (!isSilent && !data) setLoading(true);
     try {
       let url = `/api/dashboard?filter=${filter}`;
       if (filter === 'custom' && customFrom && customTo) {
@@ -61,7 +61,7 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    fetchDashboardData(Boolean(data));
   }, [filter]);
 
   const handleCustomApply = (e: React.FormEvent) => {
