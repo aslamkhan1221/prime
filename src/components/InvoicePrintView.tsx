@@ -20,14 +20,14 @@ export function InvoicePrintView({ invoice, settings, onBack }: InvoicePrintView
   const balanceDue = invoice?.balanceAmount !== undefined ? Number(invoice.balanceAmount) : grandTotal;
   const totalInWords = numberToWords(grandTotal);
 
-  // Fallbacks matching user's PDF
-  const companyName = settings?.companyName || 'Graphicon Design Studio (New)';
-  const companyId = settings?.companyId || 'GDS';
+  // Fallbacks matching Prime Print & Services
+  const companyName = settings?.companyName || 'Prime Print & Services';
+  const companyId = settings?.companyId || 'PRIME';
   const companyAddress =
     settings?.address ||
     '23/41/1068, Vaishali Nagar, Jaswantsingpura,\nCIDCO N-8, Azad Chowk to TV Center Road\nAurangabad Maharashtra 431001\nIndia';
-  const companyEmail = settings?.email || 'mail@graphicon.in';
-  const companyWebsite = settings?.website || 'https://graphicon.in/';
+  const companyEmail = settings?.email || 'accounts@primeprint.in';
+  const companyWebsite = settings?.website || 'https://primeprint.in/';
   const reviewUrl = settings?.reviewUrl || 'https://g.page/r/CfUhh8jFFKjlEAo/review';
 
   const defaultTerms =
@@ -84,19 +84,13 @@ export function InvoicePrintView({ invoice, settings, onBack }: InvoicePrintView
       {/* Printable Invoice Sheet matching exact PDF layout */}
       <div className="invoice-printable bg-white text-black p-8 sm:p-12 shadow-2xl max-w-[850px] mx-auto border border-slate-300 font-sans print:shadow-none print:border-none print:p-0 print:m-0 print:max-w-none print:w-full">
         {/* Top Header: Company Info on Left, TAX INVOICE on Right */}
-        <div className="flex justify-between items-start pb-4">
-          <div className="flex items-start gap-3">
-            {settings?.logoUrl ? (
-              <img
-                src={settings.logoUrl}
-                alt="Logo"
-                className="h-12 w-auto object-contain shrink-0"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0">
-                <PrinterIcon className="w-5 h-5 text-white" />
-              </div>
-            )}
+        <div className="flex justify-between items-start pb-3">
+          <div className="flex items-start gap-4">
+            <img
+              src={settings?.logoUrl || '/logo.png'}
+              alt={companyName}
+              className="h-14 sm:h-16 w-auto object-contain shrink-0 max-w-[200px]"
+            />
             <div>
               <h1 className="text-base font-extrabold text-black uppercase tracking-tight">
                 {companyName}
@@ -131,6 +125,9 @@ export function InvoicePrintView({ invoice, settings, onBack }: InvoicePrintView
             </h2>
           </div>
         </div>
+
+        {/* Signature CMYK Process Print Stripe from Logo */}
+        <div className="cmyk-stripe h-1 w-full rounded-full my-2.5 opacity-90" />
 
         {/* Invoice Metadata Box matching PDF format */}
         <div className="border border-slate-400 mt-2 text-xs">

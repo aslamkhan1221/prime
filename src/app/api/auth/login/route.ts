@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         await prisma.companySetting.upsert({
           where: { id: 'default' },
           update: {},
-          create: { id: 'default', companyName: 'Prime Sublimation' },
+          create: { id: 'default', companyName: 'Prime Print & Services', logoUrl: '/logo.png' },
         });
       } catch (dbErr) {
         console.warn('Prisma DB sync fallback during admin login (using memory session):', dbErr);

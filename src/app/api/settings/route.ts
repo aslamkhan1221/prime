@@ -14,7 +14,8 @@ export async function GET() {
       settings = await prisma.companySetting.create({
         data: {
           id: 'default',
-          companyName: 'PixelCraft Design Studio',
+          companyName: 'Prime Print & Services',
+          logoUrl: '/logo.png',
         },
       });
     }
@@ -65,8 +66,9 @@ export async function PUT(req: NextRequest) {
       },
       create: {
         id: 'default',
-        companyName: body.companyName || 'Graphicon Design Studio (New)',
-        companyId: body.companyId || 'GDS',
+        companyName: body.companyName || 'Prime Print & Services',
+        logoUrl: body.logoUrl || '/logo.png',
+        companyId: body.companyId || 'PRIME',
         reviewUrl: body.reviewUrl || 'https://g.page/r/CfUhh8jFFKjlEAo/review',
         ...body,
       },

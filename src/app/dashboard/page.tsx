@@ -94,8 +94,13 @@ export default function DashboardPage() {
         {/* Top Header & Filter toolbar */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-slate-800">
           <div>
-            <h1 className="text-2xl font-black text-white tracking-tight">Studio Dashboard</h1>
-            <p className="text-xs text-slate-400 mt-0.5">Real-time financial performance and business metrics</p>
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">Studio Dashboard</h1>
+              <span className="cmyk-stripe h-2 w-14 rounded-full opacity-90 inline-block" />
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Prime Print &amp; Services • <span className="text-brand-400 font-semibold">PRINT EVERYTHING YOU WANT</span>
+            </p>
           </div>
 
           {/* Date Filter Buttons */}
@@ -165,8 +170,8 @@ export default function DashboardPage() {
 
         {/* Primary Financial Metric Cards (Grid of 4) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Revenue */}
-          <div className="bg-gradient-to-br from-brand-950/40 via-slate-900 to-slate-900/90 p-5 rounded-2xl border border-brand-500/20 shadow-xl relative overflow-hidden">
+          {/* Revenue (Cyan - matching "PRINT & SERVICES") */}
+          <div className="bg-gradient-to-br from-brand-950/40 via-slate-900 to-slate-900/90 p-5 rounded-2xl border border-brand-500/30 shadow-xl relative overflow-hidden group hover:border-brand-500/50 transition">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Revenue</span>
               <div className="p-2 rounded-xl bg-brand-500/10 text-brand-400 border border-brand-500/20">
@@ -185,7 +190,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Net Profit */}
-          <div className="bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900/90 p-5 rounded-2xl border border-emerald-500/20 shadow-xl relative overflow-hidden">
+          <div className="bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900/90 p-5 rounded-2xl border border-emerald-500/20 shadow-xl relative overflow-hidden group hover:border-emerald-500/40 transition">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Net Profit</span>
               <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -202,16 +207,16 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Total Expenses */}
-          <div className="bg-gradient-to-br from-rose-950/40 via-slate-900 to-slate-900/90 p-5 rounded-2xl border border-rose-500/20 shadow-xl relative overflow-hidden">
+          {/* Total Expenses (Process Magenta - matching middle ink drop) */}
+          <div className="bg-gradient-to-br from-magenta-950/40 via-slate-900 to-slate-900/90 p-5 rounded-2xl border border-magenta-500/30 shadow-xl relative overflow-hidden group hover:border-magenta-500/50 transition">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Expenses</span>
-              <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
+              <div className="p-2 rounded-xl bg-magenta-500/10 text-magenta-400 border border-magenta-500/20">
                 <Receipt className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-3">
-              <div className="text-2xl font-black text-rose-400 tracking-tight">
+              <div className="text-2xl font-black text-magenta-300 tracking-tight">
                 {formatCurrency(metrics.totalExpenses)}
               </div>
               <p className="text-[11px] text-slate-400 mt-1">
@@ -220,19 +225,19 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Invoiced Billed Total */}
-          <div className="bg-gradient-to-br from-purple-950/40 via-slate-900 to-slate-900/90 p-5 rounded-2xl border border-purple-500/20 shadow-xl relative overflow-hidden">
+          {/* Invoiced Billed Total (Process Yellow / Amber - matching left ink drop) */}
+          <div className="bg-gradient-to-br from-amber-950/40 via-slate-900 to-slate-900/90 p-5 rounded-2xl border border-amber-500/30 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Billed</span>
-              <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
                 <FileText className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-3">
-              <div className="text-2xl font-black text-white tracking-tight">
+              <div className="text-2xl font-black text-amber-300 tracking-tight">
                 {formatCurrency(metrics.totalInvoicesAmount)}
               </div>
-              <p className="text-[11px] text-purple-300 mt-1 font-medium">
+              <p className="text-[11px] text-amber-400/80 mt-1 font-medium">
                 Across {metrics.totalInvoicesCount} invoices
               </p>
             </div>

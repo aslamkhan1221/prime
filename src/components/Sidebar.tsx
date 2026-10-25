@@ -64,26 +64,19 @@ export function Sidebar({
   return (
     <aside className="w-64 shrink-0 bg-slate-900/90 border-r border-slate-800 flex flex-col justify-between h-screen sticky top-0 no-print z-30 select-none">
       <div>
-        {/* Prime Sublimation Logo Badge */}
-        <div className="p-5 border-b border-slate-800/80">
-          <div className="flex items-center gap-3">
-            {/* Logo Splash Emblem matching attachment */}
-            <div className="relative w-10 h-10 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center shadow-lg shadow-brand-500/10 shrink-0">
-              <div className="absolute -top-1 -left-1 w-3 h-3 rounded-full bg-amber-400 border border-slate-950 shadow-sm" />
-              <div className="absolute -top-1.5 right-1 w-3.5 h-3.5 rounded-full bg-magenta-500 border border-slate-950 shadow-sm" />
-              <div className="absolute top-1 -right-1 w-3 h-3 rounded-full bg-brand-400 border border-slate-950 shadow-sm" />
-              <Printer className="w-5 h-5 text-white" />
+        {/* Prime Print & Services Official Logo Banner */}
+        <div className="p-3.5 border-b border-slate-800/80">
+          <Link href="/dashboard" className="block group">
+            <div className="bg-white rounded-2xl p-2.5 shadow-xl shadow-black/30 border border-slate-200/90 flex items-center justify-center transition-all group-hover:scale-[1.02] group-hover:shadow-brand-500/10">
+              <img
+                src="/logo.png"
+                alt="Prime Print & Services - Print Everything You Want"
+                className="w-full h-auto max-h-12 object-contain"
+              />
             </div>
-
-            <div>
-              <h1 className="font-black text-sm tracking-tight text-white uppercase">
-                PRIME <span className="text-brand-400">SUBLIMATION</span>
-              </h1>
-              <p className="text-[9px] font-bold text-magenta-400 uppercase tracking-wider mt-0.5">
-                PRINT EVERYTHING YOU WANT
-              </p>
-            </div>
-          </div>
+          </Link>
+          {/* CMYK 4-stripe bar from logo */}
+          <div className="cmyk-stripe h-1 w-full rounded-full mt-2.5 opacity-90 shadow-sm" />
         </div>
 
         {/* Navigation links */}
@@ -98,7 +91,7 @@ export function Sidebar({
                 href={item.href}
                 className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group ${
                   isActive
-                    ? 'bg-gradient-to-r from-brand-600 to-brand-700 text-white shadow-lg shadow-brand-600/30 font-semibold'
+                    ? 'bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-lg shadow-brand-500/20 font-bold border-l-4 border-magenta-500'
                     : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
                 }`}
               >

@@ -11,8 +11,13 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Prime Studio | Invoice & CRM Suite',
-  description: 'Production-ready Invoice Billing and CRM web application for Graphic Design Studios',
+  title: 'Prime Print & Services | Invoice & Studio CRM',
+  description: 'Prime Print & Services - Print Everything You Want. Modern Invoice Billing and Studio CRM Management System.',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export default function RootLayout({

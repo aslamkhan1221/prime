@@ -74,12 +74,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile Top Header */}
-        <div className="lg:hidden flex items-center justify-between p-4 bg-slate-900 border-b border-slate-800 no-print">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-600 to-accent-500 flex items-center justify-center text-white">
-              <Sparkles className="w-4 h-4" />
+        <div className="lg:hidden flex items-center justify-between p-3 bg-slate-900 border-b border-slate-800 no-print">
+          <div className="flex items-center gap-2.5">
+            <div className="bg-white px-2 py-1 rounded-xl shadow-md border border-slate-200 flex items-center justify-center">
+              <img
+                src="/logo.png"
+                alt="Prime Print & Services"
+                className="h-7 w-auto object-contain"
+              />
             </div>
-            <span className="font-extrabold text-sm text-white">PRIME STUDIO</span>
           </div>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

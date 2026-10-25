@@ -27,9 +27,12 @@ export function Header({
   return (
     <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-6 mb-6 border-b border-slate-800/80 no-print">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
-          {title}
-        </h1>
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-2xl font-black tracking-tight text-white">
+            {title}
+          </h1>
+          <span className="cmyk-stripe h-1.5 w-8 rounded-full opacity-80 shrink-0" />
+        </div>
         {subtitle && <p className="text-xs font-medium text-slate-400 mt-1">{subtitle}</p>}
       </div>
 

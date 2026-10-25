@@ -49,7 +49,8 @@ export async function POST(req: NextRequest) {
       update: companyName ? { companyName } : {},
       create: {
         id: 'default',
-        companyName: companyName || 'Prime Sublimation',
+        companyName: companyName || 'Prime Print & Services',
+        logoUrl: '/logo.png',
       },
     });
 

@@ -271,41 +271,40 @@ async function syncTurso() {
   if (existingCompany.rows.length === 0) {
     await client.execute({
       sql: `INSERT INTO "CompanySetting" (
-        id, companyName, companyId, address, phone, email, website, gstin, pan, invoiceTerms,
+        id, companyName, companyId, logoUrl, address, phone, email, website, gstin, pan, invoiceTerms,
         reviewUrl, createdAt, updatedAt
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
       args: [
         'default',
-        'Graphicon Design Studio (New)',
-        'GDS',
+        'Prime Print & Services',
+        'PRIME',
+        '/logo.png',
         '23/41/1068, Vaishali Nagar, Jaswantsingpura,\nCIDCO N-8, Azad Chowk to TV Center Road\nAurangabad Maharashtra 431001\nIndia',
         '+91 98765 43210',
-        'mail@graphicon.in',
-        'https://graphicon.in/',
+        'accounts@primeprint.in',
+        'https://primeprint.in',
         '27AAAAA0000A1Z5',
         'AAAAA0000A',
         '1) Bill must be paid within 10 days form the date of receipt.\n2) Any Queries/Corrections will be entertained only within 10 days form the date of Submission of the bill\nNo Corrections will be entertained thereafter.',
         'https://g.page/r/CfUhh8jFFKjlEAo/review',
       ],
     });
-    console.log('Created default Graphicon Design Studio CompanySetting on Turso');
+    console.log('Created default Prime Print & Services CompanySetting on Turso');
   } else {
     await client.execute({
       sql: `UPDATE "CompanySetting" SET 
-        companyName = ?, companyId = ?, address = ?, email = ?, website = ?, invoiceTerms = ?, reviewUrl = ?
+        companyName = ?, companyId = ?, logoUrl = ?, email = ?, website = ?
         WHERE id = ?`,
       args: [
-        'Graphicon Design Studio (New)',
-        'GDS',
-        '23/41/1068, Vaishali Nagar, Jaswantsingpura,\nCIDCO N-8, Azad Chowk to TV Center Road\nAurangabad Maharashtra 431001\nIndia',
-        'mail@graphicon.in',
-        'https://graphicon.in/',
-        '1) Bill must be paid within 10 days form the date of receipt.\n2) Any Queries/Corrections will be entertained only within 10 days form the date of Submission of the bill\nNo Corrections will be entertained thereafter.',
-        'https://g.page/r/CfUhh8jFFKjlEAo/review',
+        'Prime Print & Services',
+        'PRIME',
+        '/logo.png',
+        'accounts@primeprint.in',
+        'https://primeprint.in',
         'default',
       ],
     });
-    console.log('Updated CompanySetting to Graphicon Design Studio (New) on Turso');
+    console.log('Updated CompanySetting to Prime Print & Services on Turso');
   }
 
   // Seed initial sample items from invoice PDF if Item table has fewer than 2 items

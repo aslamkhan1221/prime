@@ -68,23 +68,18 @@ function LoginForm() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-500/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10">
-        {/* Prime Sublimation Brand Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center mb-4">
-            <div className="relative w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center shadow-xl shadow-brand-500/10">
-              <div className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-amber-400 border-2 border-slate-950 shadow-sm" />
-              <div className="absolute -top-2 right-1 w-4 h-4 rounded-full bg-magenta-500 border-2 border-slate-950 shadow-sm" />
-              <div className="absolute top-2 -right-1.5 w-4 h-4 rounded-full bg-brand-400 border-2 border-slate-950 shadow-sm" />
-              <Printer className="w-8 h-8 text-white" />
-            </div>
+        {/* Prime Print & Services Official Brand Header */}
+        <div className="text-center mb-7">
+          <div className="inline-block bg-white rounded-3xl p-4 shadow-2xl shadow-black/50 border border-slate-200/90 mb-3.5 transform hover:scale-[1.02] transition-all">
+            <img
+              src="/logo.png"
+              alt="Prime Print & Services - Print Everything You Want"
+              className="h-20 sm:h-24 w-auto object-contain mx-auto"
+            />
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-white uppercase">
-            PRIME <span className="text-brand-400">SUBLIMATION</span>
-          </h1>
-          <p className="text-[11px] font-bold text-magenta-400 uppercase tracking-widest mt-1">
-            PRINT EVERYTHING YOU WANT
-          </p>
-          <p className="text-xs text-slate-400 mt-2">
+          {/* CMYK 4-stripe bar */}
+          <div className="cmyk-stripe h-1.5 w-48 mx-auto rounded-full mb-2.5 opacity-90 shadow-sm" />
+          <p className="text-xs text-slate-400 font-medium">
             Invoice Billing &amp; Studio CRM Management
           </p>
         </div>
@@ -203,7 +198,7 @@ function LoginForm() {
 
         {/* Studio copyright */}
         <p className="text-center text-[11px] text-slate-400 mt-6">
-          © {new Date().getFullYear()} Prime Sublimation Studio. All rights reserved.
+          © {new Date().getFullYear()} Prime Print &amp; Services. All rights reserved.
         </p>
       </div>
     </div>

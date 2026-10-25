@@ -56,9 +56,34 @@ body {
 
 /* Multi-color logo gradient text */
 .logo-gradient-text {
-  background: linear-gradient(135deg, #ffffff 0%, #38bdf8 50%, #ec4899 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #38bdf8 50%, #ec008c 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Signature CMYK 4-color stripe directly from logo */
+.cmyk-stripe {
+  background: linear-gradient(90deg, 
+    #111827 0%, #111827 25%, 
+    #ffd100 25%, #ffd100 50%, 
+    #ec008c 50%, #ec008c 75%, 
+    #00a3e0 75%, #00a3e0 100%
+  );
+}
+
+.cmyk-stripe-vertical {
+  background: linear-gradient(180deg, 
+    #111827 0%, #111827 25%, 
+    #ffd100 25%, #ffd100 50%, 
+    #ec008c 50%, #ec008c 75%, 
+    #00a3e0 75%, #00a3e0 100%
+  );
+}
+
+/* Luminous CMYK glow for logo and cards */
+.logo-badge-card {
+  background: #ffffff;
+  box-shadow: 0 8px 30px -4px rgba(0, 163, 224, 0.25), 0 4px 15px -2px rgba(236, 0, 140, 0.2);
 }
 
 /* Clean invoice print styling */

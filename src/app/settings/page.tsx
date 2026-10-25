@@ -20,12 +20,12 @@ import {
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<any>({
-    companyName: 'Prime Sublimation',
-    logoUrl: '',
+    companyName: 'Prime Print & Services',
+    logoUrl: '/logo.png',
     address: '402 Creative Heights, Design District, Bangalore - 560001',
     phone: '+91 98765 43210',
-    email: 'accounts@pixelcraftstudio.in',
-    website: 'https://pixelcraftstudio.in',
+    email: 'accounts@primeprint.in',
+    website: 'https://primeprint.in',
     gstin: '29AAAAA0000A1Z5',
     pan: 'AAAAA0000A',
     invoicePrefix: 'INV-',
@@ -37,12 +37,12 @@ export default function SettingsPage() {
     currencySymbol: '₹',
     invoiceTerms: '1. 50% advance for graphic design / print orders.\n2. Invoices are due within 15 days of issue.\n3. Revisions beyond 3 iterations will be billed at hourly rates.',
     paymentDetails: 'Payment can be made via UPI or NEFT/IMPS direct bank transfer.',
-    bankAccountName: 'PixelCraft Design Studio LLP',
+    bankAccountName: 'Prime Print & Services',
     bankAccountNumber: '98765432101234',
     bankIfsc: 'HDFC0001234',
     bankName: 'HDFC Bank',
     bankBranch: 'MG Road, Bangalore',
-    upiId: 'pixelcraft@hdfcbank',
+    upiId: 'primeprint@hdfcbank',
   });
 
   const [loading, setLoading] = useState(true);
@@ -120,14 +120,32 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Company Logo URL</label>
-              <input
-                type="text"
-                value={settings.logoUrl || ''}
-                onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })}
-                placeholder="https://yourdomain.com/logo.png"
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-brand-500"
-              />
+              <div className="flex items-center justify-between mb-1">
+                <label className="block font-semibold text-slate-300">Company Logo</label>
+                <button
+                  type="button"
+                  onClick={() => setSettings({ ...settings, logoUrl: '/logo.png' })}
+                  className="text-[10px] text-brand-400 hover:text-brand-300 hover:underline font-semibold"
+                >
+                  Use Official Prime Logo
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-16 h-11 bg-white rounded-xl border border-slate-700 p-1 flex items-center justify-center shrink-0 shadow-sm">
+                  <img
+                    src={settings.logoUrl || '/logo.png'}
+                    alt="Logo Preview"
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+                <input
+                  type="text"
+                  value={settings.logoUrl || ''}
+                  onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })}
+                  placeholder="/logo.png or https://..."
+                  className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-brand-500"
+                />
+              </div>
             </div>
 
             <div>
