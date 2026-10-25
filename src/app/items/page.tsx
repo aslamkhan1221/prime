@@ -753,6 +753,7 @@ export default function ItemsPage() {
                 </div>
               </form>
             </div>
+          </div>
         )}
 
         {/* Delete Confirmation Modal */}

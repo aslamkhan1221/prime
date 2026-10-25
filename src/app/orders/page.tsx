@@ -906,6 +906,8 @@ export default function OrdersPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
         )}
 
         {/* Delete Confirmation Modal */}

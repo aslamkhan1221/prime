@@ -455,6 +455,8 @@ export default function InvoicesPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
         )}
 
         {/* Delete Confirmation Modal */}

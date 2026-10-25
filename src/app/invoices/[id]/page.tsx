@@ -378,6 +378,8 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
         )}
 
         {/* Delete Confirmation Modal */}

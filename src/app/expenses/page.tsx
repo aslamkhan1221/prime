@@ -479,10 +479,6 @@ export default function ExpensesPage() {
             </div>
           </div>
         )}
-              </form>
-            </div>
-          </div>
-        )}
 
         {/* Delete Confirmation Modal */}
         <ConfirmModal
