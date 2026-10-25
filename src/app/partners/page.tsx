@@ -354,18 +354,18 @@ export default function PartnersPage() {
 
         {/* 100% Allocation Validation Banner */}
         <div
-          className={`p-5 rounded-3xl border shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${
+          className={`p-5 rounded-3xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${
             validation.isValid
-              ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-100'
-              : 'bg-amber-950/40 border-amber-500/30 text-amber-100'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+              : 'bg-amber-50 border-amber-200 text-amber-900'
           }`}
         >
           <div className="flex items-center gap-3">
             <div
               className={`p-2.5 rounded-2xl border ${
                 validation.isValid
-                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                  : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                  ? 'bg-emerald-100 text-emerald-600 border-emerald-200'
+                  : 'bg-amber-100 text-amber-600 border-amber-200'
               }`}
             >
               {validation.isValid ? <CheckCircle2 className="w-6 h-6" /> : <AlertTriangle className="w-6 h-6" />}
@@ -373,11 +373,11 @@ export default function PartnersPage() {
             <div>
               <div className="text-base font-bold flex items-center gap-2">
                 <span>Profit Split Configuration:</span>
-                <span className="font-mono text-lg font-black">
+                <span className="font-mono text-lg font-black text-slate-900">
                   {validation.totalPercentage}% / 100.00%
                 </span>
               </div>
-              <p className="text-xs text-slate-300 mt-0.5">
+              <p className="text-xs text-slate-600 mt-0.5">
                 {validation.isValid
                   ? 'Active partner percentage allocation is perfectly balanced at 100.00%.'
                   : validation.error || `Current total is ${validation.totalPercentage}%. Active partners must equal exactly 100%.`}
@@ -385,17 +385,17 @@ export default function PartnersPage() {
             </div>
           </div>
 
-          <div className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-700/60 self-start sm:self-auto">
+          <div className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 shadow-sm self-start sm:self-auto">
             {rawPartners.filter((p) => p.isActive).length} Active Partner(s)
           </div>
         </div>
 
         {/* Financial Net Profit Overview Bar with Date Filter */}
-        <div className="bg-slate-900/80 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
             <div>
-              <h3 className="text-base font-bold text-white">Live Profit Calculator</h3>
-              <p className="text-xs text-slate-400">Calculated directly from received income, expenses and job costs</p>
+              <h3 className="text-base font-bold text-slate-900">Live Profit Calculator</h3>
+              <p className="text-xs text-slate-500">Calculated directly from received income, expenses and job costs</p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -409,8 +409,8 @@ export default function PartnersPage() {
                   onClick={() => setDateFilter(tab.id)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
                     dateFilter === tab.id
-                      ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30'
-                      : 'bg-slate-800/80 text-slate-400 hover:text-white'
+                      ? 'bg-[#00a3e0] text-white shadow-md shadow-[#00a3e0]/20'
+                      : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200'
                   }`}
                 >
                   {tab.label}
@@ -421,36 +421,36 @@ export default function PartnersPage() {
 
           {/* Financial Breakdown KPIs */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div className="p-4 bg-slate-950/70 rounded-2xl border border-slate-800">
-              <span className="text-xs text-slate-400 font-semibold">Total Revenue (Income)</span>
-              <div className="text-xl font-black text-white font-mono mt-1">
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+              <span className="text-xs text-slate-500 font-semibold">Total Revenue (Income)</span>
+              <div className="text-xl font-black text-slate-900 font-mono mt-1">
                 {formatCurrency(financials.totalRevenue)}
               </div>
-              <p className="text-[10px] text-emerald-400 mt-1">Cleared Client Inflow</p>
+              <p className="text-[10px] text-emerald-600 font-medium mt-1">Cleared Client Inflow</p>
             </div>
 
-            <div className="p-4 bg-slate-950/70 rounded-2xl border border-slate-800">
-              <span className="text-xs text-slate-400 font-semibold">Total Studio Expenses</span>
-              <div className="text-xl font-black text-rose-400 font-mono mt-1">
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+              <span className="text-xs text-slate-500 font-semibold">Total Studio Expenses</span>
+              <div className="text-xl font-black text-[#ec008c] font-mono mt-1">
                 {formatCurrency(financials.totalExpenses)}
               </div>
-              <p className="text-[10px] text-slate-500 mt-1">Operational Overheads</p>
+              <p className="text-[10px] text-slate-400 mt-1">Operational Overheads</p>
             </div>
 
-            <div className="p-4 bg-slate-950/70 rounded-2xl border border-slate-800">
-              <span className="text-xs text-slate-400 font-semibold">Total Product/Job Costs</span>
-              <div className="text-xl font-black text-slate-300 font-mono mt-1">
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+              <span className="text-xs text-slate-500 font-semibold">Total Product/Job Costs</span>
+              <div className="text-xl font-black text-slate-700 font-mono mt-1">
                 {formatCurrency(financials.totalJobCost)}
               </div>
-              <p className="text-[10px] text-slate-500 mt-1">Item Cost Base</p>
+              <p className="text-[10px] text-slate-400 mt-1">Item Cost Base</p>
             </div>
 
-            <div className="p-4 bg-gradient-to-br from-emerald-950/50 to-slate-950/70 rounded-2xl border border-emerald-500/30">
-              <span className="text-xs text-emerald-300 font-semibold">Distributable Net Profit</span>
-              <div className="text-2xl font-black text-emerald-400 font-mono mt-1">
+            <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200">
+              <span className="text-xs text-emerald-800 font-semibold">Distributable Net Profit</span>
+              <div className="text-2xl font-black text-emerald-600 font-mono mt-1">
                 {formatCurrency(financials.netProfit)}
               </div>
-              <p className="text-[10px] text-emerald-500/80 mt-1">For Partner Distribution</p>
+              <p className="text-[10px] text-emerald-600/80 font-medium mt-1">For Partner Distribution</p>
             </div>
           </div>
         </div>
@@ -465,38 +465,38 @@ export default function PartnersPage() {
             return (
               <div
                 key={partner.id}
-                className={`p-6 rounded-3xl border shadow-xl flex flex-col justify-between space-y-4 relative overflow-hidden transition-all ${
+                className={`p-6 rounded-3xl border shadow-sm flex flex-col justify-between space-y-4 relative overflow-hidden transition-all ${
                   partner.isActive
-                    ? 'bg-slate-900/80 border-slate-800'
-                    : 'bg-slate-900/40 border-slate-800/40 opacity-60'
+                    ? 'bg-white border-slate-200'
+                    : 'bg-slate-50/60 border-slate-200/60 opacity-60'
                 }`}
               >
                 <div className="space-y-4">
                   {/* Top Header */}
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-accent-600 text-white font-bold flex items-center justify-center text-sm shadow-lg shadow-brand-500/20 shrink-0">
+                      <div className="w-10 h-10 rounded-2xl bg-[#00a3e0] text-white font-bold flex items-center justify-center text-sm shadow-md shadow-[#00a3e0]/20 shrink-0">
                         {partner.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <h4 className="font-bold text-white text-base">{partner.name}</h4>
+                        <h4 className="font-bold text-slate-900 text-base">{partner.name}</h4>
                         <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
                           <span
                             className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${
                               partner.isActive
-                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                : 'bg-slate-800 text-slate-400'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-slate-100 text-slate-500'
                             }`}
                           >
                             {partner.isActive ? 'Active Partner' : 'Inactive'}
                           </span>
                           {hasLogin ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                              <Shield className="w-2.5 h-2.5" /> Portal Active
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                              <Shield className="w-2.5 h-2.5 text-emerald-600" /> Portal Active
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
-                              <ShieldAlert className="w-2.5 h-2.5" /> No Login
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                              <ShieldAlert className="w-2.5 h-2.5 text-amber-500" /> No Login
                             </span>
                           )}
                         </div>
@@ -504,42 +504,42 @@ export default function PartnersPage() {
                     </div>
 
                     <div className="text-right">
-                      <div className="text-2xl font-black text-brand-400 font-mono">
+                      <div className="text-2xl font-black text-[#00a3e0] font-mono">
                         {partner.profitPercentage}%
                       </div>
-                      <span className="text-[10px] text-slate-400 font-medium">Profit Share</span>
+                      <span className="text-[10px] text-slate-500 font-medium">Profit Share</span>
                     </div>
                   </div>
 
                   {/* Partner Contact & Info */}
-                  <div className="pt-3 border-t border-slate-800/80 space-y-1.5 text-xs text-slate-300">
+                  <div className="pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-600">
                     {partner.email && (
                       <div className="flex items-center gap-2">
-                        <Mail className="w-3.5 h-3.5 text-brand-400 shrink-0" />
-                        <span className="truncate font-mono">{partner.email}</span>
+                        <Mail className="w-3.5 h-3.5 text-[#00a3e0] shrink-0" />
+                        <span className="truncate font-mono text-slate-800">{partner.email}</span>
                       </div>
                     )}
                     {partner.phone && (
                       <div className="flex items-center gap-2">
-                        <Phone className="w-3.5 h-3.5 text-brand-400 shrink-0" />
-                        <span>{partner.phone}</span>
+                        <Phone className="w-3.5 h-3.5 text-[#00a3e0] shrink-0" />
+                        <span className="text-slate-800">{partner.phone}</span>
                       </div>
                     )}
                     {partner.notes && (
-                      <p className="text-[11px] text-slate-400 italic pt-0.5">{partner.notes}</p>
+                      <p className="text-[11px] text-slate-500 italic pt-0.5">{partner.notes}</p>
                     )}
                   </div>
 
                   {/* SEE CREDENTIALS & PERMISSIONS SECTION */}
-                  <div className="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-2.5">
-                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-300">
-                      <span className="flex items-center gap-1.5 text-brand-400">
+                  <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                      <span className="flex items-center gap-1.5 text-[#00a3e0]">
                         <Key className="w-3.5 h-3.5" /> Login Credentials
                       </span>
                       {hasLogin && (
                         <button
                           onClick={() => copyPartnerCardDetails(partner)}
-                          className="text-[10px] text-slate-400 hover:text-white flex items-center gap-1 font-semibold"
+                          className="text-[10px] text-slate-500 hover:text-slate-900 flex items-center gap-1 font-semibold"
                           title="Copy Login Details"
                         >
                           <Copy className="w-3 h-3" /> Copy
@@ -549,17 +549,17 @@ export default function PartnersPage() {
 
                     {hasLogin ? (
                       <div className="space-y-1.5 text-xs">
-                        <div className="flex items-center justify-between bg-slate-900/90 px-2.5 py-1.5 rounded-xl border border-slate-800">
-                          <span className="text-[10px] text-slate-400 font-semibold">Email:</span>
-                          <span className="font-mono text-white text-[11px] truncate max-w-[170px]">
+                        <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-xl border border-slate-200">
+                          <span className="text-[10px] text-slate-500 font-semibold">Email:</span>
+                          <span className="font-mono text-slate-900 text-[11px] truncate max-w-[170px]">
                             {partner.email}
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between bg-slate-900/90 px-2.5 py-1.5 rounded-xl border border-slate-800">
-                          <span className="text-[10px] text-slate-400 font-semibold">Password:</span>
+                        <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-xl border border-slate-200">
+                          <span className="text-[10px] text-slate-500 font-semibold">Password:</span>
                           <div className="flex items-center gap-1.5">
-                            <span className="font-mono text-emerald-400 text-[11px] font-bold">
+                            <span className="font-mono text-emerald-600 text-[11px] font-bold">
                               {isPasswordVisible
                                 ? partner.passwordHint || 'Default / Encrypted'
                                 : '••••••••'}
@@ -567,7 +567,7 @@ export default function PartnersPage() {
                             <button
                               type="button"
                               onClick={() => toggleCardPasswordVisibility(partner.id)}
-                              className="text-slate-400 hover:text-white p-0.5"
+                              className="text-slate-400 hover:text-slate-700 p-0.5"
                             >
                               {isPasswordVisible ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                             </button>
@@ -576,15 +576,15 @@ export default function PartnersPage() {
 
                         {/* Visible Sidebar Menus in Portal */}
                         <div className="pt-1">
-                          <div className="text-[10px] font-semibold text-slate-400 mb-1 flex items-center justify-between">
+                          <div className="text-[10px] font-semibold text-slate-500 mb-1 flex items-center justify-between">
                             <span>Portal Sidebar Menus:</span>
-                            <span className="text-[9px] text-brand-400">{perms.length} modules</span>
+                            <span className="text-[9px] text-[#00a3e0] font-bold">{perms.length} modules</span>
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {perms.map((pId: string) => (
                               <span
                                 key={pId}
-                                className="text-[9px] font-medium px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded-md border border-slate-700/60 uppercase"
+                                className="text-[9px] font-medium px-1.5 py-0.5 bg-white text-slate-700 rounded-md border border-slate-200 uppercase"
                               >
                                 {pId}
                               </span>
@@ -593,19 +593,19 @@ export default function PartnersPage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="text-[11px] text-amber-400/80 bg-amber-500/10 p-2 rounded-xl border border-amber-500/20">
+                      <div className="text-[11px] text-amber-700 bg-amber-50 p-2 rounded-xl border border-amber-200">
                         Login access is revoked or not generated yet. Click &quot;Edit / Credentials&quot; to enable.
                       </div>
                     )}
 
                     {/* Assigned Orders quick view */}
-                    <div className="flex items-center justify-between pt-1 text-[11px] border-t border-slate-800/80">
-                      <span className="text-slate-400 flex items-center gap-1">
-                        <ShoppingBag className="w-3 h-3 text-brand-400" /> Assigned Orders:
+                    <div className="flex items-center justify-between pt-1 text-[11px] border-t border-slate-200/80">
+                      <span className="text-slate-500 flex items-center gap-1">
+                        <ShoppingBag className="w-3 h-3 text-[#00a3e0]" /> Assigned Orders:
                       </span>
                       <Link
                         href={`/orders?partnerId=${partner.id}`}
-                        className="text-brand-400 hover:underline font-bold flex items-center gap-1"
+                        className="text-[#00a3e0] hover:underline font-bold flex items-center gap-1"
                       >
                         {partner.assignedOrdersCount || 0} Order(s) <ExternalLink className="w-2.5 h-2.5" />
                       </Link>
@@ -613,25 +613,25 @@ export default function PartnersPage() {
                   </div>
 
                   {/* Dynamic Calculated Share Amount */}
-                  <div className="p-3 bg-slate-950/80 rounded-2xl border border-slate-800/80 space-y-0.5">
-                    <div className="flex justify-between text-[11px] text-slate-400">
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-0.5">
+                    <div className="flex justify-between text-[11px] text-slate-500">
                       <span>Calculated Net Share:</span>
-                      <span className="text-emerald-400 font-semibold">{partner.profitPercentage}% of Profit</span>
+                      <span className="text-emerald-600 font-semibold">{partner.profitPercentage}% of Profit</span>
                     </div>
-                    <div className="text-lg font-black text-white font-mono flex items-center justify-between">
+                    <div className="text-lg font-black text-slate-900 font-mono flex items-center justify-between">
                       <span>{formatCurrency(partner.shareAmount || 0)}</span>
-                      <DollarSign className="w-4 h-4 text-emerald-400" />
+                      <DollarSign className="w-4 h-4 text-emerald-600" />
                     </div>
                   </div>
                 </div>
 
                 {/* Card Action Buttons (Edit, Revoke Login, Delete) */}
-                <div className="flex items-center justify-between pt-2 border-t border-slate-800 gap-1.5">
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 gap-1.5">
                   <button
                     onClick={() => openEditModal(partner)}
-                    className="flex-1 py-1.5 px-2.5 text-xs font-semibold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition flex items-center justify-center gap-1.5"
+                    className="flex-1 py-1.5 px-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center justify-center gap-1.5"
                   >
-                    <Edit2 className="w-3.5 h-3.5 text-brand-400" />
+                    <Edit2 className="w-3.5 h-3.5 text-[#00a3e0]" />
                     <span>Edit & Portal</span>
                   </button>
 
@@ -642,7 +642,7 @@ export default function PartnersPage() {
                         setRevokeConfirmOpen(true);
                       }}
                       title="Revoke / Delete Partner Login Credentials"
-                      className="p-1.5 text-slate-400 hover:text-amber-400 bg-slate-800 hover:bg-slate-700 rounded-xl transition"
+                      className="p-1.5 text-slate-500 hover:text-amber-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
                     >
                       <ShieldOff className="w-4 h-4" />
                     </button>
@@ -654,7 +654,7 @@ export default function PartnersPage() {
                       setDeleteConfirmOpen(true);
                     }}
                     title="Delete Partner Profile Completely"
-                    className="p-1.5 text-slate-400 hover:text-rose-400 bg-slate-800 hover:bg-slate-700 rounded-xl transition"
+                    className="p-1.5 text-slate-500 hover:text-rose-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -665,11 +665,11 @@ export default function PartnersPage() {
         </div>
 
         {partners.length === 0 && !loading && (
-          <div className="text-center py-16 bg-slate-900/40 rounded-3xl border border-slate-800">
-            <p className="text-slate-400 text-sm">No partners added yet.</p>
+          <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 shadow-sm">
+            <p className="text-slate-500 text-sm">No partners added yet.</p>
             <button
               onClick={openAddModal}
-              className="mt-3 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition"
+              className="mt-3 px-4 py-2 bg-[#00a3e0] hover:bg-[#0284c7] text-white rounded-xl text-xs font-bold transition shadow-md shadow-[#00a3e0]/20"
             >
               Add First Partner
             </button>
@@ -678,23 +678,23 @@ export default function PartnersPage() {
 
         {/* Add / Edit Partner & Portal Permissions Modal */}
         {modalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="relative w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
-              <div className="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-950/40">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+            <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-brand-500/10 text-brand-400 border border-brand-500/20">
+                  <div className="p-2 rounded-xl bg-brand-50 text-[#00a3e0] border border-brand-100">
                     <UserCheck className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white">
+                    <h3 className="text-base font-bold text-slate-900">
                       {editingPartner ? 'Edit Partner & Portal Permissions' : 'Add Partner & Generate Login'}
                     </h3>
-                    <p className="text-xs text-slate-400">Configure equity %, login credentials, and allowed sidebar menus</p>
+                    <p className="text-xs text-slate-500">Configure equity %, login credentials, and allowed sidebar menus</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setModalOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-white bg-slate-800 rounded-xl"
+                  className="p-1.5 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-xl transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -702,30 +702,32 @@ export default function PartnersPage() {
 
               <form onSubmit={handleSavePartner} className="p-6 space-y-4 text-xs max-h-[80vh] overflow-y-auto">
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Partner Full Name *</label>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Partner Full Name <span className="text-[#ec008c]">*</span>
+                  </label>
                   <input
                     type="text"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Partner A / Rajesh Nair"
-                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-brand-500"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">
-                    Partner Email (Login Username) *
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Partner Email (Login Username) <span className="text-[#ec008c]">*</span>
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="email"
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="partner@primesublimation.in"
-                      className="w-full pl-10 pr-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-brand-500 font-mono"
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-mono"
                     />
                   </div>
                 </div>
@@ -733,31 +735,31 @@ export default function PartnersPage() {
                 {/* Login Password Generation Field */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block font-semibold text-slate-300">
-                      {editingPartner ? 'Reset / Set New Password (Optional)' : 'Auto-Generated Login Password *'}
+                    <label className="block font-semibold text-slate-700">
+                      {editingPartner ? 'Reset / Set New Password (Optional)' : 'Auto-Generated Login Password'} <span className="text-[#ec008c]">*</span>
                     </label>
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, password: generateRandomPassword() })}
-                      className="text-[11px] font-semibold text-brand-400 hover:text-brand-300 flex items-center gap-1"
+                      className="text-[11px] font-semibold text-[#00a3e0] hover:text-[#0284c7] flex items-center gap-1"
                     >
                       <RefreshCw className="w-3 h-3" /> Generate New
                     </button>
                   </div>
                   <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required={!editingPartner}
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder={editingPartner ? 'Leave blank to keep existing password' : 'e.g. Prime@7384'}
-                      className="w-full pl-10 pr-10 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 font-mono focus:border-brand-500"
+                      className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 font-mono focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -765,13 +767,13 @@ export default function PartnersPage() {
                 </div>
 
                 {/* Configure Allowed Sidebar Menu for Partner's Portal */}
-                <div className="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-2.5">
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="font-bold text-white text-xs block">
+                      <span className="font-bold text-slate-900 text-xs block">
                         Visible Sidebar Menus in Partner Portal
                       </span>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-slate-500">
                         Choose which modules this partner can view in their login portal
                       </span>
                     </div>
@@ -786,7 +788,7 @@ export default function PartnersPage() {
                               : ALL_NAV_ITEMS.map((n) => n.id),
                         })
                       }
-                      className="text-[10px] text-brand-400 font-semibold hover:underline"
+                      className="text-[10px] text-[#00a3e0] font-semibold hover:underline"
                     >
                       {formData.permissions.length === ALL_NAV_ITEMS.length ? 'Deselect All' : 'Select All'}
                     </button>
@@ -802,14 +804,14 @@ export default function PartnersPage() {
                           onClick={() => togglePermission(item.id)}
                           className={`flex items-center gap-2 p-2 rounded-xl text-left border transition ${
                             isSelected
-                              ? 'bg-brand-500/10 border-brand-500/40 text-brand-300'
-                              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                              ? 'bg-brand-50 border-brand-300 text-[#00a3e0]'
+                              : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
                           }`}
                         >
                           {isSelected ? (
-                            <CheckSquare className="w-3.5 h-3.5 text-brand-400 shrink-0" />
+                            <CheckSquare className="w-3.5 h-3.5 text-[#00a3e0] shrink-0" />
                           ) : (
-                            <Square className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                            <Square className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                           )}
                           <span className="text-[11px] font-medium truncate">{item.name}</span>
                         </button>
@@ -820,19 +822,19 @@ export default function PartnersPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-300 mb-1">Phone (Optional)</label>
+                    <label className="block font-semibold text-slate-700 mb-1">Phone (Optional)</label>
                     <input
                       type="text"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="+91 98765 43210"
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-brand-500"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-300 mb-1">
-                      Profit Percentage (%) *
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      Profit Percentage (%) <span className="text-[#ec008c]">*</span>
                     </label>
                     <div className="relative">
                       <input
@@ -844,21 +846,21 @@ export default function PartnersPage() {
                         value={formData.profitPercentage}
                         onChange={(e) => setFormData({ ...formData, profitPercentage: Number(e.target.value) })}
                         placeholder="40"
-                        className="w-full pl-3 pr-7 py-2 bg-slate-800 border border-slate-700 rounded-xl font-bold text-white font-mono focus:border-brand-500"
+                        className="w-full pl-3 pr-7 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-900 font-mono focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                       />
-                      <Percent className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2" />
+                      <Percent className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2" />
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Notes / Responsibilities</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Notes / Responsibilities</label>
                   <input
                     type="text"
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     placeholder="e.g. Co-founder, Production Head..."
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-brand-500"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                   />
                 </div>
 
@@ -868,25 +870,25 @@ export default function PartnersPage() {
                     id="partnerActive"
                     checked={formData.isActive}
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                    className="rounded border-slate-700 bg-slate-800 text-brand-600 focus:ring-brand-500"
+                    className="rounded border-slate-300 bg-white text-[#00a3e0] focus:ring-[#00a3e0]"
                   />
-                  <label htmlFor="partnerActive" className="text-xs font-semibold text-slate-300 cursor-pointer">
+                  <label htmlFor="partnerActive" className="text-xs font-semibold text-slate-700 cursor-pointer">
                     Active Partner (Included in profit share calculation)
                   </label>
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => setModalOpen(false)}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-semibold"
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-bold shadow-lg shadow-brand-600/30 transition disabled:opacity-50"
+                    className="px-5 py-2 bg-[#00a3e0] hover:bg-[#0284c7] text-white rounded-xl font-bold shadow-md shadow-[#00a3e0]/20 transition disabled:opacity-50"
                   >
                     {saving ? 'Saving...' : editingPartner ? 'Update Partner & Permissions' : 'Save & Create Credentials'}
                   </button>
@@ -898,37 +900,37 @@ export default function PartnersPage() {
 
         {/* Partner Login Credentials Success Modal */}
         {credentialsModalOpen && generatedCredentials && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
-            <div className="relative w-full max-w-md bg-slate-900 border border-emerald-500/40 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
-              <div className="p-6 bg-gradient-to-b from-emerald-950/40 to-slate-900 border-b border-slate-800 text-center space-y-2">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+            <div className="relative w-full max-w-md bg-white border border-emerald-300 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
+              <div className="p-6 bg-gradient-to-b from-emerald-50 to-white border-b border-emerald-100 text-center space-y-2">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto shadow-md shadow-emerald-500/10">
                   <Key className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Partner Login Credentials</h3>
-                <p className="text-xs text-slate-300">
-                  Login account has been successfully configured for <span className="font-bold text-white">{generatedCredentials.name}</span>.
+                <h3 className="text-lg font-bold text-slate-900">Partner Login Credentials</h3>
+                <p className="text-xs text-slate-600">
+                  Login account has been successfully configured for <span className="font-bold text-slate-900">{generatedCredentials.name}</span>.
                 </p>
               </div>
 
               <div className="p-6 space-y-4 text-xs">
-                <div className="space-y-3 bg-slate-950/80 p-4 rounded-2xl border border-slate-800">
+                <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                   <div>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase">Login Email / Username</span>
-                    <div className="font-mono text-sm font-semibold text-white mt-0.5 break-all">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">Login Email / Username</span>
+                    <div className="font-mono text-sm font-semibold text-slate-900 mt-0.5 break-all">
                       {generatedCredentials.email}
                     </div>
                   </div>
 
                   <div>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase">Password</span>
-                    <div className="font-mono text-base font-bold text-emerald-400 mt-0.5 select-all">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">Password</span>
+                    <div className="font-mono text-base font-bold text-emerald-600 mt-0.5 select-all">
                       {generatedCredentials.password}
                     </div>
                   </div>
 
                   <div>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase">Assigned Role</span>
-                    <div className="font-semibold text-brand-400 mt-0.5">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">Assigned Role</span>
+                    <div className="font-semibold text-[#00a3e0] mt-0.5">
                       {generatedCredentials.role} (Portal Access)
                     </div>
                   </div>
@@ -938,7 +940,7 @@ export default function PartnersPage() {
                   <button
                     type="button"
                     onClick={copyCredentialsText}
-                    className="flex-1 py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-brand-600/30 transition"
+                    className="flex-1 py-2.5 px-4 bg-[#00a3e0] hover:bg-[#0284c7] text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-md shadow-[#00a3e0]/20 transition"
                   >
                     <Copy className="w-4 h-4" />
                     <span>Copy Login Details</span>
@@ -946,7 +948,7 @@ export default function PartnersPage() {
                   <button
                     type="button"
                     onClick={() => setCredentialsModalOpen(false)}
-                    className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-semibold transition"
+                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition"
                   >
                     Done
                   </button>

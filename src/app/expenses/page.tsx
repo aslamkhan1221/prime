@@ -190,36 +190,36 @@ export default function ExpensesPage() {
         />
 
         {/* Expenses Summary Banner */}
-        <div className="bg-gradient-to-r from-rose-950/40 via-slate-900 to-slate-900/90 p-5 rounded-3xl border border-rose-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+        <div className="bg-white p-5 rounded-3xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
+            <div className="p-2.5 rounded-2xl bg-rose-50 text-[#ec008c] border border-rose-200">
               <TrendingDown className="w-6 h-6" />
             </div>
             <div>
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Total Expenses Recorded
               </span>
-              <div className="text-2xl font-black text-rose-400 font-mono mt-0.5">
+              <div className="text-2xl font-black text-[#ec008c] font-mono mt-0.5">
                 {formatCurrency(totalAmount)}
               </div>
             </div>
           </div>
-          <div className="text-xs font-medium text-slate-400">
+          <div className="text-xs font-medium text-slate-500 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
             {expenses.length} Expense Entry(s)
           </div>
         </div>
 
         {/* Filter & Search Bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
           <div className="relative w-full md:w-80">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search expense title, description, ref #..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchExpenses()}
-              className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:bg-white transition"
             />
           </div>
 
@@ -227,7 +227,7 @@ export default function ExpensesPage() {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-brand-500 font-medium"
             >
               <option value="ALL">All Categories</option>
               {EXPENSE_CATEGORIES.map((cat) => (
@@ -240,7 +240,7 @@ export default function ExpensesPage() {
             <select
               value={methodFilter}
               onChange={(e) => setMethodFilter(e.target.value)}
-              className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-brand-500 font-medium"
             >
               <option value="ALL">All Methods</option>
               {PAYMENT_METHODS.map((pm) => (
@@ -253,11 +253,11 @@ export default function ExpensesPage() {
         </div>
 
         {/* Expenses Table */}
-        <div className="bg-slate-900/80 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-slate-950/60 border-b border-slate-800 text-slate-400 font-bold uppercase text-[10px]">
+                <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
                   <th className="py-3.5 px-4">Expense Title</th>
                   <th className="py-3.5 px-4">Category</th>
                   <th className="py-3.5 px-4">Date</th>
@@ -267,33 +267,34 @@ export default function ExpensesPage() {
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-slate-100 text-slate-800">
                 {loading ? (
                   <tr>
                     <td colSpan={7} className="py-12 text-center text-slate-500">
-                      Loading expenses...
+                      <div className="inline-block w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-2" />
+                      <div>Loading expenses...</div>
                     </td>
                   </tr>
                 ) : expenses.length > 0 ? (
                   expenses.map((exp) => (
-                    <tr key={exp.id} className="hover:bg-slate-800/30 transition group">
+                    <tr key={exp.id} className="hover:bg-slate-50/80 transition group">
                       <td className="py-3.5 px-4">
-                        <div className="font-bold text-white text-sm">{exp.title}</div>
+                        <div className="font-bold text-slate-900 text-sm">{exp.title}</div>
                         {exp.description && (
-                          <div className="text-[11px] text-slate-400 mt-0.5">{exp.description}</div>
+                          <div className="text-[11px] text-slate-500 mt-0.5">{exp.description}</div>
                         )}
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className="px-2 py-0.5 rounded-lg bg-slate-800 text-slate-300 font-medium text-[11px]">
+                        <span className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 font-medium text-[11px] border border-slate-200">
                           {exp.category}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-slate-300">{formatDate(exp.date)}</td>
-                      <td className="py-3.5 px-4 text-slate-300 font-medium">{exp.paymentMethod}</td>
-                      <td className="py-3.5 px-4 font-mono text-[11px] text-slate-400">
+                      <td className="py-3.5 px-4 text-slate-600">{formatDate(exp.date)}</td>
+                      <td className="py-3.5 px-4 text-slate-700 font-medium">{exp.paymentMethod}</td>
+                      <td className="py-3.5 px-4 font-mono text-[11px] text-slate-500">
                         {exp.referenceNumber || '-'}
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono font-bold text-rose-400 text-sm">
+                      <td className="py-3.5 px-4 text-right font-mono font-bold text-[#ec008c] text-sm">
                         {formatCurrency(exp.amount)}
                       </td>
                       <td className="py-3.5 px-4 text-right">
@@ -301,7 +302,7 @@ export default function ExpensesPage() {
                           <button
                             onClick={() => openEditModal(exp)}
                             title="Edit Expense"
-                            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition"
+                            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
@@ -311,7 +312,7 @@ export default function ExpensesPage() {
                               setDeleteConfirmOpen(true);
                             }}
                             title="Delete Expense"
-                            className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition"
+                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -333,23 +334,23 @@ export default function ExpensesPage() {
 
         {/* Add / Edit Expense Modal */}
         {modalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="relative w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
-              <div className="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-950/40">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+            <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between p-6 border-b border-slate-200 bg-slate-50/80">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                  <div className="p-2 rounded-xl bg-rose-50 text-[#ec008c] border border-rose-200">
                     <Receipt className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white">
+                    <h3 className="text-base font-bold text-slate-900">
                       {editingExpense ? 'Edit Expense Record' : 'Record New Expense'}
                     </h3>
-                    <p className="text-xs text-slate-400">Keep track of studio operational costs</p>
+                    <p className="text-xs text-slate-500">Keep track of studio operational costs</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setModalOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-white bg-slate-800 rounded-xl"
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -357,8 +358,8 @@ export default function ExpensesPage() {
 
               <form onSubmit={handleSaveExpense} className="p-6 space-y-4 text-xs">
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">
-                    Expense Title *
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Expense Title <span className="text-[#ec008c]">*</span>
                   </label>
                   <input
                     type="text"
@@ -366,19 +367,19 @@ export default function ExpensesPage() {
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     placeholder="e.g. Star Flex Vinyl Roll 100m, Adobe CC Subscription"
-                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-rose-500"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-300 mb-1">
+                    <label className="block font-semibold text-slate-700 mb-1">
                       Expense Category
                     </label>
                     <select
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-rose-500"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500"
                     >
                       {EXPENSE_CATEGORIES.map((cat) => (
                         <option key={cat} value={cat}>
@@ -389,8 +390,8 @@ export default function ExpensesPage() {
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-300 mb-1">
-                      Amount (₹) *
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      Amount (₹) <span className="text-[#ec008c]">*</span>
                     </label>
                     <input
                       type="number"
@@ -398,29 +399,29 @@ export default function ExpensesPage() {
                       required
                       value={formData.amount}
                       onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm font-bold text-white font-mono focus:border-rose-500"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-900 font-mono focus:outline-none focus:border-brand-500"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-300 mb-1">Expense Date</label>
+                    <label className="block font-semibold text-slate-700 mb-1">Expense Date</label>
                     <input
                       type="date"
                       required
                       value={formData.date}
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-rose-500"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-300 mb-1">Payment Method</label>
+                    <label className="block font-semibold text-slate-700 mb-1">Payment Method</label>
                     <select
                       value={formData.paymentMethod}
                       onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-rose-500"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500"
                     >
                       <option value="BANK_TRANSFER">Bank Transfer</option>
                       <option value="UPI">UPI / QR Code</option>
@@ -433,7 +434,7 @@ export default function ExpensesPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">
+                  <label className="block font-semibold text-slate-700 mb-1">
                     Invoice / Receipt / UTR Ref #
                   </label>
                   <input
@@ -441,12 +442,12 @@ export default function ExpensesPage() {
                     value={formData.referenceNumber}
                     onChange={(e) => setFormData({ ...formData, referenceNumber: e.target.value })}
                     placeholder="e.g. Vendor Inv #1042 / UTR 918239"
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-rose-500"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">
+                  <label className="block font-semibold text-slate-700 mb-1">
                     Description & Notes
                   </label>
                   <textarea
@@ -454,26 +455,30 @@ export default function ExpensesPage() {
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Vendor details or items purchased..."
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-rose-500"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
                   <button
                     type="button"
                     onClick={() => setModalOpen(false)}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-semibold"
+                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl font-bold shadow-lg shadow-rose-600/30 transition disabled:opacity-50"
+                    className="px-5 py-2.5 bg-gradient-to-r from-[#ec008c] to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white rounded-xl font-bold shadow-md shadow-rose-500/20 transition disabled:opacity-50"
                   >
                     {saving ? 'Saving...' : editingExpense ? 'Update Expense' : 'Save Expense'}
                   </button>
                 </div>
+              </form>
+            </div>
+          </div>
+        )}
               </form>
             </div>
           </div>

@@ -92,14 +92,14 @@ export default function DashboardPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Top Header & Filter toolbar */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-slate-800">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-5 border-b border-slate-200">
           <div>
             <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl font-black text-white tracking-tight">Studio Dashboard</h1>
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">Studio Dashboard</h1>
               <span className="cmyk-stripe h-2 w-14 rounded-full opacity-90 inline-block" />
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Prime Print &amp; Services • <span className="text-brand-400 font-semibold">PRINT EVERYTHING YOU WANT</span>
+            <p className="text-xs text-slate-500 mt-1">
+              Prime Print &amp; Services • <span className="text-brand-600 font-semibold">PRINT EVERYTHING YOU WANT</span>
             </p>
           </div>
 
@@ -117,8 +117,8 @@ export default function DashboardPage() {
                 onClick={() => setFilter(tab.id)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
                   filter === tab.id
-                    ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30'
-                    : 'bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700'
+                    ? 'bg-brand-600 text-white shadow-md shadow-brand-600/20'
+                    : 'bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-50 border border-slate-200'
                 }`}
               >
                 {tab.label}
@@ -128,7 +128,7 @@ export default function DashboardPage() {
             <button
               onClick={() => fetchDashboardData()}
               title="Refresh Data"
-              className="p-2 text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 rounded-xl transition"
+              className="p-2 text-slate-500 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition shadow-sm"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             </button>
@@ -137,31 +137,31 @@ export default function DashboardPage() {
 
         {/* Custom Date Range Picker bar */}
         {filter === 'custom' && (
-          <form onSubmit={handleCustomApply} className="flex flex-wrap items-center gap-3 p-3 bg-slate-900/90 border border-slate-800 rounded-2xl">
-            <div className="flex items-center gap-2 text-xs text-slate-300">
-              <Calendar className="w-4 h-4 text-brand-400" />
+          <form onSubmit={handleCustomApply} className="flex flex-wrap items-center gap-3 p-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm">
+            <div className="flex items-center gap-2 text-xs text-slate-700">
+              <Calendar className="w-4 h-4 text-brand-600" />
               <span>From:</span>
               <input
                 type="date"
                 required
                 value={customFrom}
                 onChange={(e) => setCustomFrom(e.target.value)}
-                className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
+                className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-brand-500"
               />
             </div>
-            <div className="flex items-center gap-2 text-xs text-slate-300">
+            <div className="flex items-center gap-2 text-xs text-slate-700">
               <span>To:</span>
               <input
                 type="date"
                 required
                 value={customTo}
                 onChange={(e) => setCustomTo(e.target.value)}
-                className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
+                className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-brand-500"
               />
             </div>
             <button
               type="submit"
-              className="px-3 py-1 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-lg transition"
+              className="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-lg transition shadow-sm"
             >
               Apply Filter
             </button>
@@ -171,18 +171,18 @@ export default function DashboardPage() {
         {/* Primary Financial Metric Cards (Grid of 4) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Revenue (Cyan - matching "PRINT & SERVICES") */}
-          <div className="bg-gradient-to-br from-brand-950/40 via-slate-900 to-slate-900/90 p-5 rounded-2xl border border-brand-500/30 shadow-xl relative overflow-hidden group hover:border-brand-500/50 transition">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 border-t-4 border-t-brand-500 shadow-sm relative overflow-hidden group hover:shadow-md transition">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Revenue</span>
-              <div className="p-2 rounded-xl bg-brand-500/10 text-brand-400 border border-brand-500/20">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Revenue</span>
+              <div className="p-2 rounded-xl bg-brand-50 text-brand-600 border border-brand-200">
                 <DollarSign className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-3">
-              <div className="text-2xl font-black text-white tracking-tight">
+              <div className="text-2xl font-black text-slate-900 tracking-tight">
                 {formatCurrency(metrics.totalRevenue)}
               </div>
-              <p className="text-[11px] text-emerald-400 flex items-center gap-1 mt-1 font-medium">
+              <p className="text-[11px] text-emerald-600 flex items-center gap-1 mt-1 font-medium">
                 <ArrowUpRight className="w-3.5 h-3.5" />
                 Actual Received Inflow
               </p>
@@ -190,54 +190,54 @@ export default function DashboardPage() {
           </div>
 
           {/* Net Profit */}
-          <div className="bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900/90 p-5 rounded-2xl border border-emerald-500/20 shadow-xl relative overflow-hidden group hover:border-emerald-500/40 transition">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 border-t-4 border-t-emerald-500 shadow-sm relative overflow-hidden group hover:shadow-md transition">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Net Profit</span>
-              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Net Profit</span>
+              <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
                 <TrendingUp className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-3">
-              <div className={`text-2xl font-black tracking-tight ${metrics.profit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+              <div className={`text-2xl font-black tracking-tight ${metrics.profit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                 {formatCurrency(metrics.profit)}
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">
+              <p className="text-[11px] text-slate-500 mt-1">
                 Revenue − Expenses − Job Costs
               </p>
             </div>
           </div>
 
           {/* Total Expenses (Process Magenta - matching middle ink drop) */}
-          <div className="bg-gradient-to-br from-magenta-950/40 via-slate-900 to-slate-900/90 p-5 rounded-2xl border border-magenta-500/30 shadow-xl relative overflow-hidden group hover:border-magenta-500/50 transition">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 border-t-4 border-t-magenta-500 shadow-sm relative overflow-hidden group hover:shadow-md transition">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Expenses</span>
-              <div className="p-2 rounded-xl bg-magenta-500/10 text-magenta-400 border border-magenta-500/20">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Expenses</span>
+              <div className="p-2 rounded-xl bg-pink-50 text-magenta-600 border border-pink-200">
                 <Receipt className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-3">
-              <div className="text-2xl font-black text-magenta-300 tracking-tight">
+              <div className="text-2xl font-black text-magenta-600 tracking-tight">
                 {formatCurrency(metrics.totalExpenses)}
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">
+              <p className="text-[11px] text-slate-500 mt-1">
                 Studio operational overheads
               </p>
             </div>
           </div>
 
           {/* Invoiced Billed Total (Process Yellow / Amber - matching left ink drop) */}
-          <div className="bg-gradient-to-br from-amber-950/40 via-slate-900 to-slate-900/90 p-5 rounded-2xl border border-amber-500/30 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 border-t-4 border-t-amber-400 shadow-sm relative overflow-hidden group hover:shadow-md transition">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Billed</span>
-              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Billed</span>
+              <div className="p-2 rounded-xl bg-amber-50 text-amber-600 border border-amber-200">
                 <FileText className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-3">
-              <div className="text-2xl font-black text-amber-300 tracking-tight">
+              <div className="text-2xl font-black text-amber-600 tracking-tight">
                 {formatCurrency(metrics.totalInvoicesAmount)}
               </div>
-              <p className="text-[11px] text-amber-400/80 mt-1 font-medium">
+              <p className="text-[11px] text-slate-500 mt-1 font-medium">
                 Across {metrics.totalInvoicesCount} invoices
               </p>
             </div>
@@ -247,72 +247,72 @@ export default function DashboardPage() {
         {/* Secondary Operational Metrics Cards (Grid of 5) */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {/* Paid Invoices */}
-          <div className="bg-slate-900/70 p-4 rounded-xl border border-slate-800">
-            <div className="flex items-center gap-2 text-emerald-400 text-xs font-semibold mb-1">
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-2 text-emerald-600 text-xs font-semibold mb-1">
               <CheckCircle className="w-3.5 h-3.5" />
               <span>Paid Invoices</span>
             </div>
-            <div className="text-lg font-bold text-white">{metrics.paidInvoicesCount}</div>
-            <div className="text-[11px] text-slate-400 font-mono mt-0.5">{formatCurrency(metrics.paidInvoicesAmount)}</div>
+            <div className="text-lg font-bold text-slate-900">{metrics.paidInvoicesCount}</div>
+            <div className="text-[11px] text-slate-500 font-mono mt-0.5">{formatCurrency(metrics.paidInvoicesAmount)}</div>
           </div>
 
           {/* Pending Invoices */}
-          <div className="bg-slate-900/70 p-4 rounded-xl border border-slate-800">
-            <div className="flex items-center gap-2 text-amber-400 text-xs font-semibold mb-1">
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-2 text-amber-600 text-xs font-semibold mb-1">
               <Clock className="w-3.5 h-3.5" />
               <span>Unpaid / Pending</span>
             </div>
-            <div className="text-lg font-bold text-white">{metrics.unpaidInvoicesCount}</div>
-            <div className="text-[11px] text-amber-400 font-mono mt-0.5">{formatCurrency(metrics.unpaidInvoicesAmount)}</div>
+            <div className="text-lg font-bold text-slate-900">{metrics.unpaidInvoicesCount}</div>
+            <div className="text-[11px] text-amber-600 font-mono mt-0.5">{formatCurrency(metrics.unpaidInvoicesAmount)}</div>
           </div>
 
           {/* Overdue */}
-          <div className="bg-slate-900/70 p-4 rounded-xl border border-slate-800">
-            <div className="flex items-center gap-2 text-rose-400 text-xs font-semibold mb-1">
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-2 text-rose-600 text-xs font-semibold mb-1">
               <AlertCircle className="w-3.5 h-3.5" />
               <span>Overdue Invoices</span>
             </div>
-            <div className="text-lg font-bold text-white">{metrics.overdueInvoicesCount}</div>
-            <div className="text-[11px] text-rose-400 font-mono mt-0.5">{formatCurrency(metrics.overdueInvoicesAmount)}</div>
+            <div className="text-lg font-bold text-slate-900">{metrics.overdueInvoicesCount}</div>
+            <div className="text-[11px] text-rose-600 font-mono mt-0.5">{formatCurrency(metrics.overdueInvoicesAmount)}</div>
           </div>
 
           {/* Total Orders */}
-          <div className="bg-slate-900/70 p-4 rounded-xl border border-slate-800">
-            <div className="flex items-center gap-2 text-sky-400 text-xs font-semibold mb-1">
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-2 text-sky-600 text-xs font-semibold mb-1">
               <ShoppingBag className="w-3.5 h-3.5" />
               <span>Total Orders</span>
             </div>
-            <div className="text-lg font-bold text-white">{metrics.totalOrdersCount}</div>
-            <div className="text-[11px] text-slate-400 font-mono mt-0.5">{formatCurrency(metrics.totalOrdersAmount)}</div>
+            <div className="text-lg font-bold text-slate-900">{metrics.totalOrdersCount}</div>
+            <div className="text-[11px] text-slate-500 font-mono mt-0.5">{formatCurrency(metrics.totalOrdersAmount)}</div>
           </div>
 
           {/* Total Customers */}
-          <div className="bg-slate-900/70 p-4 rounded-xl border border-slate-800 col-span-2 sm:col-span-1">
-            <div className="flex items-center gap-2 text-indigo-400 text-xs font-semibold mb-1">
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm col-span-2 sm:col-span-1">
+            <div className="flex items-center gap-2 text-indigo-600 text-xs font-semibold mb-1">
               <Users className="w-3.5 h-3.5" />
               <span>Active CRM Clients</span>
             </div>
-            <div className="text-lg font-bold text-white">{metrics.totalCustomersCount}</div>
-            <div className="text-[11px] text-slate-400 mt-0.5">In Database</div>
+            <div className="text-lg font-bold text-slate-900">{metrics.totalCustomersCount}</div>
+            <div className="text-[11px] text-slate-500 mt-0.5">In Database</div>
           </div>
         </div>
 
         {/* Dynamic Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Revenue & Expenses Trend Chart */}
-          <div className="lg:col-span-2 bg-slate-900/80 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+          <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-white">Financial Cash Flow Timeline</h3>
-                <p className="text-[11px] text-slate-400">Revenue collections vs. Studio expenses</p>
+                <h3 className="text-sm font-bold text-slate-900">Financial Cash Flow Timeline</h3>
+                <p className="text-[11px] text-slate-500">Revenue collections vs. Studio expenses</p>
               </div>
               <div className="flex items-center gap-4 text-xs font-medium">
-                <div className="flex items-center gap-1.5 text-brand-400">
+                <div className="flex items-center gap-1.5 text-brand-600">
                   <div className="w-2.5 h-2.5 rounded-full bg-brand-500" />
                   <span>Revenue</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-rose-400">
-                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                <div className="flex items-center gap-1.5 text-magenta-600">
+                  <div className="w-2.5 h-2.5 rounded-full bg-magenta-500" />
                   <span>Expenses</span>
                 </div>
               </div>
@@ -324,23 +324,23 @@ export default function DashboardPage() {
                   <AreaChart data={data.revenueChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#00a3e0" stopOpacity={0.35} />
+                        <stop offset="95%" stopColor="#00a3e0" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#ec008c" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#ec008c" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis dataKey="label" stroke="#64748b" fontSize={11} tickLine={false} />
-                    <YAxis stroke="#64748b" fontSize={11} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="label" stroke="#94a3b8" fontSize={11} tickLine={false} />
+                    <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
+                      contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '12px', fontSize: '12px', color: '#0f172a', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
                       formatter={(val: any) => [formatCurrency(Number(val)), '']}
                     />
-                    <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#revenueGrad)" name="Revenue" />
-                    <Area type="monotone" dataKey="expense" stroke="#f43f5e" strokeWidth={2} fillOpacity={1} fill="url(#expenseGrad)" name="Expense" />
+                    <Area type="monotone" dataKey="revenue" stroke="#00a3e0" strokeWidth={2.5} fillOpacity={1} fill="url(#revenueGrad)" name="Revenue" />
+                    <Area type="monotone" dataKey="expense" stroke="#ec008c" strokeWidth={2.5} fillOpacity={1} fill="url(#expenseGrad)" name="Expense" />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
@@ -352,10 +352,10 @@ export default function DashboardPage() {
           </div>
 
           {/* Invoice Status Breakdown Chart */}
-          <div className="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4 flex flex-col justify-between">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
             <div>
-              <h3 className="text-sm font-bold text-white">Invoice Status Split</h3>
-              <p className="text-[11px] text-slate-400">Distribution of billing volume</p>
+              <h3 className="text-sm font-bold text-slate-900">Invoice Status Split</h3>
+              <p className="text-[11px] text-slate-500">Distribution of billing volume</p>
             </div>
 
             <div className="h-56 w-full flex items-center justify-center">
@@ -377,7 +377,7 @@ export default function DashboardPage() {
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
+                      contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '12px', fontSize: '12px', color: '#0f172a', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
                     />
                     <Legend wrapperStyle={{ fontSize: '11px' }} />
                   </PieChart>
@@ -389,10 +389,10 @@ export default function DashboardPage() {
               )}
             </div>
 
-            <div className="pt-2 border-t border-slate-800 text-center">
+            <div className="pt-2 border-t border-slate-100 text-center">
               <Link
                 href="/invoices/new"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-400 hover:text-brand-300"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-500"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Create New Invoice</span>
@@ -404,15 +404,15 @@ export default function DashboardPage() {
         {/* Recent Invoices & Recent Orders Tables */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Invoices */}
-          <div className="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-white">Recent Invoices</h3>
-                <p className="text-[11px] text-slate-400">Latest graphic design invoices</p>
+                <h3 className="text-sm font-bold text-slate-900">Recent Invoices</h3>
+                <p className="text-[11px] text-slate-500">Latest graphic design invoices</p>
               </div>
               <Link
                 href="/invoices"
-                className="text-xs font-semibold text-brand-400 hover:text-brand-300 flex items-center gap-1"
+                className="text-xs font-bold text-brand-600 hover:text-brand-500 flex items-center gap-1"
               >
                 View All <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
@@ -422,40 +422,40 @@ export default function DashboardPage() {
               {data?.recentInvoices && data.recentInvoices.length > 0 ? (
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-slate-800 text-slate-400 font-semibold uppercase text-[10px]">
+                    <tr className="border-b border-slate-200 text-slate-500 font-semibold uppercase text-[10px]">
                       <th className="pb-2.5">Invoice #</th>
                       <th className="pb-2.5">Client</th>
                       <th className="pb-2.5 text-right">Amount</th>
                       <th className="pb-2.5 text-center">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
+                  <tbody className="divide-y divide-slate-100">
                     {data.recentInvoices.map((inv: any) => (
-                      <tr key={inv.id} className="hover:bg-slate-800/30 transition">
-                        <td className="py-2.5 font-mono font-bold text-white">
-                          <Link href={`/invoices/${inv.id}`} className="hover:text-brand-400">
+                      <tr key={inv.id} className="hover:bg-slate-50 transition">
+                        <td className="py-2.5 font-mono font-bold text-brand-600">
+                          <Link href={`/invoices/${inv.id}`} className="hover:underline">
                             {inv.invoiceNumber}
                           </Link>
                         </td>
                         <td className="py-2.5">
-                          <div className="font-medium text-slate-200">{inv.customer?.name}</div>
+                          <div className="font-semibold text-slate-800">{inv.customer?.name}</div>
                           {inv.customer?.companyName && (
                             <div className="text-[10px] text-slate-500">{inv.customer.companyName}</div>
                           )}
                         </td>
-                        <td className="py-2.5 text-right font-mono font-semibold text-white">
+                        <td className="py-2.5 text-right font-mono font-bold text-slate-900">
                           {formatCurrency(inv.grandTotal)}
                         </td>
                         <td className="py-2.5 text-center">
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                               inv.status === 'PAID'
-                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                 : inv.status === 'PARTIALLY_PAID'
-                                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
                                 : inv.status === 'OVERDUE'
-                                ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                                : 'bg-slate-800 text-slate-300'
+                                ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                : 'bg-slate-100 text-slate-700'
                             }`}
                           >
                             {inv.status.replace('_', ' ')}
@@ -474,15 +474,15 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Orders */}
-          <div className="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-white">Recent Orders</h3>
-                <p className="text-[11px] text-slate-400">Design projects and print orders</p>
+                <h3 className="text-sm font-bold text-slate-900">Recent Orders</h3>
+                <p className="text-[11px] text-slate-500">Design projects and print orders</p>
               </div>
               <Link
                 href="/orders"
-                className="text-xs font-semibold text-brand-400 hover:text-brand-300 flex items-center gap-1"
+                className="text-xs font-bold text-brand-600 hover:text-brand-500 flex items-center gap-1"
               >
                 View All <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
@@ -492,40 +492,40 @@ export default function DashboardPage() {
               {data?.recentOrders && data.recentOrders.length > 0 ? (
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-slate-800 text-slate-400 font-semibold uppercase text-[10px]">
+                    <tr className="border-b border-slate-200 text-slate-500 font-semibold uppercase text-[10px]">
                       <th className="pb-2.5">Order #</th>
                       <th className="pb-2.5">Client</th>
                       <th className="pb-2.5 text-right">Total</th>
                       <th className="pb-2.5 text-center">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
+                  <tbody className="divide-y divide-slate-100">
                     {data.recentOrders.map((ord: any) => (
-                      <tr key={ord.id} className="hover:bg-slate-800/30 transition">
-                        <td className="py-2.5 font-mono font-bold text-white">
+                      <tr key={ord.id} className="hover:bg-slate-50 transition">
+                        <td className="py-2.5 font-mono font-bold text-slate-900">
                           #{ord.orderNumber}
                         </td>
                         <td className="py-2.5">
-                          <div className="font-medium text-slate-200">{ord.customer?.name}</div>
+                          <div className="font-semibold text-slate-800">{ord.customer?.name}</div>
                           {ord.customer?.companyName && (
                             <div className="text-[10px] text-slate-500">{ord.customer.companyName}</div>
                           )}
                         </td>
-                        <td className="py-2.5 text-right font-mono font-semibold text-white">
+                        <td className="py-2.5 text-right font-mono font-bold text-slate-900">
                           {formatCurrency(ord.grandTotal)}
                         </td>
                         <td className="py-2.5 text-center">
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                               ord.status === 'COMPLETED'
-                                ? 'bg-emerald-500/10 text-emerald-400'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                 : ord.status === 'IN_PROGRESS'
-                                ? 'bg-sky-500/10 text-sky-400'
+                                ? 'bg-sky-50 text-sky-700 border border-sky-200'
                                 : ord.status === 'CONFIRMED'
-                                ? 'bg-indigo-500/10 text-indigo-400'
+                                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
                                 : ord.status === 'CANCELLED'
-                                ? 'bg-rose-500/10 text-rose-400'
-                                : 'bg-amber-500/10 text-amber-400'
+                                ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                : 'bg-amber-50 text-amber-700 border border-amber-200'
                             }`}
                           >
                             {ord.status.replace('_', ' ')}

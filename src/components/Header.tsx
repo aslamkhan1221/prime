@@ -25,20 +25,20 @@ export function Header({
   const today = new Date();
 
   return (
-    <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-6 mb-6 border-b border-slate-800/80 no-print">
+    <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 mb-6 border-b border-slate-200 no-print">
       <div>
         <div className="flex items-center gap-2.5">
-          <h1 className="text-2xl font-black tracking-tight text-white">
+          <h1 className="text-2xl font-black tracking-tight text-slate-900">
             {title}
           </h1>
           <span className="cmyk-stripe h-1.5 w-8 rounded-full opacity-80 shrink-0" />
         </div>
-        {subtitle && <p className="text-xs font-medium text-slate-400 mt-1">{subtitle}</p>}
+        {subtitle && <p className="text-xs font-medium text-slate-500 mt-1">{subtitle}</p>}
       </div>
 
       <div className="flex items-center gap-3 self-start md:self-auto">
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 border border-slate-700/60 rounded-xl text-xs text-slate-300">
-          <Calendar className="w-3.5 h-3.5 text-brand-400" />
+        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-600 shadow-sm">
+          <Calendar className="w-3.5 h-3.5 text-brand-500" />
           <span>{formatDate(today)}</span>
         </div>
 

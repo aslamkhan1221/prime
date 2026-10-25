@@ -41,18 +41,18 @@ export function InvoicePrintView({ invoice, settings, onBack }: InvoicePrintView
   return (
     <div className="space-y-6">
       {/* Top Action Bar (hidden when printing) */}
-      <div className="flex items-center justify-between no-print bg-slate-900 p-4 rounded-2xl border border-slate-800">
+      <div className="flex items-center justify-between no-print bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div className="flex items-center gap-3">
           {onBack && (
             <button
               onClick={onBack}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-xl transition"
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back</span>
             </button>
           )}
-          <span className="text-sm font-semibold text-white">
+          <span className="text-sm font-bold text-slate-900">
             Invoice #{invoice.invoiceNumber}
           </span>
           <span

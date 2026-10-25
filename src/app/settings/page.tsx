@@ -96,42 +96,44 @@ export default function SettingsPage() {
         />
 
         {/* Company Profile Section */}
-        <div className="bg-slate-900/80 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-6">
-          <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-            <div className="p-2 rounded-xl bg-brand-500/10 text-brand-400 border border-brand-500/20">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+            <div className="p-2 rounded-xl bg-brand-50 text-[#00a3e0] border border-brand-100">
               <Building className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Studio Profile & Branding</h3>
-              <p className="text-xs text-slate-400">These details appear on your invoices and client receipts</p>
+              <h3 className="text-base font-bold text-slate-900">Studio Profile & Branding</h3>
+              <p className="text-xs text-slate-500">These details appear on your invoices and client receipts</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Company / Studio Name *</label>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Company / Studio Name <span className="text-[#ec008c]">*</span>
+              </label>
               <input
                 type="text"
                 required
                 value={settings.companyName || ''}
                 onChange={(e) => setSettings({ ...settings, companyName: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block font-semibold text-slate-300">Company Logo</label>
+                <label className="block font-semibold text-slate-700">Company Logo</label>
                 <button
                   type="button"
                   onClick={() => setSettings({ ...settings, logoUrl: '/logo.png' })}
-                  className="text-[10px] text-brand-400 hover:text-brand-300 hover:underline font-semibold"
+                  className="text-[10px] text-[#00a3e0] hover:text-[#0284c7] hover:underline font-bold"
                 >
                   Use Official Prime Logo
                 </button>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-16 h-11 bg-white rounded-xl border border-slate-700 p-1 flex items-center justify-center shrink-0 shadow-sm">
+                <div className="w-16 h-11 bg-slate-50 rounded-xl border border-slate-200 p-1 flex items-center justify-center shrink-0 shadow-sm">
                   <img
                     src={settings.logoUrl || '/logo.png'}
                     alt="Logo Preview"
@@ -143,213 +145,213 @@ export default function SettingsPage() {
                   value={settings.logoUrl || ''}
                   onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })}
                   placeholder="/logo.png or https://..."
-                  className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-brand-500"
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Email Address</label>
+              <label className="block font-semibold text-slate-700 mb-1">Email Address</label>
               <input
                 type="email"
                 value={settings.email || ''}
                 onChange={(e) => setSettings({ ...settings, email: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Phone Number</label>
+              <label className="block font-semibold text-slate-700 mb-1">Phone Number</label>
               <input
                 type="text"
                 value={settings.phone || ''}
                 onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">GSTIN</label>
+              <label className="block font-semibold text-slate-700 mb-1">GSTIN</label>
               <input
                 type="text"
                 value={settings.gstin || ''}
                 onChange={(e) => setSettings({ ...settings, gstin: e.target.value.toUpperCase() })}
                 placeholder="29AAAAA0000A1Z5"
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white font-mono uppercase focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 font-mono uppercase focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">PAN</label>
+              <label className="block font-semibold text-slate-700 mb-1">PAN</label>
               <input
                 type="text"
                 value={settings.pan || ''}
                 onChange={(e) => setSettings({ ...settings, pan: e.target.value.toUpperCase() })}
                 placeholder="AAAAA0000A"
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white font-mono uppercase focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 font-mono uppercase focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block font-semibold text-slate-300 mb-1">Full Studio Address</label>
+              <label className="block font-semibold text-slate-700 mb-1">Full Studio Address</label>
               <textarea
                 rows={2}
                 value={settings.address || ''}
                 onChange={(e) => setSettings({ ...settings, address: e.target.value })}
-                className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-brand-500"
+                className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
           </div>
         </div>
 
         {/* Invoice Numbering & Currency Defaults */}
-        <div className="bg-slate-900/80 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-6">
-          <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-            <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+            <div className="p-2 rounded-xl bg-purple-50 text-purple-600 border border-purple-100">
               <FileText className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Invoice & Order Defaults</h3>
-              <p className="text-xs text-slate-400">Numbering sequences, prefix codes, and standard taxes</p>
+              <h3 className="text-base font-bold text-slate-900">Invoice & Order Defaults</h3>
+              <p className="text-xs text-slate-500">Numbering sequences, prefix codes, and standard taxes</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Invoice Prefix</label>
+              <label className="block font-semibold text-slate-700 mb-1">Invoice Prefix</label>
               <input
                 type="text"
                 value={settings.invoicePrefix || 'INV-'}
                 onChange={(e) => setSettings({ ...settings, invoicePrefix: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white font-mono uppercase focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 font-mono uppercase focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Invoice Start #</label>
+              <label className="block font-semibold text-slate-700 mb-1">Invoice Start #</label>
               <input
                 type="number"
                 value={settings.invoiceNumberStart || 1001}
                 onChange={(e) => setSettings({ ...settings, invoiceNumberStart: Number(e.target.value) })}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white font-mono focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 font-mono focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Order Prefix</label>
+              <label className="block font-semibold text-slate-700 mb-1">Order Prefix</label>
               <input
                 type="text"
                 value={settings.orderPrefix || 'ORD-'}
                 onChange={(e) => setSettings({ ...settings, orderPrefix: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white font-mono uppercase focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 font-mono uppercase focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Default GST / Tax Rate (%)</label>
+              <label className="block font-semibold text-slate-700 mb-1">Default GST / Tax Rate (%)</label>
               <input
                 type="number"
                 step="0.1"
                 value={settings.defaultTaxRate || 18.0}
                 onChange={(e) => setSettings({ ...settings, defaultTaxRate: Number(e.target.value) })}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Currency Code</label>
+              <label className="block font-semibold text-slate-700 mb-1">Currency Code</label>
               <input
                 type="text"
                 value={settings.currency || 'INR'}
                 onChange={(e) => setSettings({ ...settings, currency: e.target.value.toUpperCase() })}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white uppercase focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 uppercase focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Currency Symbol</label>
+              <label className="block font-semibold text-slate-700 mb-1">Currency Symbol</label>
               <input
                 type="text"
                 value={settings.currencySymbol || '₹'}
                 onChange={(e) => setSettings({ ...settings, currencySymbol: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
           </div>
 
           <div className="text-xs">
-            <label className="block font-semibold text-slate-300 mb-1">Standard Invoice Terms & Conditions</label>
+            <label className="block font-semibold text-slate-700 mb-1">Standard Invoice Terms & Conditions</label>
             <textarea
               rows={3}
               value={settings.invoiceTerms || ''}
               onChange={(e) => setSettings({ ...settings, invoiceTerms: e.target.value })}
-              className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-brand-500"
+              className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
           </div>
         </div>
 
         {/* Bank & UPI Details */}
-        <div className="bg-slate-900/80 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-6">
-          <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
               <CreditCard className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Bank & UPI Payment Details</h3>
-              <p className="text-xs text-slate-400">Printed on invoice footers for client direct settlement</p>
+              <h3 className="text-base font-bold text-slate-900">Bank & UPI Payment Details</h3>
+              <p className="text-xs text-slate-500">Printed on invoice footers for client direct settlement</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Bank Account Holder Name</label>
+              <label className="block font-semibold text-slate-700 mb-1">Bank Account Holder Name</label>
               <input
                 type="text"
                 value={settings.bankAccountName || ''}
                 onChange={(e) => setSettings({ ...settings, bankAccountName: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-emerald-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Bank Account Number</label>
+              <label className="block font-semibold text-slate-700 mb-1">Bank Account Number</label>
               <input
                 type="text"
                 value={settings.bankAccountNumber || ''}
                 onChange={(e) => setSettings({ ...settings, bankAccountNumber: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white font-mono focus:border-emerald-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 font-mono focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">IFSC Code</label>
+              <label className="block font-semibold text-slate-700 mb-1">IFSC Code</label>
               <input
                 type="text"
                 value={settings.bankIfsc || ''}
                 onChange={(e) => setSettings({ ...settings, bankIfsc: e.target.value.toUpperCase() })}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white font-mono uppercase focus:border-emerald-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 font-mono uppercase focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Bank Name & Branch</label>
+              <label className="block font-semibold text-slate-700 mb-1">Bank Name & Branch</label>
               <input
                 type="text"
                 value={settings.bankName || ''}
                 onChange={(e) => setSettings({ ...settings, bankName: e.target.value })}
                 placeholder="e.g. HDFC Bank, Indiranagar"
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-emerald-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block font-semibold text-slate-300 mb-1">UPI ID / VPA</label>
+              <label className="block font-semibold text-slate-700 mb-1">UPI ID / VPA</label>
               <input
                 type="text"
                 value={settings.upiId || ''}
                 onChange={(e) => setSettings({ ...settings, upiId: e.target.value })}
                 placeholder="e.g. yourstudio@okhdfcbank"
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white font-semibold text-emerald-400 focus:border-emerald-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 font-semibold text-emerald-600 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
           </div>
@@ -360,7 +362,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-brand-600 to-accent-600 hover:from-brand-500 hover:to-accent-500 text-white rounded-2xl text-xs font-bold shadow-xl shadow-brand-600/30 transition transform active:scale-98 disabled:opacity-50"
+            className="flex items-center gap-2 px-8 py-3 bg-[#00a3e0] hover:bg-[#0284c7] text-white rounded-2xl text-xs font-bold shadow-md shadow-[#00a3e0]/20 transition transform active:scale-98 disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
             <span>{saving ? 'Saving Settings...' : 'Save All Settings'}</span>

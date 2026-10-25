@@ -61,16 +61,15 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 relative overflow-hidden select-none">
-      {/* Background ambient glow effects */}
-      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-brand-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-magenta-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-500/5 rounded-full blur-[120px] pointer-events-none" />
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 relative overflow-hidden select-none">
+      {/* Background subtle CMYK glow effects */}
+      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-magenta-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10">
         {/* Prime Print & Services Official Brand Header */}
-        <div className="text-center mb-7">
-          <div className="inline-block bg-white rounded-3xl p-4 shadow-2xl shadow-black/50 border border-slate-200/90 mb-3.5 transform hover:scale-[1.02] transition-all">
+        <div className="text-center mb-6">
+          <div className="inline-block p-2 mb-2 transform hover:scale-[1.02] transition-all">
             <img
               src="/logo.png"
               alt="Prime Print & Services - Print Everything You Want"
@@ -79,26 +78,26 @@ function LoginForm() {
           </div>
           {/* CMYK 4-stripe bar */}
           <div className="cmyk-stripe h-1.5 w-48 mx-auto rounded-full mb-2.5 opacity-90 shadow-sm" />
-          <p className="text-xs text-slate-400 font-medium">
+          <p className="text-xs text-slate-500 font-medium">
             Invoice Billing &amp; Studio CRM Management
           </p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl p-7 shadow-2xl shadow-black/80">
+        <div className="bg-white border border-slate-200 rounded-3xl p-7 shadow-xl shadow-slate-200/60">
           <div className="mb-6">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <span>Sign In to Dashboard</span>
             </h2>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Enter your credentials to access your studio suite
             </p>
           </div>
 
           {/* Error Banner */}
           {error && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3 text-rose-300 text-xs">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <div className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-700 text-xs">
+              <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
@@ -106,7 +105,7 @@ function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username Input */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Username or Email
               </label>
               <div className="relative">
@@ -121,14 +120,14 @@ function LoginForm() {
                   placeholder="Enter Username"
                   required
                   autoFocus
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-1 focus:ring-brand-500 transition"
                 />
               </div>
             </div>
 
             {/* Password Input */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -142,12 +141,12 @@ function LoginForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter password"
                   required
-                  className="w-full pl-10 pr-11 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                  className="w-full pl-10 pr-11 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-1 focus:ring-brand-500 transition"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 transition"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition"
                   tabIndex={-1}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
@@ -156,15 +155,15 @@ function LoginForm() {
               </div>
             </div>
 
-            {/* Quick credentials hint / autofill button */}
+            {/* Quick credentials hint */}
             <div className="pt-1">
               <button
                 type="button"
                 onClick={handleAutoFillDefault}
-                className="w-full py-2 px-3 bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/50 rounded-xl text-left transition flex items-center justify-between group"
+                className="w-full py-2 px-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-left transition flex items-center justify-between group"
               >
-               
-               
+                <span className="text-[11px] text-slate-600 font-medium">Quick Fill Admin Login</span>
+                <span className="text-[10px] text-brand-600 font-semibold group-hover:underline">primeadmin</span>
               </button>
             </div>
 
@@ -173,7 +172,7 @@ function LoginForm() {
               id="login-submit-btn"
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3 px-4 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-brand-500/25 transition transform active:scale-[0.99] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full mt-2 py-3 px-4 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-600 text-white font-bold text-sm rounded-xl shadow-md shadow-brand-500/25 transition transform active:scale-[0.99] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -190,14 +189,14 @@ function LoginForm() {
           </form>
 
           {/* Secure badge footer */}
-          <div className="mt-6 pt-5 border-t border-slate-800/80 flex items-center justify-center gap-2 text-[11px] text-slate-400">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-center gap-2 text-[11px] text-slate-500">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
             <span>Encrypted Session • Prime Studio Cloud</span>
           </div>
         </div>
 
         {/* Studio copyright */}
-        <p className="text-center text-[11px] text-slate-400 mt-6">
+        <p className="text-center text-[11px] text-slate-500 mt-6">
           © {new Date().getFullYear()} Prime Print &amp; Services. All rights reserved.
         </p>
       </div>
@@ -209,7 +208,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center">
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
         </div>
       }

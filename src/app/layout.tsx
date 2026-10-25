@@ -26,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${plusJakartaSans.className}`}>
-      <body className="font-sans antialiased bg-[#0b0f19] text-slate-100 selection:bg-brand-500 selection:text-white">
+    <html lang="en" className={plusJakartaSans.className}>
+      <body className="font-sans antialiased bg-slate-50 text-slate-900 selection:bg-brand-500 selection:text-white">
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

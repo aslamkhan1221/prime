@@ -42,17 +42,17 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0b0f19] flex flex-col items-center justify-center space-y-4">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center space-y-4">
         <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-accent-500 flex items-center justify-center animate-pulse shadow-xl shadow-brand-500/20">
           <Sparkles className="w-6 h-6 text-white" />
         </div>
-        <p className="text-sm font-semibold text-slate-400">Loading Prime Studio...</p>
+        <p className="text-sm font-semibold text-slate-600">Loading Prime Studio...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-[#0b0f19] text-slate-100">
+    <div className="flex min-h-screen bg-slate-50 text-slate-900">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <Sidebar user={user} />
@@ -62,10 +62,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="relative w-64 max-w-xs bg-slate-900 h-full z-10 flex flex-col justify-between shadow-2xl">
+          <div className="relative w-64 max-w-xs bg-white h-full z-10 flex flex-col justify-between shadow-2xl">
             <Sidebar user={user} />
           </div>
         </div>
@@ -74,9 +74,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile Top Header */}
-        <div className="lg:hidden flex items-center justify-between p-3 bg-slate-900 border-b border-slate-800 no-print">
+        <div className="lg:hidden flex items-center justify-between p-3 bg-white border-b border-slate-200 shadow-sm no-print">
           <div className="flex items-center gap-2.5">
-            <div className="bg-white px-2 py-1 rounded-xl shadow-md border border-slate-200 flex items-center justify-center">
+            <div className="bg-white px-2 py-1 rounded-xl shadow-sm border border-slate-200 flex items-center justify-center">
               <img
                 src="/logo.png"
                 alt="Prime Print & Services"
@@ -86,7 +86,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </div>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-slate-400 hover:text-white bg-slate-800 rounded-xl"
+            className="p-2 text-slate-600 hover:text-slate-900 bg-slate-100 rounded-xl"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>

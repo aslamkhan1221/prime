@@ -285,15 +285,15 @@ export default function ItemsPage() {
         />
 
         {/* Search & Filter Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
           <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search items by name, vendor, description..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition"
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:bg-white transition"
             />
           </form>
 
@@ -301,7 +301,7 @@ export default function ItemsPage() {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-brand-500 font-medium"
             >
               <option value="ALL">All Types</option>
               <option value="GOODS">Goods (Products)</option>
@@ -311,22 +311,22 @@ export default function ItemsPage() {
         </div>
 
         {/* Items Table */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-slate-950/60 border-b border-slate-800 text-slate-400 font-bold uppercase text-[10px] tracking-wider">
-                  <th className="py-3 px-4">Name</th>
-                  <th className="py-3 px-4">Type</th>
-                  <th className="py-3 px-4">Unit</th>
-                  <th className="py-3 px-4 text-right">Selling Price</th>
-                  <th className="py-3 px-4 text-right">Cost Price</th>
-                  <th className="py-3 px-4">Account</th>
-                  <th className="py-3 px-4 text-center">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
+                  <th className="py-3.5 px-4">Name</th>
+                  <th className="py-3.5 px-4">Type</th>
+                  <th className="py-3.5 px-4">Unit</th>
+                  <th className="py-3.5 px-4 text-right">Selling Price</th>
+                  <th className="py-3.5 px-4 text-right">Cost Price</th>
+                  <th className="py-3.5 px-4">Account</th>
+                  <th className="py-3.5 px-4 text-center">Status</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-slate-200">
+              <tbody className="divide-y divide-slate-100 text-slate-800">
                 {loading ? (
                   <tr>
                     <td colSpan={8} className="py-12 text-center text-slate-500">
@@ -337,8 +337,8 @@ export default function ItemsPage() {
                 ) : items.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-12 text-center text-slate-500">
-                      <Package className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                      <p className="font-semibold text-slate-400">No items found</p>
+                      <Package className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                      <p className="font-semibold text-slate-700">No items found</p>
                       <p className="text-[11px] text-slate-500 mt-1">
                         Click &quot;New Item&quot; to add your first product or service.
                       </p>
@@ -346,50 +346,50 @@ export default function ItemsPage() {
                   </tr>
                 ) : (
                   items.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-800/40 transition">
-                      <td className="py-3 px-4">
-                        <div className="font-bold text-white text-sm">{item.name}</div>
+                    <tr key={item.id} className="hover:bg-slate-50/80 transition">
+                      <td className="py-3.5 px-4">
+                        <div className="font-bold text-slate-900 text-sm">{item.name}</div>
                         {item.description && (
-                          <div className="text-[11px] text-slate-400 line-clamp-1 max-w-xs mt-0.5 whitespace-pre-line">
+                          <div className="text-[11px] text-slate-500 line-clamp-1 max-w-xs mt-0.5 whitespace-pre-line">
                             {item.description}
                           </div>
                         )}
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3.5 px-4">
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                             (item.itemType || 'GOODS').toUpperCase() === 'SERVICE'
-                              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                              : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                              ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                              : 'bg-sky-50 text-sky-700 border border-sky-200'
                           }`}
                         >
                           {(item.itemType || 'GOODS').toUpperCase() === 'SERVICE' ? 'Service' : 'Goods'}
                         </span>
                       </td>
-                      <td className="py-3 px-4 font-mono text-slate-300">{item.unit || 'pcs'}</td>
-                      <td className="py-3 px-4 text-right font-mono font-bold text-emerald-400">
+                      <td className="py-3.5 px-4 font-mono text-slate-600">{item.unit || 'pcs'}</td>
+                      <td className="py-3.5 px-4 text-right font-mono font-bold text-[#00a3e0]">
                         {formatCurrency(item.price || 0, '₹')}
                       </td>
-                      <td className="py-3 px-4 text-right font-mono text-slate-400">
+                      <td className="py-3.5 px-4 text-right font-mono text-slate-600">
                         {formatCurrency(item.costPrice || 0, '₹')}
                       </td>
-                      <td className="py-3 px-4 text-slate-400 text-[11px]">
-                        <div>{item.salesAccount || 'Sales'}</div>
+                      <td className="py-3.5 px-4 text-slate-600 text-[11px]">
+                        <div className="font-medium text-slate-700">{item.salesAccount || 'Sales'}</div>
                         {item.preferredVendor && (
                           <div className="text-[10px] text-slate-500">Vendor: {item.preferredVendor}</div>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center">
                         <span
-                          className={`inline-block w-2 h-2 rounded-full ${
-                            item.isActive !== false ? 'bg-emerald-400' : 'bg-slate-500'
+                          className={`inline-block w-2.5 h-2.5 rounded-full ${
+                            item.isActive !== false ? 'bg-emerald-500 ring-2 ring-emerald-100' : 'bg-slate-300'
                           }`}
                         />
                       </td>
-                      <td className="py-3 px-4 text-right space-x-2">
+                      <td className="py-3.5 px-4 text-right space-x-2">
                         <button
                           onClick={() => openEditModal(item)}
-                          className="p-1.5 text-slate-400 hover:text-brand-400 hover:bg-slate-800 rounded-lg transition"
+                          className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition"
                           title="Edit Item"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -399,7 +399,7 @@ export default function ItemsPage() {
                             setItemToDelete(item);
                             setDeleteConfirmOpen(true);
                           }}
-                          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition"
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
                           title="Delete Item"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -413,19 +413,22 @@ export default function ItemsPage() {
           </div>
         </div>
 
-        {/* New / Edit Item Modal matching user reference screenshot */}
+        {/* New / Edit Item Modal */}
         {modalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto bg-black/75 backdrop-blur-sm animate-fadeIn">
-            <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden my-8">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto bg-slate-900/50 backdrop-blur-sm animate-fadeIn">
+            <div className="relative w-full max-w-3xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden my-8">
               {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/90 sticky top-0 z-10">
-                <h3 className="text-lg font-bold text-white">
-                  {editingItem ? 'Edit Item' : 'New Item'}
-                </h3>
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/80 sticky top-0 z-10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-2.5 h-6 rounded-full bg-gradient-to-b from-[#00a3e0] via-[#ec008c] to-[#ffd100]" />
+                  <h3 className="text-lg font-bold text-slate-900">
+                    {editingItem ? 'Edit Item' : 'New Item'}
+                  </h3>
+                </div>
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
+                  className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -433,17 +436,17 @@ export default function ItemsPage() {
 
               <form onSubmit={handleSaveItem} className="p-6 space-y-6 max-h-[calc(88vh-80px)] overflow-y-auto">
                 {/* Info Callout Banner matching user screenshot */}
-                <div className="flex items-start gap-3 p-4 bg-sky-950/40 border border-sky-800/60 rounded-xl text-sky-200 text-xs leading-relaxed">
-                  <div className="w-5 h-5 rounded-full bg-sky-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <div className="flex items-start gap-3 p-4 bg-sky-50 border border-sky-200 rounded-xl text-sky-900 text-xs leading-relaxed">
+                  <div className="w-5 h-5 rounded-full bg-[#00a3e0] text-white flex items-center justify-center shrink-0 mt-0.5">
                     <Info className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <strong className="block text-sky-100 font-semibold mb-0.5">
+                    <strong className="block text-sky-950 font-semibold mb-0.5">
                       Do you want to keep track of this item?
                     </strong>
-                    <span className="text-sky-300/90 text-[11px]">
+                    <span className="text-sky-800 text-[11px]">
                       Enable Inventory to view its stock based on the sales and purchase transactions you record for it. Go to{' '}
-                      <span className="italic font-medium text-white">Settings &gt; Preferences &gt; Items</span> and enable inventory.
+                      <span className="italic font-bold text-sky-950">Settings &gt; Preferences &gt; Items</span> and enable inventory.
                     </span>
                   </div>
                 </div>
@@ -452,7 +455,7 @@ export default function ItemsPage() {
                 <div className="space-y-4">
                   {/* Name* */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                    <label className="sm:w-28 text-xs font-semibold text-rose-400">
+                    <label className="sm:w-28 text-xs font-semibold text-[#ec008c]">
                       Name*
                     </label>
                     <div className="flex-1 max-w-md">
@@ -462,46 +465,46 @@ export default function ItemsPage() {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder="e.g. Flex Star with Frame, Vinyl Print, Logo Design"
-                        className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition"
+                        className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition font-medium"
                       />
                     </div>
                   </div>
 
                   {/* Type Radio: Goods vs Service */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                    <div className="sm:w-28 flex items-center gap-1 text-xs font-semibold text-slate-300">
+                    <div className="sm:w-28 flex items-center gap-1 text-xs font-semibold text-slate-700">
                       <span>Type</span>
                       <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
                     </div>
                     <div className="flex items-center gap-6">
-                      <label className="flex items-center gap-2 text-xs font-medium text-slate-200 cursor-pointer">
+                      <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
                         <input
                           type="radio"
                           name="itemType"
                           value="GOODS"
                           checked={formData.itemType === 'GOODS'}
                           onChange={() => setFormData({ ...formData, itemType: 'GOODS' })}
-                          className="w-4 h-4 text-brand-500 bg-slate-950 border-slate-700 focus:ring-brand-500"
+                          className="w-4 h-4 text-brand-500 bg-white border-slate-300 focus:ring-brand-500"
                         />
-                        <span>Goods</span>
+                        <span className="font-semibold">Goods</span>
                       </label>
-                      <label className="flex items-center gap-2 text-xs font-medium text-slate-200 cursor-pointer">
+                      <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
                         <input
                           type="radio"
                           name="itemType"
                           value="SERVICE"
                           checked={formData.itemType === 'SERVICE'}
                           onChange={() => setFormData({ ...formData, itemType: 'SERVICE' })}
-                          className="w-4 h-4 text-brand-500 bg-slate-950 border-slate-700 focus:ring-brand-500"
+                          className="w-4 h-4 text-brand-500 bg-white border-slate-300 focus:ring-brand-500"
                         />
-                        <span>Service</span>
+                        <span className="font-semibold">Service</span>
                       </label>
                     </div>
                   </div>
 
                   {/* Unit Dropdown / Type to add */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                    <div className="sm:w-28 flex items-center gap-1 text-xs font-semibold text-slate-300">
+                    <div className="sm:w-28 flex items-center gap-1 text-xs font-semibold text-slate-700">
                       <span>Unit</span>
                       <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
                     </div>
@@ -513,7 +516,7 @@ export default function ItemsPage() {
                             value={customUnitInput}
                             onChange={(e) => setCustomUnitInput(e.target.value)}
                             placeholder="Type custom unit (e.g. Bundle, Set, Sheet)..."
-                            className="flex-1 px-3.5 py-2 bg-slate-950/70 border border-brand-500 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none"
+                            className="flex-1 px-3.5 py-2 bg-white border border-brand-500 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-medium"
                             autoFocus
                           />
                           <button
@@ -524,7 +527,7 @@ export default function ItemsPage() {
                               }
                               setCustomUnitMode(false);
                             }}
-                            className="px-3 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold"
+                            className="px-3.5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold"
                           >
                             Done
                           </button>
@@ -540,7 +543,7 @@ export default function ItemsPage() {
                               setFormData({ ...formData, unit: e.target.value });
                             }
                           }}
-                          className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
+                          className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-medium"
                         >
                           <option value="" disabled>
                             Select or type to add
@@ -550,7 +553,7 @@ export default function ItemsPage() {
                               {u.label}
                             </option>
                           ))}
-                          <option value="__CUSTOM__" className="text-brand-400 font-bold">
+                          <option value="__CUSTOM__" className="text-brand-600 font-bold">
                             + Type custom unit...
                           </option>
                         </select>
@@ -560,13 +563,13 @@ export default function ItemsPage() {
                 </div>
 
                 {/* Sales Information Section */}
-                <div className="pt-4 border-t border-slate-800 space-y-4">
-                  <label className="flex items-center gap-2 text-xs font-bold text-slate-100 cursor-pointer">
+                <div className="pt-4 border-t border-slate-200 space-y-4">
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-900 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.enableSales}
                       onChange={(e) => setFormData({ ...formData, enableSales: e.target.checked })}
-                      className="w-4 h-4 text-brand-500 bg-slate-950 border-slate-700 rounded focus:ring-brand-500"
+                      className="w-4 h-4 text-brand-500 bg-white border-slate-300 rounded focus:ring-brand-500"
                     />
                     <span>Sales Information</span>
                   </label>
@@ -576,11 +579,11 @@ export default function ItemsPage() {
                       {/* Left: Selling Price & Description */}
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-xs font-semibold text-rose-400 mb-1">
+                          <label className="block text-xs font-semibold text-[#ec008c] mb-1">
                             Selling Price*
                           </label>
-                          <div className="relative flex rounded-xl border border-slate-700 bg-slate-950/70 overflow-hidden focus-within:border-brand-500">
-                            <span className="inline-flex items-center px-3 text-xs font-bold text-slate-400 bg-slate-800/80 border-r border-slate-700 select-none">
+                          <div className="relative flex rounded-xl border border-slate-300 bg-white overflow-hidden focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500">
+                            <span className="inline-flex items-center px-3 text-xs font-bold text-slate-600 bg-slate-50 border-r border-slate-200 select-none">
                               INR
                             </span>
                             <input
@@ -591,13 +594,13 @@ export default function ItemsPage() {
                               value={formData.price === 0 ? '' : formData.price}
                               onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) || 0 })}
                               placeholder="0.00"
-                              className="w-full px-3 py-2 bg-transparent text-xs text-white focus:outline-none font-mono"
+                              className="w-full px-3 py-2 bg-transparent text-xs text-slate-900 focus:outline-none font-mono font-medium"
                             />
                           </div>
                         </div>
 
                         <div>
-                          <label className="block text-xs font-semibold text-slate-300 mb-1">
+                          <label className="block text-xs font-semibold text-slate-700 mb-1">
                             Description
                           </label>
                           <textarea
@@ -605,7 +608,7 @@ export default function ItemsPage() {
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             placeholder="Specification details, printing type, media type..."
-                            className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+                            className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                           />
                         </div>
                       </div>
@@ -613,13 +616,13 @@ export default function ItemsPage() {
                       {/* Right: Account* */}
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-xs font-semibold text-rose-400 mb-1">
+                          <label className="block text-xs font-semibold text-[#ec008c] mb-1">
                             Account*
                           </label>
                           <select
                             value={formData.salesAccount}
                             onChange={(e) => setFormData({ ...formData, salesAccount: e.target.value })}
-                            className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
+                            className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-medium"
                           >
                             {SALES_ACCOUNTS.map((acc) => (
                               <option key={acc} value={acc}>
@@ -634,13 +637,13 @@ export default function ItemsPage() {
                 </div>
 
                 {/* Purchase Information Section */}
-                <div className="pt-4 border-t border-slate-800 space-y-4">
-                  <label className="flex items-center gap-2 text-xs font-bold text-slate-100 cursor-pointer">
+                <div className="pt-4 border-t border-slate-200 space-y-4">
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-900 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.enablePurchase}
                       onChange={(e) => setFormData({ ...formData, enablePurchase: e.target.checked })}
-                      className="w-4 h-4 text-brand-500 bg-slate-950 border-slate-700 rounded focus:ring-brand-500"
+                      className="w-4 h-4 text-brand-500 bg-white border-slate-300 rounded focus:ring-brand-500"
                     />
                     <span>Purchase Information</span>
                   </label>
@@ -650,11 +653,11 @@ export default function ItemsPage() {
                       {/* Left: Cost Price & Description */}
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-xs font-semibold text-rose-400 mb-1">
+                          <label className="block text-xs font-semibold text-[#ec008c] mb-1">
                             Cost Price*
                           </label>
-                          <div className="relative flex rounded-xl border border-slate-700 bg-slate-950/70 overflow-hidden focus-within:border-brand-500">
-                            <span className="inline-flex items-center px-3 text-xs font-bold text-slate-400 bg-slate-800/80 border-r border-slate-700 select-none">
+                          <div className="relative flex rounded-xl border border-slate-300 bg-white overflow-hidden focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500">
+                            <span className="inline-flex items-center px-3 text-xs font-bold text-slate-600 bg-slate-50 border-r border-slate-200 select-none">
                               INR
                             </span>
                             <input
@@ -665,13 +668,13 @@ export default function ItemsPage() {
                               value={formData.costPrice === 0 ? '' : formData.costPrice}
                               onChange={(e) => setFormData({ ...formData, costPrice: Number(e.target.value) || 0 })}
                               placeholder="0.00"
-                              className="w-full px-3 py-2 bg-transparent text-xs text-white focus:outline-none font-mono"
+                              className="w-full px-3 py-2 bg-transparent text-xs text-slate-900 focus:outline-none font-mono font-medium"
                             />
                           </div>
                         </div>
 
                         <div>
-                          <label className="block text-xs font-semibold text-slate-300 mb-1">
+                          <label className="block text-xs font-semibold text-slate-700 mb-1">
                             Description
                           </label>
                           <textarea
@@ -679,7 +682,7 @@ export default function ItemsPage() {
                             value={formData.purchaseDescription}
                             onChange={(e) => setFormData({ ...formData, purchaseDescription: e.target.value })}
                             placeholder="Vendor purchase specifications, raw material details..."
-                            className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+                            className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                           />
                         </div>
                       </div>
@@ -687,13 +690,13 @@ export default function ItemsPage() {
                       {/* Right: Account* & Preferred Vendor */}
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-xs font-semibold text-rose-400 mb-1">
+                          <label className="block text-xs font-semibold text-[#ec008c] mb-1">
                             Account*
                           </label>
                           <select
                             value={formData.purchaseAccount}
                             onChange={(e) => setFormData({ ...formData, purchaseAccount: e.target.value })}
-                            className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
+                            className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-medium"
                           >
                             {PURCHASE_ACCOUNTS.map((acc) => (
                               <option key={acc} value={acc}>
@@ -704,13 +707,13 @@ export default function ItemsPage() {
                         </div>
 
                         <div>
-                          <label className="block text-xs font-semibold text-slate-300 mb-1">
+                          <label className="block text-xs font-semibold text-slate-700 mb-1">
                             Preferred Vendor
                           </label>
                           <select
                             value={formData.preferredVendor}
                             onChange={(e) => setFormData({ ...formData, preferredVendor: e.target.value })}
-                            className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
+                            className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-medium"
                           >
                             <option value="">Select or type to add</option>
                             {partners.map((p) => (
@@ -732,25 +735,24 @@ export default function ItemsPage() {
                 </div>
 
                 {/* Footer Buttons */}
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
                   <button
                     type="button"
                     onClick={() => setModalOpen(false)}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition"
+                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-6 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-600/30 transition disabled:opacity-50"
+                    className="px-6 py-2.5 bg-gradient-to-r from-[#00a3e0] to-[#0284c7] hover:from-[#0284c7] hover:to-[#0369a1] text-white rounded-xl text-xs font-bold shadow-md shadow-sky-500/20 transition disabled:opacity-50"
                   >
-                    {saving ? 'Saving...' : 'Save'}
+                    {saving ? 'Saving...' : 'Save Item'}
                   </button>
                 </div>
               </form>
             </div>
-          </div>
         )}
 
         {/* Delete Confirmation Modal */}

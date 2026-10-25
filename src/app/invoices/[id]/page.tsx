@@ -167,19 +167,22 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
     <DashboardLayout>
       <div className="space-y-6">
         {/* Action Header (Hidden during Print) */}
-        <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
           <div className="flex items-center gap-3">
             <Link
               href="/invoices"
-              className="p-2 text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 rounded-xl transition"
+              className="p-2 text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div>
-              <h1 className="text-2xl font-black text-white tracking-tight">
-                Invoice #{invoice.invoiceNumber}
-              </h1>
-              <p className="text-xs text-slate-400">Client: {invoice.customer?.name}</p>
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-6 rounded-full bg-gradient-to-b from-[#00a3e0] via-[#ec008c] to-[#ffd100]" />
+                <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                  Invoice #{invoice.invoiceNumber}
+                </h1>
+              </div>
+              <p className="text-xs text-slate-500">Client: {invoice.customer?.name}</p>
             </div>
           </div>
 
@@ -187,7 +190,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
             {invoice.balanceAmount > 0 && invoice.status !== 'CANCELLED' && (
               <button
                 onClick={() => setPaymentModalOpen(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 transition"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition"
               >
                 <CreditCard className="w-4 h-4" />
                 <span>Record Payment</span>
@@ -196,7 +199,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
 
             <button
               onClick={handleDuplicate}
-              className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition"
+              className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold transition"
             >
               <Copy className="w-3.5 h-3.5" />
               <span>Duplicate</span>
@@ -204,7 +207,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
 
             <Link
               href={`/invoices/${invoice.id}/edit`}
-              className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition"
+              className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold transition"
             >
               <Edit2 className="w-3.5 h-3.5" />
               <span>Edit</span>
@@ -212,7 +215,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
 
             <button
               onClick={() => setDeleteConfirmOpen(true)}
-              className="p-2 bg-slate-800 hover:bg-rose-900/30 text-slate-400 hover:text-rose-400 rounded-xl text-xs transition"
+              className="p-2 bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 rounded-xl text-xs transition"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -224,16 +227,16 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
 
         {/* Payment History List for this invoice */}
         {invoice.payments && invoice.payments.length > 0 && (
-          <div className="no-print bg-slate-900/80 p-6 rounded-3xl border border-slate-800 shadow-xl max-w-4xl mx-auto space-y-4">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-emerald-400" />
+          <div className="no-print bg-white p-6 rounded-3xl border border-slate-200 shadow-sm max-w-4xl mx-auto space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-emerald-600" />
               <span>Recorded Payment Receipts</span>
             </h3>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 font-bold uppercase text-[10px]">
+                  <tr className="border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px]">
                     <th className="pb-2">Receipt #</th>
                     <th className="pb-2">Date</th>
                     <th className="pb-2">Method</th>
@@ -241,14 +244,14 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                     <th className="pb-2 text-right">Amount</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-slate-100">
                   {invoice.payments.map((p: any) => (
                     <tr key={p.id}>
-                      <td className="py-2.5 font-mono font-bold text-white">{p.paymentNumber}</td>
-                      <td className="py-2.5 text-slate-300">{formatDate(p.paymentDate)}</td>
-                      <td className="py-2.5 text-slate-300 font-medium">{p.paymentMethod}</td>
-                      <td className="py-2.5 text-slate-400 font-mono text-[11px]">{p.referenceNumber || '-'}</td>
-                      <td className="py-2.5 text-right font-mono font-bold text-emerald-400">
+                      <td className="py-2.5 font-mono font-bold text-slate-900">{p.paymentNumber}</td>
+                      <td className="py-2.5 text-slate-600">{formatDate(p.paymentDate)}</td>
+                      <td className="py-2.5 text-slate-700 font-medium">{p.paymentMethod}</td>
+                      <td className="py-2.5 text-slate-500 font-mono text-[11px]">{p.referenceNumber || '-'}</td>
+                      <td className="py-2.5 text-right font-mono font-bold text-emerald-600">
                         {formatCurrency(p.amount)}
                       </td>
                     </tr>
@@ -261,38 +264,38 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
 
         {/* Payment Modal */}
         {paymentModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm no-print">
-            <div className="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
-              <div className="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-950/40">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm no-print">
+            <div className="relative w-full max-w-md bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between p-6 border-b border-slate-200 bg-slate-50/80">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
                     <CreditCard className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white">
+                    <h3 className="text-base font-bold text-slate-900">
                       Record Payment: #{invoice.invoiceNumber}
                     </h3>
-                    <p className="text-xs text-slate-400">Client: {invoice.customer?.name}</p>
+                    <p className="text-xs text-slate-500">Client: {invoice.customer?.name}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setPaymentModalOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-white bg-slate-800 rounded-xl"
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <form onSubmit={handleRecordPayment} className="p-6 space-y-4 text-xs">
-                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex justify-between items-center">
-                  <span className="text-slate-400 font-medium">Outstanding Balance:</span>
-                  <span className="font-mono font-bold text-amber-400 text-sm">
+                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 flex justify-between items-center text-amber-900">
+                  <span className="font-medium text-amber-800">Outstanding Balance:</span>
+                  <span className="font-mono font-bold text-[#f59e0b] text-sm">
                     {formatCurrency(invoice.balanceAmount)}
                   </span>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">
+                  <label className="block font-semibold text-slate-700 mb-1">
                     Payment Amount (₹) *
                   </label>
                   <input
@@ -301,28 +304,28 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                     required
                     value={paymentAmount}
                     onChange={(e) => setPaymentAmount(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm font-bold text-white font-mono focus:border-emerald-500"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-300 mb-1">Payment Date</label>
+                    <label className="block font-semibold text-slate-700 mb-1">Payment Date</label>
                     <input
                       type="date"
                       required
                       value={paymentDate}
                       onChange={(e) => setPaymentDate(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-emerald-500"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-300 mb-1">Payment Method</label>
+                    <label className="block font-semibold text-slate-700 mb-1">Payment Method</label>
                     <select
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:border-emerald-500"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                     >
                       <option value="UPI">UPI / QR Code</option>
                       <option value="BANK_TRANSFER">Bank Transfer</option>
@@ -335,7 +338,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">
+                  <label className="block font-semibold text-slate-700 mb-1">
                     Transaction / Reference Number
                   </label>
                   <input
@@ -343,40 +346,38 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                     value={referenceNumber}
                     onChange={(e) => setReferenceNumber(e.target.value)}
                     placeholder="e.g. UPI Ref: 31829371923"
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Notes</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Notes</label>
                   <input
                     type="text"
                     value={paymentNotes}
                     onChange={(e) => setPaymentNotes(e.target.value)}
                     placeholder="Payment notes..."
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
                   <button
                     type="button"
                     onClick={() => setPaymentModalOpen(false)}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-semibold"
+                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={savingPayment}
-                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/30 transition"
+                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-md shadow-emerald-600/20 transition"
                   >
                     {savingPayment ? 'Recording...' : 'Record Payment'}
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
         )}
 
         {/* Delete Confirmation Modal */}
