@@ -57,6 +57,7 @@ const PURCHASE_ACCOUNTS = [
 
 export default function ItemsPage() {
   const [items, setItems] = useState<any[]>([]);
+  const [partners, setPartners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('ALL');
@@ -118,6 +119,10 @@ export default function ItemsPage() {
 
   useEffect(() => {
     fetchItems();
+    fetch('/api/partners')
+      .then((res) => res.json())
+      .then((data) => setPartners(data.rawPartners || data.partners || []))
+      .catch(() => {});
   }, [typeFilter]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -702,13 +707,24 @@ export default function ItemsPage() {
                           <label className="block text-xs font-semibold text-slate-300 mb-1">
                             Preferred Vendor
                           </label>
-                          <input
-                            type="text"
+                          <select
                             value={formData.preferredVendor}
                             onChange={(e) => setFormData({ ...formData, preferredVendor: e.target.value })}
-                            placeholder="Select or type vendor"
-                            className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
-                          />
+                            className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
+                          >
+                            <option value="">Select or type to add</option>
+                            {partners.map((p) => (
+                              <option key={p.id} value={p.name}>
+                                {p.name} {p.profitPercentage ? `(${p.profitPercentage}% Partner)` : ''}
+                              </option>
+                            ))}
+                            {formData.preferredVendor &&
+                              !partners.some((p) => p.name === formData.preferredVendor) && (
+                                <option value={formData.preferredVendor}>
+                                  {formData.preferredVendor}
+                                </option>
+                              )}
+                          </select>
                         </div>
                       </div>
                     </div>

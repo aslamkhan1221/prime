@@ -60,11 +60,21 @@ export async function GET(req: NextRequest) {
       return {
         id: c.id,
         name: c.name,
+        customerType: c.customerType || 'BUSINESS',
+        salutation: c.salutation,
+        firstName: c.firstName,
+        lastName: c.lastName,
         companyName: c.companyName,
         mobile: c.mobile,
+        workPhone: c.workPhone,
         email: c.email,
+        language: c.language || 'English',
         gstin: c.gstin,
         pan: c.pan,
+        currency: c.currency || 'INR',
+        openingBalance: c.openingBalance || 0,
+        paymentTerms: c.paymentTerms || 'Due on Receipt',
+        enablePortal: Boolean(c.enablePortal),
         billingAddress: c.billingAddress,
         shippingAddress: c.shippingAddress,
         notes: c.notes,
@@ -93,17 +103,27 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     if (!body.name || !body.name.trim()) {
-      return NextResponse.json({ error: 'Customer name is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Display Name is required' }, { status: 400 });
     }
 
     const customer = await prisma.customer.create({
       data: {
         name: body.name.trim(),
+        customerType: body.customerType || 'BUSINESS',
+        salutation: body.salutation?.trim() || null,
+        firstName: body.firstName?.trim() || null,
+        lastName: body.lastName?.trim() || null,
         companyName: body.companyName?.trim() || null,
         mobile: body.mobile?.trim() || null,
+        workPhone: body.workPhone?.trim() || null,
         email: body.email?.trim() || null,
+        language: body.language || 'English',
         gstin: body.gstin?.trim()?.toUpperCase() || null,
         pan: body.pan?.trim()?.toUpperCase() || null,
+        currency: body.currency || 'INR',
+        openingBalance: Number(body.openingBalance) || 0,
+        paymentTerms: body.paymentTerms || 'Due on Receipt',
+        enablePortal: Boolean(body.enablePortal),
         billingAddress: body.billingAddress?.trim() || null,
         shippingAddress: body.shippingAddress?.trim() || null,
         notes: body.notes?.trim() || null,

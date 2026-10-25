@@ -34,17 +34,51 @@ export default function CustomersPage() {
   const [editingCustomer, setEditingCustomer] = useState<any>(null);
   const [saving, setSaving] = useState(false);
 
-  // Form State
+  // Form State matching Zoho Books screenshot
+  const [activeTab, setActiveTab] = useState<'other' | 'address' | 'contact_persons' | 'custom_fields' | 'remarks'>('other');
+  const [gstPrefillOpen, setGstPrefillOpen] = useState(false);
+  const [prefillGstin, setPrefillGstin] = useState('');
+
   const [formData, setFormData] = useState({
-    name: '',
+    customerType: 'BUSINESS', // 'BUSINESS' | 'INDIVIDUAL'
+    salutation: 'Mr.',
+    firstName: '',
+    lastName: '',
     companyName: '',
-    mobile: '',
+    name: '', // Display Name*
     email: '',
-    gstin: '',
+    workPhone: '',
+    mobile: '',
+    language: 'English',
+    // Tab: Other Details
     pan: '',
+    currency: 'INR - Indian Rupee',
+    accountReceivable: 'Accounts Receivable',
+    openingBalance: 0,
+    paymentTerms: 'Due on Receipt',
+    enablePortal: false,
+    // Tab: Address
+    billingAttention: '',
+    billingCountry: 'India',
+    billingStreet1: '',
+    billingStreet2: '',
+    billingCity: '',
+    billingState: '',
+    billingPincode: '',
+    billingPhone: '',
+    shippingAttention: '',
+    shippingCountry: 'India',
+    shippingStreet1: '',
+    shippingStreet2: '',
+    shippingCity: '',
+    shippingState: '',
+    shippingPincode: '',
+    shippingPhone: '',
     billingAddress: '',
     shippingAddress: '',
+    // Tab: Remarks
     notes: '',
+    gstin: '',
     status: 'ACTIVE',
   });
 
@@ -80,16 +114,44 @@ export default function CustomersPage() {
 
   const openAddModal = () => {
     setEditingCustomer(null);
+    setActiveTab('other');
     setFormData({
-      name: '',
+      customerType: 'BUSINESS',
+      salutation: 'Mr.',
+      firstName: '',
+      lastName: '',
       companyName: '',
-      mobile: '',
+      name: '',
       email: '',
-      gstin: '',
+      workPhone: '',
+      mobile: '',
+      language: 'English',
       pan: '',
+      currency: 'INR - Indian Rupee',
+      accountReceivable: 'Accounts Receivable',
+      openingBalance: 0,
+      paymentTerms: 'Due on Receipt',
+      enablePortal: false,
+      billingAttention: '',
+      billingCountry: 'India',
+      billingStreet1: '',
+      billingStreet2: '',
+      billingCity: '',
+      billingState: '',
+      billingPincode: '',
+      billingPhone: '',
+      shippingAttention: '',
+      shippingCountry: 'India',
+      shippingStreet1: '',
+      shippingStreet2: '',
+      shippingCity: '',
+      shippingState: '',
+      shippingPincode: '',
+      shippingPhone: '',
       billingAddress: '',
       shippingAddress: '',
       notes: '',
+      gstin: '',
       status: 'ACTIVE',
     });
     setModalOpen(true);
@@ -97,27 +159,175 @@ export default function CustomersPage() {
 
   const openEditModal = (customer: any) => {
     setEditingCustomer(customer);
+    setActiveTab('other');
     setFormData({
-      name: customer.name || '',
+      customerType: customer.customerType || 'BUSINESS',
+      salutation: customer.salutation || 'Mr.',
+      firstName: customer.firstName || '',
+      lastName: customer.lastName || '',
       companyName: customer.companyName || '',
-      mobile: customer.mobile || '',
+      name: customer.name || '',
       email: customer.email || '',
-      gstin: customer.gstin || '',
+      workPhone: customer.workPhone || '',
+      mobile: customer.mobile || '',
+      language: customer.language || 'English',
       pan: customer.pan || '',
+      currency: customer.currency || 'INR - Indian Rupee',
+      accountReceivable: 'Accounts Receivable',
+      openingBalance: customer.openingBalance || 0,
+      paymentTerms: customer.paymentTerms || 'Due on Receipt',
+      enablePortal: Boolean(customer.enablePortal),
+      billingAttention: customer.name || '',
+      billingCountry: 'India',
+      billingStreet1: customer.billingAddress || '',
+      billingStreet2: '',
+      billingCity: '',
+      billingState: '',
+      billingPincode: '',
+      billingPhone: customer.mobile || '',
+      shippingAttention: customer.name || '',
+      shippingCountry: 'India',
+      shippingStreet1: customer.shippingAddress || customer.billingAddress || '',
+      shippingStreet2: '',
+      shippingCity: '',
+      shippingState: '',
+      shippingPincode: '',
+      shippingPhone: customer.mobile || '',
       billingAddress: customer.billingAddress || '',
       shippingAddress: customer.shippingAddress || '',
       notes: customer.notes || '',
+      gstin: customer.gstin || '',
       status: customer.status || 'ACTIVE',
     });
     setModalOpen(true);
   };
 
-  const handleSaveCustomer = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) {
-      error('Customer name is required');
+  // Auto-generate or suggest Display Name
+  const handleAutoSuggestDisplayName = (type: string, val: string) => {
+    const updated = { ...formData, [type]: val };
+    let displayName = updated.name;
+    if (!displayName || displayName === formData.companyName || displayName === `${formData.firstName} ${formData.lastName}`.trim()) {
+      if (updated.customerType === 'BUSINESS' && updated.companyName.trim()) {
+        displayName = updated.companyName.trim();
+      } else {
+        const contactName = `${updated.firstName} ${updated.lastName}`.trim();
+        if (contactName) displayName = contactName;
+      }
+    }
+    setFormData({ ...updated, name: displayName });
+  };
+
+  // Prefill details from GSTIN
+  const handleApplyGstPrefill = () => {
+    const cleanGst = prefillGstin.trim().toUpperCase();
+    if (!cleanGst || cleanGst.length < 15) {
+      error('Please enter a valid 15-digit GSTIN number');
       return;
     }
+
+    const stateCode = cleanGst.slice(0, 2);
+    const panFromGst = cleanGst.slice(2, 12);
+    const stateMap: { [key: string]: string } = {
+      '01': 'Jammu & Kashmir',
+      '02': 'Himachal Pradesh',
+      '03': 'Punjab',
+      '04': 'Chandigarh',
+      '05': 'Uttarakhand',
+      '06': 'Haryana',
+      '07': 'Delhi',
+      '08': 'Rajasthan',
+      '09': 'Uttar Pradesh',
+      '10': 'Bihar',
+      '19': 'West Bengal',
+      '24': 'Gujarat',
+      '27': 'Maharashtra',
+      '29': 'Karnataka',
+      '32': 'Kerala',
+      '33': 'Tamil Nadu',
+      '36': 'Telangana',
+      '37': 'Andhra Pradesh',
+    };
+
+    const detectedState = stateMap[stateCode] || '';
+    setFormData((prev) => ({
+      ...prev,
+      gstin: cleanGst,
+      pan: panFromGst,
+      billingState: detectedState,
+      shippingState: detectedState,
+    }));
+
+    setGstPrefillOpen(false);
+    success(`GSTIN parsed! State (${detectedState}) and PAN (${panFromGst}) auto-filled.`);
+  };
+
+  // Copy billing address to shipping address
+  const handleCopyBillingAddress = () => {
+    setFormData((prev) => ({
+      ...prev,
+      shippingAttention: prev.billingAttention,
+      shippingCountry: prev.billingCountry,
+      shippingStreet1: prev.billingStreet1,
+      shippingStreet2: prev.billingStreet2,
+      shippingCity: prev.billingCity,
+      shippingState: prev.billingState,
+      shippingPincode: prev.billingPincode,
+      shippingPhone: prev.billingPhone,
+    }));
+    success('Billing address copied to shipping address');
+  };
+
+  const handleSaveCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const finalName = formData.name.trim() || formData.companyName.trim() || `${formData.firstName} ${formData.lastName}`.trim();
+    if (!finalName) {
+      error('Display Name is required');
+      return;
+    }
+
+    // Build serialized addresses
+    const bParts = [
+      formData.billingAttention,
+      formData.billingStreet1,
+      formData.billingStreet2,
+      formData.billingCity,
+      formData.billingState,
+      formData.billingPincode,
+    ].filter(Boolean);
+    const formattedBilling = bParts.join(', ');
+
+    const sParts = [
+      formData.shippingAttention,
+      formData.shippingStreet1,
+      formData.shippingStreet2,
+      formData.shippingCity,
+      formData.shippingState,
+      formData.shippingPincode,
+    ].filter(Boolean);
+    const formattedShipping = sParts.join(', ') || formattedBilling;
+
+    const payload = {
+      name: finalName,
+      customerType: formData.customerType,
+      salutation: formData.salutation,
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      companyName: formData.companyName.trim(),
+      email: formData.email.trim(),
+      workPhone: formData.workPhone.trim(),
+      mobile: formData.mobile.trim(),
+      language: formData.language,
+      pan: formData.pan.trim().toUpperCase(),
+      currency: formData.currency,
+      openingBalance: Number(formData.openingBalance) || 0,
+      paymentTerms: formData.paymentTerms,
+      enablePortal: formData.enablePortal,
+      billingAddress: formattedBilling || formData.billingAddress,
+      shippingAddress: formattedShipping || formData.shippingAddress,
+      notes: formData.notes.trim(),
+      gstin: formData.gstin.trim().toUpperCase(),
+      status: formData.status,
+    };
 
     setSaving(true);
     try {
@@ -125,13 +335,13 @@ export default function CustomersPage() {
         const res = await fetch(`/api/customers/${editingCustomer.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to update customer');
 
         // INSTANT DISPLAY: Immediately update customer in table state
-        const updated = data.customer || { ...editingCustomer, ...formData };
+        const updated = data.customer || { ...editingCustomer, ...payload };
         setCustomers((prev) =>
           prev.map((c) => (c.id === editingCustomer.id ? { ...c, ...updated } : c))
         );
@@ -142,7 +352,7 @@ export default function CustomersPage() {
         const res = await fetch('/api/customers', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to create customer');
@@ -357,187 +567,770 @@ export default function CustomersPage() {
         </div>
 
         {/* Add / Edit Customer Modal */}
+        {/* Add / Edit Customer Modal matching Zoho Books screenshot */}
         {modalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-            <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
-              <div className="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-950/40">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-brand-500/10 text-brand-400 border border-brand-500/20">
-                    <Users className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white">
-                      {editingCustomer ? 'Edit Client Details' : 'Create New Client Profile'}
-                    </h3>
-                    <p className="text-xs text-slate-400">Complete CRM profile for invoices and orders</p>
-                  </div>
-                </div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm overflow-y-auto">
+            <div className="relative w-full max-w-4xl bg-[#0f172a] border border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 my-auto max-h-[92vh] flex flex-col">
+              {/* Modal Top Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/60">
+                <h2 className="text-xl font-bold text-white tracking-tight">
+                  {editingCustomer ? 'Edit Customer' : 'New Customer'}
+                </h2>
                 <button
+                  type="button"
                   onClick={() => setModalOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-white bg-slate-800 rounded-xl"
+                  className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSaveCustomer} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Customer / Contact Person Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. Vikram Sharma"
-                      className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
-                    />
+              {/* Scrollable Form Body */}
+              <form onSubmit={handleSaveCustomer} className="flex-1 overflow-y-auto p-6 space-y-6 text-xs">
+                {/* GSTIN Prefill Banner (matches screenshot) */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-300 text-xs">
+                  <div className="flex items-center gap-2">
+                    <Building className="w-4 h-4 text-blue-400 shrink-0" />
+                    <span>Prefill Customer details from the GST portal using the Customer's GSTIN.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setGstPrefillOpen(true)}
+                    className="text-blue-400 hover:text-blue-300 font-bold underline shrink-0 cursor-pointer"
+                  >
+                    Prefill &gt;
+                  </button>
+                </div>
+
+                {/* Primary Contact & Core Fields */}
+                <div className="space-y-4">
+                  {/* Customer Type */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                    <div className="w-36 flex items-center gap-1.5 text-slate-300 font-medium">
+                      <span>Customer Type</span>
+                      <span title="Select if customer is a registered business or an individual" className="cursor-help text-slate-500">ⓘ</span>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <label className="flex items-center gap-2 cursor-pointer text-slate-200">
+                        <input
+                          type="radio"
+                          name="customerType"
+                          value="BUSINESS"
+                          checked={formData.customerType === 'BUSINESS'}
+                          onChange={() => setFormData({ ...formData, customerType: 'BUSINESS' })}
+                          className="w-4 h-4 text-blue-600 bg-slate-900 border-slate-700 focus:ring-blue-500"
+                        />
+                        <span>Business</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer text-slate-200">
+                        <input
+                          type="radio"
+                          name="customerType"
+                          value="INDIVIDUAL"
+                          checked={formData.customerType === 'INDIVIDUAL'}
+                          onChange={() => setFormData({ ...formData, customerType: 'INDIVIDUAL' })}
+                          className="w-4 h-4 text-blue-600 bg-slate-900 border-slate-700 focus:ring-blue-500"
+                        />
+                        <span>Individual</span>
+                      </label>
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Company / Organization Name
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.companyName}
-                      onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                      placeholder="e.g. Acme Media Works Pvt Ltd"
-                      className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
-                    />
+                  {/* Primary Contact */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                    <div className="w-36 flex items-center gap-1.5 text-slate-300 font-medium">
+                      <span>Primary Contact</span>
+                      <span title="Salutation, first name, and last name of the contact person" className="cursor-help text-slate-500">ⓘ</span>
+                    </div>
+                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-w-xl">
+                      <select
+                        value={formData.salutation}
+                        onChange={(e) => setFormData({ ...formData, salutation: e.target.value })}
+                        className="px-3 py-2 bg-slate-900/90 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
+                      >
+                        <option value="Mr.">Mr.</option>
+                        <option value="Mrs.">Mrs.</option>
+                        <option value="Ms.">Ms.</option>
+                        <option value="Miss">Miss</option>
+                        <option value="Dr.">Dr.</option>
+                      </select>
+                      <input
+                        type="text"
+                        placeholder="First Name"
+                        value={formData.firstName}
+                        onChange={(e) => handleAutoSuggestDisplayName('firstName', e.target.value)}
+                        className="px-3 py-2 bg-slate-900/90 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Last Name"
+                        value={formData.lastName}
+                        onChange={(e) => handleAutoSuggestDisplayName('lastName', e.target.value)}
+                        className="px-3 py-2 bg-slate-900/90 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Phone / Mobile Number
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.mobile}
-                      onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                      placeholder="+91 98765 00000"
-                      className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
-                    />
+                  {/* Company Name */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                    <div className="w-36 text-slate-300 font-medium">
+                      <span>Company Name</span>
+                    </div>
+                    <div className="flex-1 max-w-xl">
+                      <input
+                        type="text"
+                        placeholder="Company Name"
+                        value={formData.companyName}
+                        onChange={(e) => handleAutoSuggestDisplayName('companyName', e.target.value)}
+                        className="w-full px-3 py-2 bg-slate-900/90 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="vikram@acmemedia.com"
-                      className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
-                    />
+                  {/* Display Name* */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                    <div className="w-36 flex items-center gap-1.5 font-medium">
+                      <span className="text-rose-400">Display Name*</span>
+                      <span title="This name will appear on invoices and customer statements" className="cursor-help text-slate-500">ⓘ</span>
+                    </div>
+                    <div className="flex-1 max-w-xl relative">
+                      <input
+                        type="text"
+                        required
+                        placeholder="Select or type to add"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-900/90 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                      />
+                      {(formData.companyName || formData.firstName) && (
+                        <div className="flex items-center gap-2 mt-1.5 text-[11px] text-slate-400">
+                          <span>Suggestions:</span>
+                          {formData.companyName && (
+                            <button
+                              type="button"
+                              onClick={() => setFormData({ ...formData, name: formData.companyName })}
+                              className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-blue-400 font-medium"
+                            >
+                              {formData.companyName}
+                            </button>
+                          )}
+                          {formData.firstName && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setFormData({
+                                  ...formData,
+                                  name: `${formData.salutation} ${formData.firstName} ${formData.lastName}`.trim(),
+                                })
+                              }
+                              className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-blue-400 font-medium"
+                            >
+                              {`${formData.salutation} ${formData.firstName} ${formData.lastName}`.trim()}
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      GSTIN (Goods & Service Tax Number)
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.gstin}
-                      onChange={(e) => setFormData({ ...formData, gstin: e.target.value.toUpperCase() })}
-                      placeholder="29ABCDE1234F1Z5"
-                      className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white uppercase placeholder-slate-500 focus:outline-none focus:border-brand-500"
-                    />
+                  {/* Email Address */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                    <div className="w-36 flex items-center gap-1.5 text-slate-300 font-medium">
+                      <span>Email Address</span>
+                      <span title="Primary email address for invoice deliveries" className="cursor-help text-slate-500">ⓘ</span>
+                    </div>
+                    <div className="flex-1 max-w-xl relative">
+                      <div className="relative flex rounded-lg border border-slate-700 bg-slate-900/90 overflow-hidden focus-within:border-blue-500">
+                        <span className="inline-flex items-center px-3 text-slate-500 bg-slate-800/50">
+                          <Mail className="w-3.5 h-3.5" />
+                        </span>
+                        <input
+                          type="email"
+                          placeholder="client@example.com"
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          className="w-full px-3 py-2 bg-transparent text-white placeholder-slate-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      PAN Number
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.pan}
-                      onChange={(e) => setFormData({ ...formData, pan: e.target.value.toUpperCase() })}
-                      placeholder="ABCDE1234F"
-                      className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white uppercase placeholder-slate-500 focus:outline-none focus:border-brand-500"
-                    />
+                  {/* Phone */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                    <div className="w-36 flex items-center gap-1.5 text-slate-300 font-medium">
+                      <span>Phone</span>
+                      <span title="Work phone and primary mobile number" className="cursor-help text-slate-500">ⓘ</span>
+                    </div>
+                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl">
+                      {/* Work Phone */}
+                      <div className="flex rounded-lg border border-slate-700 bg-slate-900/90 overflow-hidden focus-within:border-blue-500">
+                        <span className="inline-flex items-center px-2.5 text-slate-400 bg-slate-800/60 font-mono text-[11px] border-r border-slate-700">
+                          +91 ▾
+                        </span>
+                        <input
+                          type="text"
+                          placeholder="Work Phone"
+                          value={formData.workPhone}
+                          onChange={(e) => setFormData({ ...formData, workPhone: e.target.value })}
+                          className="w-full px-2.5 py-2 bg-transparent text-white placeholder-slate-500 focus:outline-none"
+                        />
+                      </div>
+
+                      {/* Mobile */}
+                      <div className="flex rounded-lg border border-slate-700 bg-slate-900/90 overflow-hidden focus-within:border-blue-500">
+                        <span className="inline-flex items-center px-2.5 text-slate-400 bg-slate-800/60 font-mono text-[11px] border-r border-slate-700">
+                          +91 ▾
+                        </span>
+                        <input
+                          type="text"
+                          placeholder="Mobile"
+                          value={formData.mobile}
+                          onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                          className="w-full px-2.5 py-2 bg-transparent text-white placeholder-slate-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Customer Language */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                    <div className="w-36 flex items-center gap-1.5 text-slate-300 font-medium">
+                      <span>Customer Language</span>
+                      <span title="Preferred language for automated billing emails" className="cursor-help text-slate-500">ⓘ</span>
+                    </div>
+                    <div className="flex-1 max-w-xl">
+                      <select
+                        value={formData.language}
+                        onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-900/90 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
+                      >
+                        <option value="English">English</option>
+                        <option value="Hindi">Hindi (हिंदी)</option>
+                        <option value="Marathi">Marathi (मराठी)</option>
+                        <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+                        <option value="Tamil">Tamil (தமிழ்)</option>
+                        <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Billing Address
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={formData.billingAddress}
-                      onChange={(e) => setFormData({ ...formData, billingAddress: e.target.value })}
-                      placeholder="Full billing address with PIN code..."
-                      className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Shipping / Delivery Address
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={formData.shippingAddress}
-                      onChange={(e) => setFormData({ ...formData, shippingAddress: e.target.value })}
-                      placeholder="Delivery site or venue address..."
-                      className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
-                    />
+                {/* Tab Navigation (matches screenshot) */}
+                <div className="pt-4 border-t border-slate-800">
+                  <div className="flex items-center gap-6 border-b border-slate-800 overflow-x-auto">
+                    {[
+                      { id: 'other', label: 'Other Details' },
+                      { id: 'address', label: 'Address' },
+                      { id: 'contact_persons', label: 'Contact Persons' },
+                      { id: 'custom_fields', label: 'Custom Fields' },
+                      { id: 'remarks', label: 'Remarks' },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setActiveTab(tab.id as any)}
+                        className={`pb-2.5 text-xs font-semibold tracking-wide transition border-b-2 whitespace-nowrap ${
+                          activeTab === tab.id
+                            ? 'border-blue-500 text-blue-400'
+                            : 'border-transparent text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Customer Status
-                    </label>
+                {/* Tab Content: Other Details */}
+                {activeTab === 'other' && (
+                  <div className="space-y-4 pt-2">
+                    {/* PAN */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                      <div className="w-36 flex items-center gap-1.5 text-slate-300 font-medium">
+                        <span>PAN</span>
+                        <span title="Permanent Account Number (10 digits)" className="cursor-help text-slate-500">ⓘ</span>
+                      </div>
+                      <div className="flex-1 max-w-xl">
+                        <input
+                          type="text"
+                          maxLength={10}
+                          placeholder="ABCDE1234F"
+                          value={formData.pan}
+                          onChange={(e) => setFormData({ ...formData, pan: e.target.value.toUpperCase() })}
+                          className="w-full px-3 py-2 bg-slate-900/90 border border-slate-700 rounded-lg text-white font-mono uppercase placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    {/* GSTIN Field */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                      <div className="w-36 flex items-center gap-1.5 text-slate-300 font-medium">
+                        <span>GSTIN</span>
+                        <span title="Goods and Services Tax Identification Number" className="cursor-help text-slate-500">ⓘ</span>
+                      </div>
+                      <div className="flex-1 max-w-xl">
+                        <input
+                          type="text"
+                          maxLength={15}
+                          placeholder="27ABCDE1234F1Z5"
+                          value={formData.gstin}
+                          onChange={(e) => setFormData({ ...formData, gstin: e.target.value.toUpperCase() })}
+                          className="w-full px-3 py-2 bg-slate-900/90 border border-slate-700 rounded-lg text-white font-mono uppercase placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Currency */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                      <div className="w-36 text-slate-300 font-medium">
+                        <span>Currency</span>
+                      </div>
+                      <div className="flex-1 max-w-xl">
+                        <select
+                          value={formData.currency}
+                          onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                          className="w-full px-3 py-2 bg-slate-900/90 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
+                        >
+                          <option value="INR - Indian Rupee">INR - Indian Rupee</option>
+                          <option value="USD - United States Dollar">USD - United States Dollar</option>
+                          <option value="EUR - Euro">EUR - Euro</option>
+                          <option value="AED - UAE Dirham">AED - UAE Dirham</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Accounts Receivable */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                      <div className="w-36 flex items-center gap-1.5 text-slate-300 font-medium">
+                        <span>Accounts Receivable</span>
+                        <span title="The ledger account tracking invoice receivables for this client" className="cursor-help text-slate-500">ⓘ</span>
+                      </div>
+                      <div className="flex-1 max-w-xl">
+                        <select
+                          value={formData.accountReceivable}
+                          onChange={(e) => setFormData({ ...formData, accountReceivable: e.target.value })}
+                          className="w-full px-3 py-2 bg-slate-900/90 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
+                        >
+                          <option value="Accounts Receivable">Accounts Receivable</option>
+                          <option value="Trade Debtors">Trade Debtors</option>
+                          <option value="Client Advance Ledger">Client Advance Ledger</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Opening Balance */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                      <div className="w-36 text-slate-300 font-medium">
+                        <span>Opening Balance</span>
+                      </div>
+                      <div className="flex-1 max-w-xl">
+                        <div className="flex rounded-lg border border-slate-700 bg-slate-900/90 overflow-hidden focus-within:border-blue-500">
+                          <span className="inline-flex items-center px-3 text-slate-400 bg-slate-800/60 font-mono select-none">
+                            INR
+                          </span>
+                          <input
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00"
+                            value={formData.openingBalance === 0 ? '' : formData.openingBalance}
+                            onChange={(e) => setFormData({ ...formData, openingBalance: Number(e.target.value) || 0 })}
+                            className="w-full px-3 py-2 bg-transparent text-white font-mono placeholder-slate-500 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Payment Terms */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                      <div className="w-36 text-slate-300 font-medium">
+                        <span>Payment Terms</span>
+                      </div>
+                      <div className="flex-1 max-w-xl">
+                        <select
+                          value={formData.paymentTerms}
+                          onChange={(e) => setFormData({ ...formData, paymentTerms: e.target.value })}
+                          className="w-full px-3 py-2 bg-slate-900/90 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
+                        >
+                          <option value="Due on Receipt">Due on Receipt</option>
+                          <option value="Net 15">Net 15</option>
+                          <option value="Net 30">Net 30</option>
+                          <option value="Net 45">Net 45</option>
+                          <option value="Net 60">Net 60</option>
+                          <option value="Due end of the month">Due end of the month</option>
+                          <option value="Due end of next month">Due end of next month</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Enable Portal? */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                      <div className="w-36 flex items-center gap-1.5 text-slate-300 font-medium">
+                        <span>Enable Portal?</span>
+                        <span title="Allow client to view invoices and pay online through customer portal" className="cursor-help text-slate-500">ⓘ</span>
+                      </div>
+                      <div className="flex-1 max-w-xl">
+                        <label className="flex items-center gap-2.5 cursor-pointer text-slate-300">
+                          <input
+                            type="checkbox"
+                            checked={formData.enablePortal}
+                            onChange={(e) => setFormData({ ...formData, enablePortal: e.target.checked })}
+                            className="w-4 h-4 text-blue-600 bg-slate-900 border-slate-700 rounded focus:ring-blue-500"
+                          />
+                          <span>Allow portal access for this customer</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Documents Upload */}
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-8 pt-2">
+                      <div className="w-36 text-slate-300 font-medium">
+                        <span>Documents</span>
+                      </div>
+                      <div className="flex-1 max-w-xl space-y-1">
+                        <button
+                          type="button"
+                          onClick={() => success('File upload dialog ready. Attach contracts or GST certificates.')}
+                          className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold rounded-lg flex items-center gap-2 transition"
+                        >
+                          <span>Upload File ▾</span>
+                        </button>
+                        <p className="text-[11px] text-slate-500">You can upload a maximum of 10 files, 10MB each</p>
+                      </div>
+                    </div>
+
+                    {/* Customer Owner Note */}
+                    <div className="pt-4 border-t border-slate-800/80 text-[11px] text-slate-400">
+                      <span>Customer Owner: Assign a user as the customer owner to provide access only to the data of this customer. </span>
+                      <span className="text-blue-400 hover:underline cursor-pointer">Learn More</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab Content: Address */}
+                {activeTab === 'address' && (
+                  <div className="space-y-6 pt-2">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Billing Address Column */}
+                      <div className="space-y-3 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                          <h4 className="font-bold text-white text-xs uppercase tracking-wider">Billing Address</h4>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-slate-400 mb-1">Attention</label>
+                          <input
+                            type="text"
+                            placeholder="Contact Person or Department"
+                            value={formData.billingAttention}
+                            onChange={(e) => setFormData({ ...formData, billingAttention: e.target.value })}
+                            className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-slate-400 mb-1">Country / Region</label>
+                          <input
+                            type="text"
+                            value={formData.billingCountry}
+                            onChange={(e) => setFormData({ ...formData, billingCountry: e.target.value })}
+                            className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-slate-400 mb-1">Address Line 1</label>
+                          <input
+                            type="text"
+                            placeholder="Street address, building number"
+                            value={formData.billingStreet1}
+                            onChange={(e) => setFormData({ ...formData, billingStreet1: e.target.value })}
+                            className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-slate-400 mb-1">Address Line 2</label>
+                          <input
+                            type="text"
+                            placeholder="Suite, unit, floor, landmark"
+                            value={formData.billingStreet2}
+                            onChange={(e) => setFormData({ ...formData, billingStreet2: e.target.value })}
+                            className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[11px] text-slate-400 mb-1">City</label>
+                            <input
+                              type="text"
+                              placeholder="City"
+                              value={formData.billingCity}
+                              onChange={(e) => setFormData({ ...formData, billingCity: e.target.value })}
+                              className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] text-slate-400 mb-1">State</label>
+                            <input
+                              type="text"
+                              placeholder="State"
+                              value={formData.billingState}
+                              onChange={(e) => setFormData({ ...formData, billingState: e.target.value })}
+                              className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[11px] text-slate-400 mb-1">Pin Code</label>
+                            <input
+                              type="text"
+                              placeholder="400001"
+                              value={formData.billingPincode}
+                              onChange={(e) => setFormData({ ...formData, billingPincode: e.target.value })}
+                              className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] text-slate-400 mb-1">Phone</label>
+                            <input
+                              type="text"
+                              placeholder="Phone"
+                              value={formData.billingPhone}
+                              onChange={(e) => setFormData({ ...formData, billingPhone: e.target.value })}
+                              className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Shipping Address Column */}
+                      <div className="space-y-3 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                          <h4 className="font-bold text-white text-xs uppercase tracking-wider">Shipping Address</h4>
+                          <button
+                            type="button"
+                            onClick={handleCopyBillingAddress}
+                            className="text-[11px] text-blue-400 hover:text-blue-300 font-semibold underline"
+                          >
+                            Copy billing address
+                          </button>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-slate-400 mb-1">Attention</label>
+                          <input
+                            type="text"
+                            placeholder="Receiving contact or site supervisor"
+                            value={formData.shippingAttention}
+                            onChange={(e) => setFormData({ ...formData, shippingAttention: e.target.value })}
+                            className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-slate-400 mb-1">Country / Region</label>
+                          <input
+                            type="text"
+                            value={formData.shippingCountry}
+                            onChange={(e) => setFormData({ ...formData, shippingCountry: e.target.value })}
+                            className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-slate-400 mb-1">Address Line 1</label>
+                          <input
+                            type="text"
+                            placeholder="Delivery site or venue address"
+                            value={formData.shippingStreet1}
+                            onChange={(e) => setFormData({ ...formData, shippingStreet1: e.target.value })}
+                            className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-slate-400 mb-1">Address Line 2</label>
+                          <input
+                            type="text"
+                            placeholder="Plot number, gate, landmark"
+                            value={formData.shippingStreet2}
+                            onChange={(e) => setFormData({ ...formData, shippingStreet2: e.target.value })}
+                            className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[11px] text-slate-400 mb-1">City</label>
+                            <input
+                              type="text"
+                              placeholder="City"
+                              value={formData.shippingCity}
+                              onChange={(e) => setFormData({ ...formData, shippingCity: e.target.value })}
+                              className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] text-slate-400 mb-1">State</label>
+                            <input
+                              type="text"
+                              placeholder="State"
+                              value={formData.shippingState}
+                              onChange={(e) => setFormData({ ...formData, shippingState: e.target.value })}
+                              className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[11px] text-slate-400 mb-1">Pin Code</label>
+                            <input
+                              type="text"
+                              placeholder="400001"
+                              value={formData.shippingPincode}
+                              onChange={(e) => setFormData({ ...formData, shippingPincode: e.target.value })}
+                              className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] text-slate-400 mb-1">Phone</label>
+                            <input
+                              type="text"
+                              placeholder="Phone"
+                              value={formData.shippingPhone}
+                              onChange={(e) => setFormData({ ...formData, shippingPhone: e.target.value })}
+                              className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab Content: Contact Persons */}
+                {activeTab === 'contact_persons' && (
+                  <div className="p-4 bg-slate-900/50 rounded-xl border border-slate-800 space-y-3">
+                    <p className="text-xs text-slate-400">
+                      Primary contact is registered as: <strong className="text-white">{formData.salutation} {formData.firstName} {formData.lastName}</strong>.
+                    </p>
+                    <p className="text-[11px] text-slate-500">
+                      Additional contact persons for billing escalations, dispatch notifications, and proof approvals can be associated during invoice or order generation.
+                    </p>
+                  </div>
+                )}
+
+                {/* Tab Content: Custom Fields */}
+                {activeTab === 'custom_fields' && (
+                  <div className="p-4 bg-slate-900/50 rounded-xl border border-slate-800 space-y-3">
+                    <p className="text-xs text-slate-400">
+                      Customer Status:
+                    </p>
                     <select
                       value={formData.status}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500"
+                      className="px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500 text-xs"
                     >
-                      <option value="ACTIVE">Active</option>
-                      <option value="CLIENT">Client</option>
-                      <option value="LEAD">Lead</option>
-                      <option value="INACTIVE">Inactive</option>
+                      <option value="ACTIVE">Active Customer</option>
+                      <option value="CLIENT">Verified Client</option>
+                      <option value="LEAD">Prospective Lead</option>
+                      <option value="INACTIVE">Inactive / Archived</option>
                     </select>
                   </div>
+                )}
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Internal Notes
+                {/* Tab Content: Remarks */}
+                {activeTab === 'remarks' && (
+                  <div className="space-y-2 pt-2">
+                    <label className="block text-xs font-semibold text-slate-300">
+                      Remarks / Internal Studio Notes (For internal team only)
                     </label>
-                    <input
-                      type="text"
+                    <textarea
+                      rows={5}
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      placeholder="Client preferences, branding guidelines..."
-                      className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+                      placeholder="Special design guidelines, color profiles, credit history, delivery preferences..."
+                      className="w-full px-3.5 py-2.5 bg-slate-900/90 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
                     />
                   </div>
-                </div>
+                )}
 
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-                  <button
-                    type="button"
-                    onClick={() => setModalOpen(false)}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
-                  >
-                    Cancel
-                  </button>
+                {/* Bottom Action Buttons (matches screenshot) */}
+                <div className="flex items-center gap-3 pt-4 border-t border-slate-800">
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-600/30 transition"
+                    className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition shadow-md shadow-blue-600/30 disabled:opacity-50"
                   >
-                    {saving ? 'Saving...' : editingCustomer ? 'Update Client' : 'Save Customer'}
+                    {saving ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModalOpen(false)}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition"
+                  >
+                    Cancel
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* GSTIN Prefill Modal */}
+        {gstPrefillOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl p-6 space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Building className="w-4 h-4 text-blue-400" />
+                  <span>Prefill from GSTIN Portal</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setGstPrefillOpen(false)}
+                  className="p-1 text-slate-400 hover:text-white rounded-lg"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Enter the 15-character GSTIN number to automatically extract state code, PAN number, and register legal business profile:
+              </p>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">GSTIN Number</label>
+                <input
+                  type="text"
+                  maxLength={15}
+                  placeholder="e.g. 27ABCDE1234F1Z5"
+                  value={prefillGstin}
+                  onChange={(e) => setPrefillGstin(e.target.value.toUpperCase())}
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white font-mono uppercase focus:outline-none focus:border-blue-500 text-xs"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setGstPrefillOpen(false)}
+                  className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApplyGstPrefill}
+                  className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold"
+                >
+                  Apply & Prefill
+                </button>
+              </div>
             </div>
           </div>
         )}

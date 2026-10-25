@@ -52,11 +52,21 @@ model CompanySetting {
 model Customer {
   id              String    @id @default(cuid())
   name            String
+  customerType    String?   @default("BUSINESS")
+  salutation      String?
+  firstName       String?
+  lastName        String?
   companyName     String?
   mobile          String?
+  workPhone       String?
   email           String?
+  language        String?   @default("English")
   gstin           String?
   pan             String?
+  currency        String?   @default("INR")
+  openingBalance  Float?    @default(0.0)
+  paymentTerms    String?   @default("Due on Receipt")
+  enablePortal    Boolean?  @default(false)
   billingAddress  String?
   shippingAddress String?
   notes           String?

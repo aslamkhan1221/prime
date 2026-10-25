@@ -121,7 +121,7 @@ export default function DashboardPage() {
             ))}
 
             <button
-              onClick={fetchDashboardData}
+              onClick={() => fetchDashboardData()}
               title="Refresh Data"
               className="p-2 text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 rounded-xl transition"
             >

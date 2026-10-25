@@ -158,6 +158,11 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
           <div>
             <h3 className="text-slate-400 font-bold uppercase text-[10px] tracking-wider mb-2">Contact Details</h3>
             <div className="space-y-1.5 text-slate-300">
+              {customer.customerType && (
+                <div className="text-[11px] text-slate-400">
+                  Type: <span className="text-brand-300 font-semibold">{customer.customerType}</span>
+                </div>
+              )}
               {customer.email && (
                 <div className="flex items-center gap-2">
                   <Mail className="w-3.5 h-3.5 text-brand-400" />
@@ -167,7 +172,18 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
               {customer.mobile && (
                 <div className="flex items-center gap-2">
                   <Phone className="w-3.5 h-3.5 text-brand-400" />
-                  <span>{customer.mobile}</span>
+                  <span>Mobile: {customer.mobile}</span>
+                </div>
+              )}
+              {customer.workPhone && (
+                <div className="flex items-center gap-2">
+                  <Phone className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Work: {customer.workPhone}</span>
+                </div>
+              )}
+              {customer.paymentTerms && (
+                <div className="text-[11px] text-slate-400 pt-1">
+                  Terms: <span className="text-white font-medium">{customer.paymentTerms}</span>
                 </div>
               )}
               {customer.gstin && (
