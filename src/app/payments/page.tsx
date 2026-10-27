@@ -6,12 +6,16 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { Header } from '@/components/Header';
 import { useToast } from '@/components/Toast';
 import { ConfirmModal } from '@/components/ConfirmModal';
+import { EditPaymentModal } from '@/components/EditPaymentModal';
+import { PaymentReceiptModal } from '@/components/PaymentReceiptModal';
 import { formatCurrency, formatDate, PAYMENT_METHODS } from '@/lib/utils';
 import {
   CreditCard,
   Search,
   Plus,
   Trash2,
+  Pencil,
+  Printer,
   FileText,
   Building,
   CheckCircle,
@@ -36,6 +40,14 @@ export default function PaymentsPage() {
   const [referenceNumber, setReferenceNumber] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Edit Payment State
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [paymentToEdit, setPaymentToEdit] = useState<any>(null);
+
+  // View Receipt State
+  const [receiptModalOpen, setReceiptModalOpen] = useState(false);
+  const [paymentToView, setPaymentToView] = useState<any>(null);
 
   // Delete Confirm State
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -273,11 +285,31 @@ export default function PaymentsPage() {
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => {
+                              setPaymentToView(p);
+                              setReceiptModalOpen(true);
+                            }}
+                            title="View & Print Official Receipt"
+                            className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition"
+                          >
+                            <Printer className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setPaymentToEdit(p);
+                              setEditModalOpen(true);
+                            }}
+                            title="Edit Payment Receipt"
+                            className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
                               setPaymentToDelete(p);
                               setDeleteConfirmOpen(true);
                             }}
                             title="Delete Payment Transaction"
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition"
+                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -441,6 +473,34 @@ export default function PaymentsPage() {
           title="Delete Payment Receipt"
           message={`Are you sure you want to delete payment receipt #${paymentToDelete?.paymentNumber}? The invoice balance will be automatically restored.`}
           confirmText="Delete Payment"
+        />
+
+        {/* Edit Payment Receipt Modal */}
+        <EditPaymentModal
+          isOpen={editModalOpen}
+          onClose={() => {
+            setEditModalOpen(false);
+            setPaymentToEdit(null);
+          }}
+          payment={paymentToEdit}
+          onSuccess={() => {
+            fetchPayments();
+            fetchUnpaidInvoices();
+          }}
+        />
+
+        {/* View / Print Payment Receipt Voucher */}
+        <PaymentReceiptModal
+          isOpen={receiptModalOpen}
+          onClose={() => {
+            setReceiptModalOpen(false);
+            setPaymentToView(null);
+          }}
+          payment={paymentToView}
+          onEditClick={(p) => {
+            setPaymentToEdit(p);
+            setEditModalOpen(true);
+          }}
         />
       </div>
     </DashboardLayout>

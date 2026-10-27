@@ -157,14 +157,7 @@ function LoginForm() {
 
             {/* Quick credentials hint */}
             <div className="pt-1">
-              <button
-                type="button"
-                onClick={handleAutoFillDefault}
-                className="w-full py-2 px-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-left transition flex items-center justify-between group"
-              >
-                <span className="text-[11px] text-slate-600 font-medium">Quick Fill Admin Login</span>
-                <span className="text-[10px] text-brand-600 font-semibold group-hover:underline">primeadmin</span>
-              </button>
+             
             </div>
 
             {/* Submit Button */}

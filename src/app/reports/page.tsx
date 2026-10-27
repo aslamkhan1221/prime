@@ -225,13 +225,15 @@ export default function ReportsPage() {
             <div className="py-16 text-center text-slate-400">Generating report...</div>
           ) : data ? (
             <div>
-              {/* 1. Revenue Report */}
-              {activeTab === 'revenue' && (
+              {/* 1. Revenue & Payment Receipts Report */}
+              {(activeTab === 'revenue' || activeTab === 'payment') && (
                 <div className="space-y-6">
                   <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 flex justify-between items-center">
-                    <span className="text-sm font-semibold text-emerald-800">Total Cleared Revenue</span>
+                    <span className="text-sm font-semibold text-emerald-800">
+                      {activeTab === 'payment' ? 'Total Payment Receipts' : 'Total Cleared Revenue'}
+                    </span>
                     <span className="text-2xl font-black text-emerald-600 font-mono">
-                      {formatCurrency(data.totalRevenue)}
+                      {formatCurrency(data.totalRevenue || (data.payments ? data.payments.reduce((acc: number, p: any) => acc + (p.amount || 0), 0) : 0))}
                     </span>
                   </div>
 

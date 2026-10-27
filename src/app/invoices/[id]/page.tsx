@@ -7,6 +7,8 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { InvoicePrintView } from '@/components/InvoicePrintView';
 import { useToast } from '@/components/Toast';
 import { ConfirmModal } from '@/components/ConfirmModal';
+import { EditPaymentModal } from '@/components/EditPaymentModal';
+import { PaymentReceiptModal } from '@/components/PaymentReceiptModal';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import {
   CreditCard,
@@ -16,6 +18,7 @@ import {
   ArrowLeft,
   X,
   Printer,
+  Pencil,
 } from 'lucide-react';
 
 export default function InvoiceDetailPage({ params }: { params: { id: string } }) {
@@ -33,7 +36,20 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
   const [paymentNotes, setPaymentNotes] = useState('');
   const [savingPayment, setSavingPayment] = useState(false);
 
-  // Delete modal state
+  // Edit Payment Receipt Modal state
+  const [editPaymentModalOpen, setEditPaymentModalOpen] = useState(false);
+  const [paymentToEdit, setPaymentToEdit] = useState<any>(null);
+
+  // View Payment Receipt Modal state
+  const [receiptModalOpen, setReceiptModalOpen] = useState(false);
+  const [receiptToView, setReceiptToView] = useState<any>(null);
+
+  // Delete Payment Modal state
+  const [deletePaymentConfirmOpen, setDeletePaymentConfirmOpen] = useState(false);
+  const [paymentToDelete, setPaymentToDelete] = useState<any>(null);
+  const [deletingPayment, setDeletingPayment] = useState(false);
+
+  // Delete Invoice modal state
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -142,6 +158,24 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
     }
   };
 
+  const handleDeletePayment = async () => {
+    if (!paymentToDelete) return;
+    setDeletingPayment(true);
+    try {
+      const res = await fetch(`/api/payments/${paymentToDelete.id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to delete payment receipt');
+      success('Payment receipt deleted and balance recalculated');
+      setDeletePaymentConfirmOpen(false);
+      setPaymentToDelete(null);
+      fetchInvoice(true);
+    } catch (err: any) {
+      error(err.message || 'Error deleting payment receipt');
+    } finally {
+      setDeletingPayment(false);
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -228,10 +262,15 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
         {/* Payment History List for this invoice */}
         {invoice.payments && invoice.payments.length > 0 && (
           <div className="no-print bg-white p-6 rounded-3xl border border-slate-200 shadow-sm max-w-4xl mx-auto space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-emerald-600" />
-              <span>Recorded Payment Receipts</span>
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-emerald-600" />
+                <span>Recorded Payment Receipts</span>
+              </h3>
+              <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">
+                {invoice.payments.length} receipt{invoice.payments.length === 1 ? '' : 's'} recorded
+              </span>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
@@ -242,17 +281,52 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                     <th className="pb-2">Method</th>
                     <th className="pb-2">Reference</th>
                     <th className="pb-2 text-right">Amount</th>
+                    <th className="pb-2 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {invoice.payments.map((p: any) => (
-                    <tr key={p.id}>
+                    <tr key={p.id} className="hover:bg-slate-50/70 transition">
                       <td className="py-2.5 font-mono font-bold text-slate-900">{p.paymentNumber}</td>
                       <td className="py-2.5 text-slate-600">{formatDate(p.paymentDate)}</td>
                       <td className="py-2.5 text-slate-700 font-medium">{p.paymentMethod}</td>
                       <td className="py-2.5 text-slate-500 font-mono text-[11px]">{p.referenceNumber || '-'}</td>
                       <td className="py-2.5 text-right font-mono font-bold text-emerald-600">
                         {formatCurrency(p.amount)}
+                      </td>
+                      <td className="py-2.5 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => {
+                              setReceiptToView({ ...p, invoice });
+                              setReceiptModalOpen(true);
+                            }}
+                            title="View & Print Official Receipt"
+                            className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setPaymentToEdit({ ...p, invoice });
+                              setEditPaymentModalOpen(true);
+                            }}
+                            title="Edit Payment Receipt"
+                            className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setPaymentToDelete(p);
+                              setDeletePaymentConfirmOpen(true);
+                            }}
+                            title="Delete Payment Receipt"
+                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -382,7 +456,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
           </div>
         )}
 
-        {/* Delete Confirmation Modal */}
+        {/* Delete Confirmation Modal for Invoice */}
         <ConfirmModal
           isOpen={deleteConfirmOpen}
           onClose={() => setDeleteConfirmOpen(false)}
@@ -391,6 +465,47 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
           title="Delete Tax Invoice"
           message={`Are you sure you want to delete invoice #${invoice.invoiceNumber}? This action cannot be undone.`}
           confirmText="Delete Invoice"
+        />
+
+        {/* Delete Confirmation Modal for Payment Receipt */}
+        <ConfirmModal
+          isOpen={deletePaymentConfirmOpen}
+          onClose={() => {
+            setDeletePaymentConfirmOpen(false);
+            setPaymentToDelete(null);
+          }}
+          onConfirm={handleDeletePayment}
+          isLoading={deletingPayment}
+          title="Delete Payment Receipt"
+          message={`Are you sure you want to delete payment receipt #${paymentToDelete?.paymentNumber}? The invoice balance will be automatically recalculated.`}
+          confirmText="Delete Payment"
+        />
+
+        {/* Edit Payment Receipt Modal */}
+        <EditPaymentModal
+          isOpen={editPaymentModalOpen}
+          onClose={() => {
+            setEditPaymentModalOpen(false);
+            setPaymentToEdit(null);
+          }}
+          payment={paymentToEdit}
+          onSuccess={() => {
+            fetchInvoice(true);
+          }}
+        />
+
+        {/* View / Print Payment Receipt Voucher */}
+        <PaymentReceiptModal
+          isOpen={receiptModalOpen}
+          onClose={() => {
+            setReceiptModalOpen(false);
+            setReceiptToView(null);
+          }}
+          payment={receiptToView}
+          onEditClick={(p) => {
+            setPaymentToEdit(p);
+            setEditPaymentModalOpen(true);
+          }}
         />
       </div>
     </DashboardLayout>
