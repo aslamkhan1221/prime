@@ -159,24 +159,52 @@ export function PaymentReceiptModal({
             </div>
 
             {/* Transaction Details */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs border-t border-b border-slate-100 py-3 print:border-slate-300">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs border-t border-b border-slate-100 py-3 print:border-slate-300">
               <div>
                 <span className="text-slate-400 text-[10px] uppercase font-semibold">Payment Mode</span>
-                <div className="font-semibold text-slate-900 mt-0.5">{payment.paymentMethod}</div>
+                <div className="font-semibold text-slate-900 mt-0.5">{payment.paymentMethod || 'Cash'}</div>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-semibold">Ref / UTR / Cheque #</span>
+                <span className="text-slate-400 text-[10px] uppercase font-semibold">Deposit To</span>
+                <div className="font-semibold text-slate-900 mt-0.5">{payment.depositTo || 'Petty Cash'}</div>
+              </div>
+              <div>
+                <span className="text-slate-400 text-[10px] uppercase font-semibold">Ref / Cheque #</span>
                 <div className="font-mono font-medium text-slate-900 mt-0.5">
                   {payment.referenceNumber || 'N/A'}
                 </div>
               </div>
-              <div className="col-span-2 sm:col-span-1">
+              <div>
                 <span className="text-slate-400 text-[10px] uppercase font-semibold">Payment Status</span>
-                <div className="flex items-center gap-1 font-bold text-emerald-600 mt-0.5">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Settled & Reconciled</span>
+                <div className="flex items-center gap-1 font-bold mt-0.5">
+                  {payment.status === 'DRAFT' ? (
+                    <span className="text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-[10px]">Draft Receipt</span>
+                  ) : (
+                    <span className="text-emerald-600 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Paid & Settled</span>
+                    </span>
+                  )}
                 </div>
               </div>
+              {payment.bankCharges > 0 && (
+                <div>
+                  <span className="text-slate-400 text-[10px] uppercase font-semibold">Bank Charges</span>
+                  <div className="font-mono text-slate-700 mt-0.5">{formatCurrency(payment.bankCharges)}</div>
+                </div>
+              )}
+              {payment.tdsDeducted && (
+                <div>
+                  <span className="text-slate-400 text-[10px] uppercase font-semibold">TDS Deducted</span>
+                  <div className="font-semibold text-blue-700 mt-0.5">Income TDS Applied</div>
+                </div>
+              )}
+              {payment.paymentReceivedOn && (
+                <div>
+                  <span className="text-slate-400 text-[10px] uppercase font-semibold">Received On</span>
+                  <div className="text-slate-700 mt-0.5">{formatDate(payment.paymentReceivedOn)}</div>
+                </div>
+              )}
             </div>
 
             {/* Notes if any */}

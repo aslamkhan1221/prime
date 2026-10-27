@@ -100,7 +100,13 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             paymentMethod,
             referenceNumber,
             notes,
-          },
+            bankCharges: body.bankCharges !== undefined ? Number(body.bankCharges) || 0 : (existingPayment as any).bankCharges,
+            tdsDeducted: body.tdsDeducted !== undefined ? Boolean(body.tdsDeducted) : (existingPayment as any).tdsDeducted,
+            paymentReceivedOn: body.paymentReceivedOn !== undefined ? (body.paymentReceivedOn ? new Date(body.paymentReceivedOn) : null) : (existingPayment as any).paymentReceivedOn,
+            depositTo: body.depositTo !== undefined ? body.depositTo : (existingPayment as any).depositTo,
+            status: body.status !== undefined ? body.status : (existingPayment as any).status,
+            attachments: body.attachments !== undefined ? (typeof body.attachments === 'string' ? body.attachments : JSON.stringify(body.attachments)) : (existingPayment as any).attachments,
+          } as any,
           include: {
             invoice: {
               include: { customer: true },

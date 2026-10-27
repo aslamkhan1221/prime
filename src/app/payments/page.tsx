@@ -8,6 +8,7 @@ import { useToast } from '@/components/Toast';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { EditPaymentModal } from '@/components/EditPaymentModal';
 import { PaymentReceiptModal } from '@/components/PaymentReceiptModal';
+import { ZohoPaymentForm } from '@/components/ZohoPaymentForm';
 import { formatCurrency, formatDate, PAYMENT_METHODS } from '@/lib/utils';
 import {
   CreditCard,
@@ -178,7 +179,7 @@ export default function PaymentsPage() {
           title="Payment Receipts & Ledger"
           subtitle="Track cash inflows, UPI transfers, bank deposits, and outstanding invoice balances"
           actionText="Record Payment"
-          onActionClick={openAddModal}
+          actionHref="/payments/new"
           actionIcon={<Plus className="w-4 h-4" />}
         />
 
@@ -331,135 +332,28 @@ export default function PaymentsPage() {
 
         {/* Record Payment Modal */}
         {modalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-            <div className="relative w-full max-w-md bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
-              <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
-                    <CreditCard className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900">Record Client Payment</h3>
-                    <p className="text-xs text-slate-500">Log bank transfer, UPI or cash receipt</p>
-                  </div>
-                </div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs no-print overflow-y-auto">
+            <div className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
+              <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
+                <h2 className="font-bold text-slate-800 text-sm">Record Payment Receipt</h2>
                 <button
                   onClick={() => setModalOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-xl transition"
+                  className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-200"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-
-              <form onSubmit={handleSavePayment} className="p-6 space-y-4 text-xs">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Select Invoice <span className="text-[#ec008c]">*</span>
-                  </label>
-                  {unpaidInvoices.length > 0 ? (
-                    <select
-                      required
-                      value={selectedInvoiceId}
-                      onChange={(e) => handleInvoiceChange(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-medium"
-                    >
-                      {unpaidInvoices.map((inv) => (
-                        <option key={inv.id} value={inv.id}>
-                          #{inv.invoiceNumber} - {inv.customer?.name} (Due: ₹{inv.balanceAmount})
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500">
-                      All invoices are fully paid or no unpaid invoices found.
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Amount Received (₹) <span className="text-[#ec008c]">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    value={amount}
-                    onChange={(e) => setAmount(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-900 font-mono focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Payment Date</label>
-                    <input
-                      type="date"
-                      required
-                      value={paymentDate}
-                      onChange={(e) => setPaymentDate(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Payment Method</label>
-                    <select
-                      value={paymentMethod}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                    >
-                      <option value="UPI">UPI / QR Code</option>
-                      <option value="BANK_TRANSFER">Bank Transfer (NEFT/RTGS/IMPS)</option>
-                      <option value="CASH">Cash</option>
-                      <option value="CARD">Credit / Debit Card</option>
-                      <option value="CHEQUE">Cheque</option>
-                      <option value="OTHER">Other</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Reference / Transaction ID
-                  </label>
-                  <input
-                    type="text"
-                    value={referenceNumber}
-                    onChange={(e) => setReferenceNumber(e.target.value)}
-                    placeholder="e.g. UTR / UPI reference ID"
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Notes</label>
-                  <input
-                    type="text"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Payment notes or cheque details..."
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => setModalOpen(false)}
-                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={saving || !selectedInvoiceId}
-                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-md shadow-emerald-600/20 transition disabled:opacity-50"
-                  >
-                    {saving ? 'Recording...' : 'Record Payment'}
-                  </button>
-                </div>
-              </form>
+              <div className="overflow-y-auto flex-1">
+                <ZohoPaymentForm
+                  isModal={true}
+                  onClose={() => setModalOpen(false)}
+                  onSuccess={() => {
+                    setModalOpen(false);
+                    fetchPayments();
+                    fetchUnpaidInvoices();
+                  }}
+                />
+              </div>
             </div>
           </div>
         )}

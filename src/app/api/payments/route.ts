@@ -46,7 +46,16 @@ export async function GET(req: NextRequest) {
             balanceAmount: true,
             status: true,
             customer: {
-              select: { id: true, name: true, companyName: true },
+              select: {
+                id: true,
+                name: true,
+                companyName: true,
+                pan: true,
+                gstin: true,
+                email: true,
+                mobile: true,
+                billingAddress: true,
+              },
             },
           },
         },
@@ -84,23 +93,52 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
-    // Auto-generate payment receipt number
-    const count = await prisma.payment.count();
-    const paymentNumber = `PAY-${1001 + count}`;
+    // Payment number: either user provided or auto generated
+    let paymentNumber = body.paymentNumber ? String(body.paymentNumber).trim() : '';
+    if (!paymentNumber) {
+      const count = await prisma.payment.count();
+      paymentNumber = `${count + 1}`;
+    }
+
+    // Check uniqueness of paymentNumber
+    const existingNum = await prisma.payment.findUnique({ where: { paymentNumber } });
+    if (existingNum) {
+      const count = await prisma.payment.count();
+      paymentNumber = `PAY-${1001 + count}`;
+    }
 
     const paymentDate = body.paymentDate ? new Date(body.paymentDate) : new Date();
+    const paymentReceivedOn = body.paymentReceivedOn ? new Date(body.paymentReceivedOn) : null;
+    const isDraft = body.status === 'DRAFT';
+    const status = isDraft ? 'DRAFT' : 'PAID';
 
-    // Calculate new paid amount and balance
-    const existingPaid = invoice.payments.reduce((acc, p) => acc + p.amount, 0);
-    const newPaidAmount = existingPaid + amount;
-    const newBalanceAmount = Math.max(0, invoice.grandTotal - newPaidAmount);
-
+    // Calculate new paid amount and balance if paid
+    let newPaidAmount = invoice.paidAmount;
+    let newBalanceAmount = invoice.balanceAmount;
     let newStatus = invoice.status;
-    if (newBalanceAmount <= 0) {
-      newStatus = 'PAID';
-    } else if (newPaidAmount > 0) {
-      newStatus = 'PARTIALLY_PAID';
+
+    if (!isDraft) {
+      const existingPaid = invoice.payments
+        .filter((p: any) => (p as any).status !== 'DRAFT')
+        .reduce((acc, p) => acc + p.amount, 0);
+      newPaidAmount = existingPaid + amount;
+      newBalanceAmount = Math.max(0, invoice.grandTotal - newPaidAmount);
+
+      if (newBalanceAmount <= 0) {
+        newStatus = 'PAID';
+      } else if (newPaidAmount > 0) {
+        newStatus = 'PARTIALLY_PAID';
+      }
     }
+
+    const bankCharges = body.bankCharges !== undefined ? Number(body.bankCharges) || 0 : 0;
+    const tdsDeducted = Boolean(body.tdsDeducted);
+    const depositTo = body.depositTo ? String(body.depositTo).trim() : 'Petty Cash';
+    const attachments = body.attachments
+      ? typeof body.attachments === 'string'
+        ? body.attachments
+        : JSON.stringify(body.attachments)
+      : null;
 
     // Transaction to create payment and update invoice
     const [payment] = await prisma.$transaction([
@@ -110,10 +148,16 @@ export async function POST(req: NextRequest) {
           invoiceId: body.invoiceId,
           amount,
           paymentDate,
-          paymentMethod: body.paymentMethod || 'UPI',
+          paymentMethod: body.paymentMethod || 'Cash',
           referenceNumber: body.referenceNumber?.trim() || null,
           notes: body.notes?.trim() || null,
-        },
+          bankCharges,
+          tdsDeducted,
+          paymentReceivedOn,
+          depositTo,
+          status,
+          attachments,
+        } as any,
       }),
       prisma.invoice.update({
         where: { id: body.invoiceId },

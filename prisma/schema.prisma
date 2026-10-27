@@ -192,16 +192,22 @@ model InvoiceItem {
 }
 
 model Payment {
-  id              String   @id @default(cuid())
-  paymentNumber   String   @unique
-  invoiceId       String
-  amount          Float
-  paymentDate     DateTime @default(now())
-  paymentMethod   String   @default("UPI")
-  referenceNumber String?
-  notes           String?
-  createdAt       DateTime @default(now())
-  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  id                String    @id @default(cuid())
+  paymentNumber     String    @unique
+  invoiceId         String
+  amount            Float
+  paymentDate       DateTime  @default(now())
+  paymentMethod     String    @default("UPI")
+  referenceNumber   String?
+  notes             String?
+  bankCharges       Float?    @default(0.0)
+  tdsDeducted       Boolean?  @default(false)
+  paymentReceivedOn DateTime?
+  depositTo         String?   @default("Petty Cash")
+  status            String?   @default("PAID")
+  attachments       String?
+  createdAt         DateTime  @default(now())
+  invoice           Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
 model Expense {

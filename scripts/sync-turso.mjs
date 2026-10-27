@@ -180,6 +180,12 @@ const statements = [
     "paymentMethod" TEXT NOT NULL DEFAULT 'UPI',
     "referenceNumber" TEXT,
     "notes" TEXT,
+    "bankCharges" REAL DEFAULT 0.0,
+    "tdsDeducted" BOOLEAN DEFAULT 0,
+    "paymentReceivedOn" DATETIME,
+    "depositTo" TEXT DEFAULT 'Petty Cash',
+    "status" TEXT DEFAULT 'PAID',
+    "attachments" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
   );`,
 

@@ -9,6 +9,7 @@ import { useToast } from '@/components/Toast';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { EditPaymentModal } from '@/components/EditPaymentModal';
 import { PaymentReceiptModal } from '@/components/PaymentReceiptModal';
+import { ZohoPaymentForm } from '@/components/ZohoPaymentForm';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import {
   CreditCard,
@@ -222,13 +223,13 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
 
           <div className="flex flex-wrap items-center gap-2">
             {invoice.balanceAmount > 0 && invoice.status !== 'CANCELLED' && (
-              <button
-                onClick={() => setPaymentModalOpen(true)}
+              <Link
+                href={`/payments/new?invoiceId=${invoice.id}`}
                 className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition"
               >
                 <CreditCard className="w-4 h-4" />
                 <span>Record Payment</span>
-              </button>
+              </Link>
             )}
 
             <button
@@ -338,120 +339,28 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
 
         {/* Payment Modal */}
         {paymentModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm no-print">
-            <div className="relative w-full max-w-md bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
-              <div className="flex items-center justify-between p-6 border-b border-slate-200 bg-slate-50/80">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
-                    <CreditCard className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900">
-                      Record Payment: #{invoice.invoiceNumber}
-                    </h3>
-                    <p className="text-xs text-slate-500">Client: {invoice.customer?.name}</p>
-                  </div>
-                </div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs no-print overflow-y-auto">
+            <div className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
+              <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
+                <h2 className="font-bold text-slate-800 text-sm">Record Payment for #{invoice.invoiceNumber}</h2>
                 <button
                   onClick={() => setPaymentModalOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl"
+                  className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-200"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-
-              <form onSubmit={handleRecordPayment} className="p-6 space-y-4 text-xs">
-                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 flex justify-between items-center text-amber-900">
-                  <span className="font-medium text-amber-800">Outstanding Balance:</span>
-                  <span className="font-mono font-bold text-[#f59e0b] text-sm">
-                    {formatCurrency(invoice.balanceAmount)}
-                  </span>
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Payment Amount (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    value={paymentAmount}
-                    onChange={(e) => setPaymentAmount(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Payment Date</label>
-                    <input
-                      type="date"
-                      required
-                      value={paymentDate}
-                      onChange={(e) => setPaymentDate(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Payment Method</label>
-                    <select
-                      value={paymentMethod}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                    >
-                      <option value="UPI">UPI / QR Code</option>
-                      <option value="BANK_TRANSFER">Bank Transfer</option>
-                      <option value="CASH">Cash</option>
-                      <option value="CARD">Card</option>
-                      <option value="CHEQUE">Cheque</option>
-                      <option value="OTHER">Other</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Transaction / Reference Number
-                  </label>
-                  <input
-                    type="text"
-                    value={referenceNumber}
-                    onChange={(e) => setReferenceNumber(e.target.value)}
-                    placeholder="e.g. UPI Ref: 31829371923"
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Notes</label>
-                  <input
-                    type="text"
-                    value={paymentNotes}
-                    onChange={(e) => setPaymentNotes(e.target.value)}
-                    placeholder="Payment notes..."
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentModalOpen(false)}
-                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={savingPayment}
-                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-md shadow-emerald-600/20 transition"
-                  >
-                    {savingPayment ? 'Recording...' : 'Record Payment'}
-                  </button>
-                </div>
-              </form>
+              <div className="overflow-y-auto flex-1">
+                <ZohoPaymentForm
+                  initialInvoiceId={invoice.id}
+                  isModal={true}
+                  onClose={() => setPaymentModalOpen(false)}
+                  onSuccess={() => {
+                    setPaymentModalOpen(false);
+                    fetchInvoice(true);
+                  }}
+                />
+              </div>
             </div>
           </div>
         )}
