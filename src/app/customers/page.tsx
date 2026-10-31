@@ -21,7 +21,12 @@ import {
   ShoppingBag,
   X,
   Sparkles,
+  Download,
+  Upload,
 } from 'lucide-react';
+import { ExportModal } from '@/components/ExportModal';
+import { ImportModal } from '@/components/ImportModal';
+import { CUSTOMER_FIELDS } from '@/lib/import-export-definitions';
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<any[]>([]);
@@ -33,6 +38,10 @@ export default function CustomersPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<any>(null);
   const [saving, setSaving] = useState(false);
+
+  // Import / Export State
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   // Form State matching Zoho Books screenshot
   const [activeTab, setActiveTab] = useState<'other' | 'address' | 'contact_persons' | 'custom_fields' | 'remarks'>('other');
@@ -407,9 +416,33 @@ export default function CustomersPage() {
         <Header
           title="Customer Relationship Management (CRM)"
           subtitle="Manage client portfolios, billing addresses, GST details, and outstanding balances"
-          actionText="Add New Customer"
-          onActionClick={openAddModal}
-          actionIcon={<Plus className="w-4 h-4" />}
+          action={
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setExportModalOpen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 text-xs font-semibold rounded-xl shadow-xs transition"
+                title="Export customer list to Excel or CSV"
+              >
+                <Download className="w-3.5 h-3.5 text-brand-600" />
+                <span>Export</span>
+              </button>
+              <button
+                onClick={() => setImportModalOpen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 text-xs font-semibold rounded-xl shadow-xs transition"
+                title="Import customers from Excel or CSV with custom field mappings"
+              >
+                <Upload className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Import</span>
+              </button>
+              <button
+                onClick={openAddModal}
+                className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-brand-600/30 transition transform active:scale-95"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add New Customer</span>
+              </button>
+            </div>
+          }
         />
 
         {/* Filter & Search Bar */}
@@ -1347,6 +1380,30 @@ export default function CustomersPage() {
           title="Delete Customer Profile"
           message={`Are you sure you want to delete customer "${customerToDelete?.name}"? If they have invoices or orders, you may archive or mark them inactive instead.`}
           confirmText="Delete Customer"
+        />
+
+        {/* Export Modal with customizable fields */}
+        <ExportModal
+          isOpen={exportModalOpen}
+          onClose={() => setExportModalOpen(false)}
+          title="Export Customers (CRM)"
+          subtitle="Export client records to Excel (.xlsx) or CSV (.csv) with customizable columns"
+          fields={CUSTOMER_FIELDS}
+          data={customers}
+          defaultFilename="customers_export"
+          entityName="Customers"
+        />
+
+        {/* Import Modal with customizable field mappings */}
+        <ImportModal
+          isOpen={importModalOpen}
+          onClose={() => setImportModalOpen(false)}
+          title="Import Customers (CRM)"
+          subtitle="Upload an Excel or CSV file and customize which fields to import into your CRM"
+          fields={CUSTOMER_FIELDS}
+          endpointUrl="/api/customers/import"
+          entityName="Customers"
+          onSuccess={() => fetchCustomers(true)}
         />
       </div>
     </DashboardLayout>

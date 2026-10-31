@@ -18,7 +18,12 @@ import {
   Check,
   ShoppingBag,
   Layers,
+  Download,
+  Upload,
 } from 'lucide-react';
+import { ExportModal } from '@/components/ExportModal';
+import { ImportModal } from '@/components/ImportModal';
+import { ITEM_FIELDS } from '@/lib/import-export-definitions';
 
 const STANDARD_UNITS = [
   { value: 'pcs', label: 'pcs (Pieces)' },
@@ -66,6 +71,10 @@ export default function ItemsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [saving, setSaving] = useState(false);
+
+  // Import / Export State
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   // Custom Unit Entry Mode
   const [customUnitMode, setCustomUnitMode] = useState(false);
@@ -279,9 +288,33 @@ export default function ItemsPage() {
         <Header
           title="Items & Services"
           subtitle="Manage goods, print media, substrates, and design services"
-          actionText="New Item"
-          onActionClick={openAddModal}
-          actionIcon={<Plus className="w-4 h-4" />}
+          action={
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setExportModalOpen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 text-xs font-semibold rounded-xl shadow-xs transition"
+                title="Export catalog items to Excel or CSV"
+              >
+                <Download className="w-3.5 h-3.5 text-brand-600" />
+                <span>Export</span>
+              </button>
+              <button
+                onClick={() => setImportModalOpen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 text-xs font-semibold rounded-xl shadow-xs transition"
+                title="Import catalog items from Excel or CSV with custom field mappings"
+              >
+                <Upload className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Import</span>
+              </button>
+              <button
+                onClick={openAddModal}
+                className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-brand-600/30 transition transform active:scale-95"
+              >
+                <Plus className="w-4 h-4" />
+                <span>New Item</span>
+              </button>
+            </div>
+          }
         />
 
         {/* Search & Filter Bar */}
@@ -765,6 +798,30 @@ export default function ItemsPage() {
           title="Delete Catalog Item"
           message={`Are you sure you want to delete "${itemToDelete?.name}"? If this item is used in existing invoices, you can mark it Inactive instead.`}
           confirmText="Delete Item"
+        />
+
+        {/* Export Modal with customizable fields */}
+        <ExportModal
+          isOpen={exportModalOpen}
+          onClose={() => setExportModalOpen(false)}
+          title="Export Items & Catalog"
+          subtitle="Export catalog items to Excel (.xlsx) or CSV (.csv) with customizable columns"
+          fields={ITEM_FIELDS}
+          data={items}
+          defaultFilename="items_catalog"
+          entityName="Items"
+        />
+
+        {/* Import Modal with customizable field mappings */}
+        <ImportModal
+          isOpen={importModalOpen}
+          onClose={() => setImportModalOpen(false)}
+          title="Import Items & Catalog"
+          subtitle="Upload an Excel or CSV file and customize which fields to import into your catalog"
+          fields={ITEM_FIELDS}
+          endpointUrl="/api/items/import"
+          entityName="Items"
+          onSuccess={() => fetchItems(true)}
         />
       </div>
     </DashboardLayout>
